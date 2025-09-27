@@ -1,0 +1,47 @@
+#intro
+##why i care
+##target audience
+##problem setting
+Riemann mapping theorem applications in FEM
+
+#theoretical background
+##riemann mapping thm
+##riemann curves
+##conformal mappings
+#literature review
+When reviewing literature, pay special attention to:
+- Numerical stability of different conformal mapping methods
+- Boundary discretization requirements (how smooth does γ need to be?)
+- Mesh quality preservation - how does the mapping affect triangle quality?
+- Computational complexity - O(n²) vs O(n log n) vs O(n) methods
+
+Prioritize algorithms that output Φ in evaluable form: E.g., Schwarz-Christoffel (good for polygonal Ω, efficient via parameter solving), zipper algorithm (fast for smooth boundaries), or numerical methods like least-squares conformal energy minimization.
+- Check inputs/outputs: Ensure it takes Fourier coeffs for γ, outputs callable Φ/DΦ (e.g., as splines or polynomials). Test applicability: Use real-world Ω like airfoils or biological shapes from papers.
+- Justification pages: Include a table comparing 3-4 options (e.g., accuracy, runtime, stability for curvilinear meshes). Analyze efficiency: Big-O for evaluations (aim for O(1) per point via precomputation), numerical stability (condition numbers).
+- Resources: Look into papers on "numerical conformal mappings" (e.g., via SymPy implementations) or books like Driscoll's "Schwarz-Christoffel Mapping".
+
+##existing methods
+#implementation
+Don't forget: Handle periodicity (γ is 2π-periodic) and boundary accuracy—small errors can distort meshes. Compute DΦ analytically if possible; fall back to finite differences.
+##chosen algo/ justification
+criteria:
+- Accuracy for domains with sharp corners or high curvature
+- Speed for practical mesh sizes (10³-10⁶ elements)
+- Robustness - does it fail for certain domain shapes?
+- Implementation complexity given your timeline
+- Jacobian computation - analytical vs numerical differentiation
+##code
+- Separate modules for boundary parameterization, mapping computation, Jacobian eval, and mesh transformation
+- plot original vs. mapped grids (e.g., Matplotlib quiver for Jacobians) to spot issues early.
+##testing
+check angle preservation (e.g., via dot products on mapped vectors) and scale factors (det(DΦ) > 0, |∂Φ/∂z| constant in theory).
+- Test suite: Use known exact mappings (e.g., disk to square via Schwarz-Christoffel) for error metrics (L2 norm on boundary points).
+- Metrics: Runtime for N points, mesh quality post-mapping (e.g., min/max angles in triangles, shape regularity ratio).
+- Real-world applicability: Apply to a sample FEM problem (e.g., Poisson equation on Ω) and compare accuracy/speed vs. uniform mesh.
+- Robustness: Vary boundary complexity (smooth vs. corners), noise in Fourier coeffs, mesh resolutions.
+- Debugging: Use assertions for bijectivity (e.g., check injectivity numerically)
+- Error handling - what happens with degenerate inputs?
+
+
+##results and discussion
+#conclusion
