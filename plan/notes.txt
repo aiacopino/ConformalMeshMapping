@@ -6,7 +6,8 @@ Riemann mapping theorem applications in FEM
 
 #theoretical background
 ##riemann mapping thm
-##riemann curves
+##riemann-hilbert problem
+## hilbert transform
 ##conformal mappings
 #literature review
 When reviewing literature, pay special attention to:
