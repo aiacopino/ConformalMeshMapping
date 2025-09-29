@@ -13,75 +13,17 @@
 \end{titlepage}
 
 \begin{abstract}
+    
 \end{abstract}
 \newpage
 
 \tableofcontents
 \newpage
 
-\section{Introduction}
-\subsection{Motivation}
-why i care, target audience
-\subsection{Problem Setting}
-
-
-\section{Theoretical Background}
-\subsection{Conformal Mappings}
-\subsection{Riemann Mapping Theorem}
-\subsection{Riemann-Hilbert Problem}
-\subsection{Hilbert Transform}
-
-\section{Existing Methods}
-- Numerical stability of different conformal mapping methods
-- Boundary discretization requirements (how smooth does $\gamma$ need to be?)
-- Mesh quality preservation - how does the mapping affect triangle quality?
-- Computational complexity
-- Input and output formats
-
-\section{Proposed Method}
-\subsection{Choice/ Justification}
-criteria:
-- Accuracy for domains with sharp corners or high curvature
-- Speed for practical mesh sizes
-- Robustness - does it fail for certain domain shapes?
-- Implementation complexity given your timeline
-- Jacobian computation - analytical vs numerical differentiation
-\subsection{Implementation}
-- Separate modules for boundary parameterization, mapping computation, Jacobian eval, and mesh transformation
-- plot original vs. mapped grids (e.g., Matplotlib quiver for Jacobians) to spot issues early.
-\subsection{Numerical Experiments/ Testing}
-check angle preservation (e.g., via dot products on mapped vectors) and scale factors ($det(D\Phi) > 0$, $|\frac{\del\Phi}{\del z}|$ constant in theory).
-- Test suite: Use known exact mappings (e.g., disk to square via Schwarz-Christoffel) for error metrics (L2 norm on boundary points).
-- Metrics: Runtime for N points, mesh quality post-mapping (e.g., min/max angles in triangles, shape regularity ratio).
-- Real-world applicability: Apply to a sample FEM problem (e.g., Poisson equation on $\Omega$) and compare accuracy/speed vs. uniform mesh.
-- Robustness: Vary boundary complexity (smooth vs. corners), noise in Fourier coeffs, mesh resolutions.
-- Debugging: Use assertions for bijectivity (e.g., check injectivity numerically)
-- Error handling - what happens with degenerate inputs?
-\subsection{Results}
-
-\begin{definition}
-    A conformal mapping, also called a conformal map, conformal transformation, angle-preserving transformation, or biholomorphic map, is a transformation w=f(z) that preserves local angles. An analytic function is conformal at any point where it has a nonzero derivative.
-\end{definition}
-
-
-
-Wegmann proved the following result.
-
-\textbf{THEOREM} When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides (see Figure 4) then the conformal mapping $\phi : D \rightarrow G$ satisfies
-$$
-\|\phi'\|_D \geq b \psi(b/a)
-$$
-with a function $\psi(\tau)$ which behaves for small $\tau$ like
-$$
-\psi(\tau) \approx \frac{1}{2\pi \sqrt{\epsilon}} \exp\left(\frac{\pi}{2\tau}\right).
-$$
-
-Crowding is cumbersome for all methods which work with grid points. On the other hand, methods which approximate the mapping functions by polynomials also face severe problems when the target region is elongated. 
-It follows that, for the mapping of the disk to a region of aspect ratio 1 910 by a polynomial, the degree must be of several millions.
-In any case, the number of grid points and the degree of the approximating polynomials increase both like exp(zr/2r) as the aspect ratio, r, tends to zero.
-DeLillo [37] has shown how crowding affects the accuracy of numerical computations.
-Crowding also limits the practical usefulness of conformal maps. This was demonstrated by DeLillo [36] for the Laplace equation. Crowding has also been observed for regions with elongated sections ("fingers"). For "pinched" regions, such as the interior of an inverted ellipse, ill conditioning occurs of a less severe, algebraic nature (DeLillo [37]).
-
-
+\include{introduction}
+\include{theory}
+\include{existingmethods}
+\include{proposedmethod}
+\include{conclusion}
 
 \end{document}

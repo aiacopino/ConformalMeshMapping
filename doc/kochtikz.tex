@@ -1,0 +1,13 @@
+\begin{tikzpicture}
+    \pgfdeclarelindenmayersystem{Koch curve}{
+        \rule{F -> F-F++F-F}
+        }
+        \draw [black]
+    [l-system={Koch curve, step=1.4pt, angle=60, axiom=F++F++F, order=4}]
+    lindenmayer system -- cycle;
+
+    \pgfmathsetmacro{\kochwidth}{2pt*4*8}
+    \draw [black] (9,1.1) circle (\kochwidth pt);
+
+    \draw [->, thick] (5,1.3) -- (6,1.3) node [midway, above] {$\Phi$};
+\end{tikzpicture}
