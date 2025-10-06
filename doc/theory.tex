@@ -19,19 +19,57 @@ Simply connected open sets in the plane can be highly complicated, for instance,
 \end{definition}
 
 
-Wegmann proved the following result.
+Wegmann \cite{Wegmann2005} proved the following result.
 
-\textbf{THEOREM} When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides (see Figure 4) then the conformal mapping $\phi : D \rightarrow G$ satisfies
-$$
-\|\phi'\|_D \geq b \psi(b/a)
-$$
-with a function $\psi(\tau)$ which behaves for small $\tau$ like
-$$
-\psi(\tau) \approx \frac{1}{2\pi \sqrt{\epsilon}} \exp\left(\frac{\pi}{2\tau}\right).
-$$
+\begin{theorem}
+    When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides (see Figure 4) then the conformal mapping $\phi : D \rightarrow G$ satisfies
+    $$
+    \|\phi'\|_D \geq b \psi(b/a)
+    $$
+    with a function $\psi(\tau)$ which behaves for small $\tau$ like
+    $$
+    \psi(\tau) \approx \frac{1}{2\pi \sqrt{\epsilon}} \exp\left(\frac{\pi}{2\tau}\right).
+    $$
+\end{theorem} 
 
 Crowding is cumbersome for all methods which work with grid points. On the other hand, methods which approximate the mapping functions by polynomials also face severe problems when the target region is elongated. 
 It follows that, for the mapping of the disk to a region of aspect ratio 1 910 by a polynomial, the degree must be of several millions.
 In any case, the number of grid points and the degree of the approximating polynomials increase both like exp(zr/2r) as the aspect ratio, r, tends to zero.
 DeLillo [37] has shown how crowding affects the accuracy of numerical computations.
 Crowding also limits the practical usefulness of conformal maps. This was demonstrated by DeLillo [36] for the Laplace equation. Crowding has also been observed for regions with elongated sections ("fingers"). For "pinched" regions, such as the interior of an inverted ellipse, ill conditioning occurs of a less severe, algebraic nature (DeLillo [37]).
+
+\subsubsection{The operator R}
+In some conformal mapping methods, boundars value problems as follows occur,
+$$ \Psi(e^{it})=B(t) + A(t)U(t) $$
+where $A, B: \mathbb{C}\to \mathbb{C}$ and $U:\mathbb{C}\to \mathbb{R}$. Multiplication with $\bar{A}$ yields the RH problem $$ Im(\bar{A(t)}\Psi(e^{it})) = Im(\bar{A(t)}B(t))$$
+This problem can be solved by the operator $R_{\beta}$, which is defined as follows:
+
+This follows from the following theorem:
+\begin{theorem}
+    There exists a function $\Psi$ analytic in $D$ with $\Psi(0)= 0$ satisfying the boundary problem if and only if U is a solution of the Fredholm integral equation of the second kind
+    $$(I+R_{\beta})U=g$$
+    with the right-hand side
+    $$g := -Re ( e ^{-i\beta} ( I - iK + J)/B).$$ 
+    Where $K$ is the conjugation operator and J the averaging operator.
+\end{theorem}
+
+\subsection{Mapping from the region to the disk}
+\subsubsection{Extremum Principles}
+% (WEG384)
+Both the \color{red} Bergman and the Szegö norms \color{black} are very useful for characterizing the conformal mapping from G to a disk by extremum principles:
+\begin{theorem}
+    Let F be the conformal mapping from G to a disk normalized by $f(0)=0, f'(0)=1$.
+    Then
+    \begin{enumerate}
+        \item (Principle of minimum area) F' is the unique function which minimizes $||f||_B$ among all functions $f \in B(G)$ satisfying $f (O) = 1$.
+        \item (Principle of minimum length) $\sqrt{F'}$ is the unique function which minimizes $||f||_S$ among all functions $f \in S(G)$ satisfying $f (O) = 1$.
+    \end{enumerate}
+\end{theorem}
+
+\subsubsection{Osculation Methods}
+The osculation method (Schmiegungsverfahren) of Koebe [ 140] approximates F by a com-
+position of elementary maps. It is universally applicable, since it requires no hypotheses at
+all concerning the boundary 0G of the region G.
+
+\color{green}
+\subsection{Mapping from the disk to the region}

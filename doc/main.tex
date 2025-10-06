@@ -13,6 +13,28 @@
 \end{titlepage}
 
 \begin{abstract}
+    When performing shape optimization one encounters the problem of conformal mapping of a relatively simple onto a potentially very complicated domain. The Riemann mapping theorem guarantees the existence of such a conformal map, but does not provide any explicit construction of it. In practice, one has to resort to numerical methods to construct the conformal map.
+    This text is intended to give a general overview of currently known numerical algorithms for this very problem, and to provide a comparison of their suitability in terms of input and output format as well as their performance in terms of accuracy and speed.
+    One of the algorithms is then implemented in the context of a 2-dimensional shape optimization problem, and its performance is evaluated.
+
+
+    % If the region S is a convex polygon, the extremal problem can be treated numerically by linear programming methods (Opfer [202]).
+
+    Keywords: 
+    numerical conformal mapping, 
+    Riemann mapping theorem, 
+    Schwarz-Christoffel mapping, 
+    conjugate function method, 
+    Fourier series representation, 
+    curvilinear triangular mesh, 
+    mesh generation, 
+    finite element method, 
+    Laplace-Beltrami equations, 
+    spectral conformal parameterization, 
+    Ricci flow, 
+    charge simulation method, 
+    RT-algorithm, 
+    CRDT (cross-ratios Delaunay triangulation)
     
 \end{abstract}
 \newpage
@@ -25,5 +47,8 @@
 \include{existingmethods}
 \include{proposedmethod}
 \include{conclusion}
+
+\bibliography{references}
+\bibliographystyle{alpha}
 
 \end{document}
