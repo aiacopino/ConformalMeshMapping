@@ -1,5 +1,10 @@
 \begin{thebibliography}{Weg05}
 
+\bibitem[Wec19]{Wechsung2019}
+F~Wechsung.
+\newblock {\em Shape optimisation and robust solvers for incompressible flow}.
+\newblock PhD thesis, University of Oxford, 2019.
+
 \bibitem[Weg05]{Wegmann2005}
 Rudolf Wegmann.
 \newblock Chapter 9 - methods for numerical conformal mapping.

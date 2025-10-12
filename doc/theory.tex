@@ -1,24 +1,63 @@
 \section{Theoretical Background}
 \subsection{Conformal Mappings}
-\subsection{Riemann Mapping Theorem}
-\subsection{Riemann-Hilbert Problem}
-\subsection{Hilbert Transform}
-
-The \textbf{Riemann mapping theorem} states that if $U$ is a non-empty simply connected open subset of the complex number plane $\mathbb{C}$ which is not all of $\mathbb{C}$, then there exists a biholomorphic mapping $f$ (i.e. a bijective holomorphic mapping whose inverse is also holomorphic) from $U$ onto the open unit disk
-$$ D = \{z \in \mathbb{C}: |z|<1 \}. $$
-This mapping is known as a Riemann mapping.
-
-The beauty of the Riemann mapping theorem lies in its weight of implications, i.e. the fact that it guarantees the existence of a conformal map between any two simply connected domains in the complex plane, provided they are not the entire plane. The existence of this Riemann map is a priori not obvious: Even relatively simple Riemann mappings (for example a map from the interior of a circle to the interior of a square) have no explicit formula using only elementary functions.
-Simply connected open sets in the plane can be highly complicated, for instance, the boundary can be a nowhere-differentiable fractal curve of infinite length, even if the set itself is bounded. One such example is the Koch curve.[8] The fact that such a set can be mapped in an angle-preserving manner to the nice and regular unit disc seems counter-intuitive.
-
-\input{kochtikz.tex}
-
 
 \begin{definition}
     A conformal mapping, also called a conformal map, conformal transformation, angle-preserving transformation, or biholomorphic map, is a transformation w=f(z) that preserves local angles. An analytic function is conformal at any point where it has a nonzero derivative.
 \end{definition}
+This type of mapping is useful as some mesh properties remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure \cite{Wechsung2019}. 
+In two dimensions, conformality can be achieved by enforcing that the mapping satisfies the Cauchy-Riemann equations. 
+\color{red} 
+In higher dimensions, slmcoawrown
+\color{black}
 
 
+
+\subsection{Riemann Mapping Theorem}
+The reason why we use conformal mappings for shape optimisation in two dimensions is the following
+\begin{theorem}[Riemann Mapping Theorem]
+    If $U$ is a non-empty simply connected open subset of the complex number plane $\mathbb{C}$ which is not all of $\mathbb{C}$, then there exists a biholomorphic mapping $f$ (i.e. a bijective holomorphic mapping whose inverse is also holomorphic) from $U$ onto the open unit disk
+    $$ D = \{z \in \mathbb{C}: |z|<1 \}. $$
+    This mapping is known as a Riemann mapping.
+\end{theorem}
+
+The beauty of the Riemann mapping theorem lies in its weight of implications, i.e. the fact that it guarantees the existence of a conformal map between any two simply connected domains in the complex plane, provided they are not the entire plane. The existence of this Riemann map is a priori not obvious: Even relatively simple Riemann mappings (for example a map from the interior of a circle to the interior of a square) have no explicit formula using only elementary functions.
+Simply connected open sets in the plane can be highly complicated, for instance, the boundary can be a nowhere-differentiable fractal curve of infinite length, even if the set itself is bounded. One such example is the Koch curve. The fact that such a set can be mapped in an angle-preserving manner from the nice and regular unit disc seems counter-intuitive.
+\input{kochtikz.tex}
+
+\textit{proof.}
+
+
+\subsection{Riemann-Hilbert Problem}
+\subsection{Hilbert Transform}
+\subsection{Mixed boundary conditions (Wec 4.3)(?)}
+\subsection{Hilbert theory and different inner products}
+
+From complex analysis we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
+Denoting 
+$$B:= \begin{pmatrix}
+    \partial_x & -\partial_y \\
+    \partial_y & \partial_x
+\end{pmatrix}$$
+we want to find a deformation $\Phi$ such that $B\Phi = 0$.
+
+
+The Cauchy-Riemann equations however do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\mathbb{R}^ 2$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies [PROOF]. Thus, the choice of parametrization of the target region's boundary is another challenge posed when solving conformal mapping problems, along with finding a holomorphic deformation $\Phi$.
+
+In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells 
+\color{red}
+(?) where for a mesh $\mathcal{M}:= {K}$ of triangles $K$ such that $\bar{\Omega}= \Cup_{K\in\mathcal{M}}K$ we define $h(K)$ the diameter of the smallest $K$-circumscribing ball and $\rho(K)$ the diameter of the largest ball inscribed in K. Then a measure for the quality of K is the ratio of these diameters
+$$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) $$
+\cite{Wechsung2019}.
+\color{black}
+''' \cite{Wechsung2019}: Mesh quality measures comment p 54 '''
+
+
+
+
+
+
+
+\subsection{Crowding}
 Wegmann \cite{Wegmann2005} proved the following result.
 
 \begin{theorem}
