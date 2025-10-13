@@ -1,5 +1,10 @@
 \begin{thebibliography}{Weg05}
 
+\bibitem[SS03]{SteinShakarchi2003}
+Elias~M. Stein and Rami. Shakarchi.
+\newblock {\em Complex analysis}.
+\newblock Princeton lectures in analysis ; 2. Princeton University Press, Princeton, N.J, 2003.
+
 \bibitem[Wec19]{Wechsung2019}
 F~Wechsung.
 \newblock {\em Shape optimisation and robust solvers for incompressible flow}.

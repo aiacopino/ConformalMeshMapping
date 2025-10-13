@@ -1,13 +1,19 @@
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{amssymb}
+\usepackage{amsmath, amsthm, amssymb}
 \usepackage{bibentry}
 
-\usepackage{tikz}
+\usepackage{tikz, xcolor}
 \usetikzlibrary{lindenmayersystems}
 
 \newcommand{\del}{\partial}
-\newtheorem{definition}{Definition}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{corollary}{Corollary}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+\newtheoremstyle{custom}{5pt}{5pt}{\normalfont}{0pt}{\bfseries}{}{\newline}{}
+\theoremstyle{custom}
+
+%\newcommand{\mydef}[1]{\indent\textbf{Definition.}\newline #1\par}
+\newtheorem*{definition}{Definition}
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{lemma}{Lemma}
+\newtheorem*{corollary}{Corollary}
+\newtheorem*{proposition}{Proposition}
+\newtheorem*{remark}{Remark}

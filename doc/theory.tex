@@ -2,20 +2,22 @@
 \subsection{Conformal Mappings}
 
 \begin{definition}
-    A conformal mapping, also called a conformal map, conformal transformation, angle-preserving transformation, or biholomorphic map, is a transformation w=f(z) that preserves local angles. An analytic function is conformal at any point where it has a nonzero derivative.
+    A \textbf{conformal mapping}, also called a conformal map, conformal transformation, angle-preserving transformation, or biholomorphic map, is a transformation $f(z)$ that preserves local angles. An analytic function is conformal at any point where it has a nonzero derivative.
 \end{definition}
+
 This type of mapping is useful as some mesh properties remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure \cite{Wechsung2019}. 
 In two dimensions, conformality can be achieved by enforcing that the mapping satisfies the Cauchy-Riemann equations. 
-\color{red} 
-In higher dimensions, slmcoawrown
-\color{black}
-
-
+\red{In higher dimensions, slmcoawrown}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\mydef{We call a subset $\Omega \subset \mathbb{C}$ proper if $\emptyset \neq \Omega \neq \mathbb{C}$.}
+\begin{definition}
+    We call a subset $\Omega \in \mathbb{C}$ \textbf{proper} if $\emptyset \neq \Omega \neq \mathbb{C}$.
+\end{definition}    
 
 \subsection{Riemann Mapping Theorem}
 The reason why we use conformal mappings for shape optimisation in two dimensions is the following
 \begin{theorem}[Riemann Mapping Theorem]
-    If $U$ is a non-empty simply connected open subset of the complex number plane $\mathbb{C}$ which is not all of $\mathbb{C}$, then there exists a biholomorphic mapping $f$ (i.e. a bijective holomorphic mapping whose inverse is also holomorphic) from $U$ onto the open unit disk
+    If $\Omega$ is a non-empty simply connected open proper subset of the complex plane $\mathbb{C}$, then there exists a biholomorphic mapping $f$ (i.e. a bijective holomorphic mapping whose inverse is also holomorphic) from $\Omega$ onto the open unit disk
     $$ D = \{z \in \mathbb{C}: |z|<1 \}. $$
     This mapping is known as a Riemann mapping.
 \end{theorem}
@@ -24,8 +26,79 @@ The beauty of the Riemann mapping theorem lies in its weight of implications, i.
 Simply connected open sets in the plane can be highly complicated, for instance, the boundary can be a nowhere-differentiable fractal curve of infinite length, even if the set itself is bounded. One such example is the Koch curve. The fact that such a set can be mapped in an angle-preserving manner from the nice and regular unit disc seems counter-intuitive.
 \input{kochtikz.tex}
 
-\textit{proof.}
+The existence of a conformal map between any two simply connected, open proper subsets of $\mathbb{C}$ is what allows us to perform shape optimisation in two dimensions by solving the optimisation problem on a simple reference domain (e.g. the unit disk) and then mapping the solution to the complicated target domain.
+We closely follow the proof by normal families in \cite{SteinShakarchi2003}.
+\subsubsection{Preliminary Results}
+\begin{lemma}[Schwarz Lemma] \label{thm:SchwarzLemma}
+    XXXXXXXXX
+\end{lemma}
+\begin{definition}
+    A family $\mathcal{F}$ of holomorphic functions on a domain $\Omega$ is called \textbf{normal} if every sequence in $\mathcal{F}$ contains a subsequence that converges uniformly on any compact subset of $\Omega$.
+\end{definition}    
+\begin{definition}
+    A family $\mathcal{F}$ is called \textbf{uniformly bounded on compact subsets} of $\Omega$ if for every compact subset $K \subset \Omega$ there exists a constant $M_K$ such that $|f(z)| \leq M_K$ for all $z \in K$ and all $f \in \mathcal{F}$.
+\end{definition}
+\begin{definition}
+    A family $\mathcal{F}$ of holomorphic functions on a domain $\Omega$ is called \textbf{equicontinuous} if for every $\epsilon > 0$ there exists a $\delta > 0$ such that if $z \in \Omega$ with $|z-z_0| < \delta$ we have $|f(z) - f(z_0)| < \epsilon$ for all $f \in \mathcal{F}$.
+\end{definition}
+\begin{theorem}[Montel]
+    A family $\mathcal{F}$ of holomorphic functions on $\Omega$ that is uniformly bounded on compact subsets of $\Omega$ is normal if and only if it is equicontinuous on compacta.
+\end{theorem}
+\color{red} DO I HAVE TO WRITE THIS PROOF? \color{black}
 
+\begin{proposition}[Uniform Convergence to Holomorphic Limit and Injectivity]
+    Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f$. Then $f$ is either constant or injective.
+\end{proposition}
+
+\begin{proposition}[Cauchy Inequality]
+\label{thm:CauchyInequality}
+    Let $f$ be holomorphic on an open set containing the closure of a ball $B_R(z_0)$ centered at $z_0$ of radius R. Then $$ |f^{(n)}(z_0)|\leq \frac{n! \lVert f \rVert _C}{R^n},$$ where $ \lVert f \rVert _C= \displaystyle \sup_{z\in C}|f(z)|$ on the boundary circle $C$.
+\end{proposition}
+
+\red{\textit{Proof.}}
+
+\subsubsection{Proof of Riemann Mapping Theorem}
+\textit{Step 1: Existence of a bounded injective conformal map to the unit disk} \\
+Let $\Omega$ be a simply connected open proper subset of $\mathbb{C}$. We show that $\Omega$ is conformally equivalent to an open subset of the unit disk containing the origin. 
+Indeed, choose $\alpha \notin \Omega$ and consider the function $f(z) = log(z-\alpha)$ on $\Omega$, which is well-posed and holomorphic since $z-\alpha$ never vanishes on $\Omega$. 
+Note $f$ is injective since $e^{f(z)} = z-\alpha$ ($f(z_1) = f(z_2) \implies z_1 - \alpha = z_2 - \alpha$).
+Then for a point $\omega \in \Omega$ we get $f(z) \neq f(\omega) + 2\pi i \forall z \in \Omega$ since otherwise we would find $z = \omega$ again by exponentiating.
+In fact, $f(z)\cap B_{\epsilon}(f(\omega) + 2\pi i) = \emptyset$ for some $\epsilon > 0$ since otherwise we would find a sequence $z_n \to \omega$ with $f(z_n) \to f(\omega) + 2\pi i$, contradicting the continuity of $f$.
+Finally, the function $g(z) = \frac{1}{f(z) - (f(\omega) + 2\pi i)}$ is well-defined, holomorphic and injective on $\Omega$ and maps $\Omega$ to a bounded subset $g(\Omega)\subset\mathbb{C}$, so $g$ is conformal. By boundedness of $g(z) < \frac{1}{\epsilon}$ we can scale and translate $g(\Omega)$ to contain the origin and fit into the unit disk.
+
+\textit{Step 2:} \\
+By step 1 we can assume $\Omega$ to be an open subset of the unit disk with $0\in\Omega$.
+Consider the family $\mathcal{F}$ of all injective holomorphic functions $f: \Omega \to \mathbb{D}$ with $f(0) = 0$.
+Note that $\mathcal{F}\neq\emptyset$ since it contains the identity, and it is a uniformly bounded family by construction (maps into unit disk). 
+We now want to find a function $f \in \mathcal{F}$ that maximizes $|f'(0)|$. \red{(WHY?)}
+Observe that by the Cauchy inequality \red{ \ref{thm:CauchyInequality}} $|f'(0)|$ are uniformly bounded for $f$ in $\mathcal{F}$.
+\red{Next, let $$s:= \displaystyle \sup_{f\in\mathcal{F}} |f'(0)|.$$ and choose a sequence {$f_n$}$\subset\mathcal{F}$ such that $|f_n'(0)| \to s$ as $n\to\infty$.}
+By Montel's theorem, {$f_n$} has a subsequence converging uniformly on compacta to a holomorphic $f$ on $\Omega$.
+Since $s\geq 1$ (the identity is in $\mathcal{F}$), $f$ is non-constant and by the proposition on uniform convergence to holomorphic limit and injectivity, $f$ is injective.
+By continuity we have $|f(z)\leq 1$ for all $z\in\Omega$, and by the \red{maximum modulus principle} $|f(z)|<1$.
+Finally and since $f(0) = 0$, we have $f\in\mathcal{F}$ and $|f'(0)| = s$.
+
+\textit{Step 3: $f$ is a conformal map from $\Omega$ to $\mathbb{D}$.} \\
+By step 1 we have injectivity, hence it suffices to show $f$ is surjective.
+Suppose towards a contradiction that $f$ is not surjective, we will construct a function in $\mathcal{F}$ with derivative greater than $s$ at the origin.
+So let $\alpha\in\mathbb{D}$ be such that $\alpha\notin f(\Omega)$ and consider the automorphism of the unit disk that interchanges 0 and $\alpha$,
+$$\psi_{\alpha}(z) = \frac{\alpha-z}{1-\bar{\alpha}z}.$$
+Since $\Omega$ is simply connected and by continuity of $f$ and $\psi_{\alpha}(\Omega)$, the set $U:= (\psi_{\alpha}\circ f)(\Omega)$ is simply connected and does not contain the origin.
+Thus we can define a square root function on $U$ by $$ q(w)=e^{\frac{1}{2}log w}.$$
+Next, consider the function $$F=\psi_{q(\alpha)}\circ q \circ \psi_{\alpha}\circ f.$$
+Then $F\in\mathcal{F}$ since $F(0) = 0$ and $F$ is holomorphic and injective since all the composing functions are. Also, $F$ maps into the unit disk since all the composing functions do.
+But now if $h$ denotes the square function $h(w)=w^2$, then we must have $$f = \psi_{\alpha}^{-1}\circ h \circ \psi_{q(\alpha)}^{-1} \circ F = \Psi \circ F.$$
+But $\Psi:\mathbb{D}\to\mathbb{D}$ satisfies $\Psi(0) = 0$ and is not injective since $F$ is but $h$ is not. By the \red{Schwarz lemma} \ref{thm:SchwarzLemma} we get $|\Psi'(0)| < 1$ and hence
+$$|f'(0)| = |\Psi'(0)||F'(0)| < |F'(0)|,$$
+contradicting maximality of $|f'(0)|$ in $\mathcal{F}$.
+
+Finally, multiplying $f$ with a suitable unimodular complex number gives the desired conformal map from $\Omega$ to $\mathbb{D}$ with $f(0) = 0$ and $f'(0) > 0$. $\hfill\qed$
+
+\begin{corollary}
+    Any two simple connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
+\end{corollary}
+This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
+Now we have the theory for why shape optimisation of two dimensional simply connected regions works in the first place.
 
 \subsection{Riemann-Hilbert Problem}
 \subsection{Hilbert Transform}
