@@ -1,6 +1,57 @@
-\section{Existing Methods}
+\iffalse METRICS
 - Numerical stability of different conformal mapping methods
 - Boundary discretization requirements (how smooth does $\gamma$ need to be?)
 - Mesh quality preservation - how does the mapping affect triangle quality?
 - Computational complexity
 - Input and output formats
+\fi
+\section{Existing Methods}
+Let $G$ be a simply connected region in the complex plane with $0\in G$ and boundary $\gamma$. The Riemann mapping theorem guarantees the existence of a conformal map from the unit disk to $G$. Several numerical methods exist to construct such maps. This chapter aims to give an overview and compare the methods in terms of input/output format suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
+
+\subsection{Potential Theoretic Methods}
+% starting p 369 weg05
+\subsubsection{Bergman Kernel Method}
+
+\iffalse
+\subsection{Mapping from the Region to the Disk}
+\subsubsection{Extremum Principles}
+% (WEG384)
+Both the \color{red} Bergman and the Szegö norms \color{black} are very useful for characterizing the conformal mapping from G to a disk by extremum principles:
+\begin{theorem}
+    Let F be the conformal mapping from G to a disk normalized by $f(0)=0, f'(0)=1$.
+    Then
+    \begin{enumerate}
+        \item (Principle of minimum area) F' is the unique function which minimizes $||f||_B$ among all functions $f \in B(G)$ satisfying $f (O) = 1$.
+        \item (Principle of minimum length) $\sqrt{F'}$ is the unique function which minimizes $||f||_S$ among all functions $f \in S(G)$ satisfying $f (O) = 1$.
+    \end{enumerate}
+\end{theorem}
+
+\subsubsection{Osculation Methods}
+The osculation method (Schmiegungsverfahren) of Koebe [ 140] approximates F by a com-
+position of elementary maps. It is universally applicable, since it requires no hypotheses at
+all concerning the boundary 0G of the region G.
+\subsubsection{Accuracy}
+\fi 
+
+\subsection{Mapping from the Disk to the Region}
+When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\bar{D}$ by Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, s. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
+By the \red{implicit mapping theorem}\ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
+
+\red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
+
+
+\subsubsection{Projection Methods}
+Alternating Projection Method à la Neumann \cite{Wegmann2005} p389
+\red{
+Algo:
+Start iteration with a $2\pi$-periodic function $S_0(t)$, e.g. $S_0(t)=t$.
+Calculate Fourier coefficients $B_k$ of the boundary function using...
+}
+AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $S_0$ is sufficiently close to the actual boundary correspondence function $S$.
+Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably size grids, and converges very slowly for finer meshes.
+
+\red{various improvements}
+\subsubsection{Newton Methods}
+
+\subsubsection{Interpolation}
+\subsubsection{Accuracy}

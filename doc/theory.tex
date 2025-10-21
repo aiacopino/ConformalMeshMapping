@@ -1,4 +1,8 @@
 \section{Theoretical Background}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%maybe change structure to section existence of a conformal map, section construction of a conformal map
+
+
 \subsection{Conformal Mappings}
 
 \begin{definition}
@@ -97,8 +101,19 @@ Finally, multiplying $f$ with a suitable unimodular complex number gives the des
 \begin{corollary}
     Any two simple connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
 \end{corollary}
-This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
-Now we have the theory for why shape optimisation of two dimensional simply connected regions works in the first place.
+\textit{Proof.} This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
+\\
+This completes the theory for why shape optimisation of two dimensional simply connected regions works in the first place.
+Here follows some more theory on how to actually construct such conformal maps numerically.
+
+\subsection{Conformal Mapping and Prerequisites}
+\begin{theorem}[\cite{Wegmann2005}, p. 357] \label{thm:ExtensionToBoundary}
+    The conformal mapping $\Phi:D\to G$ can be extended to a continuous mapping $\Phi:\bar{D}\to\bar{G}$ if and only if the boundary $\Gamma$ of $G$ consists of a closed curve.
+\end{theorem}
+
+\begin{theorem}[Implicit Mapping Theorem] \label{thm:ImplicitMappingTheorem}
+    XXXXXXXXXXXXXXXXXXXXx
+\end{theorem}
 
 \subsection{Riemann-Hilbert Problem}
 \subsection{Hilbert Transform}
@@ -122,7 +137,9 @@ In order to keep the approximation error as low as possible while maintaining go
 $$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) $$
 \cite{Wechsung2019}.
 \color{black}
-''' \cite{Wechsung2019}: Mesh quality measures comment p 54 '''
+\iffalse
+\cite{Wechsung2019}: Mesh quality measures comment p 54
+\fi
 
 
 
@@ -134,7 +151,7 @@ $$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) $$
 Wegmann \cite{Wegmann2005} proved the following result.
 
 \begin{theorem}
-    When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides (see Figure 4) then the conformal mapping $\phi : D \rightarrow G$ satisfies
+    When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides then the conformal mapping $\phi : D \rightarrow G$ satisfies
     $$
     \|\phi'\|_D \geq b \psi(b/a)
     $$
@@ -151,7 +168,7 @@ DeLillo [37] has shown how crowding affects the accuracy of numerical computatio
 Crowding also limits the practical usefulness of conformal maps. This was demonstrated by DeLillo [36] for the Laplace equation. Crowding has also been observed for regions with elongated sections ("fingers"). For "pinched" regions, such as the interior of an inverted ellipse, ill conditioning occurs of a less severe, algebraic nature (DeLillo [37]).
 
 \subsubsection{The operator R}
-In some conformal mapping methods, boundars value problems as follows occur,
+In some conformal mapping methods, boundary value problems as follows occur,
 $$ \Psi(e^{it})=B(t) + A(t)U(t) $$
 where $A, B: \mathbb{C}\to \mathbb{C}$ and $U:\mathbb{C}\to \mathbb{R}$. Multiplication with $\bar{A}$ yields the RH problem $$ Im(\bar{A(t)}\Psi(e^{it})) = Im(\bar{A(t)}B(t))$$
 This problem can be solved by the operator $R_{\beta}$, which is defined as follows:
@@ -164,24 +181,3 @@ This follows from the following theorem:
     $$g := -Re ( e ^{-i\beta} ( I - iK + J)/B).$$ 
     Where $K$ is the conjugation operator and J the averaging operator.
 \end{theorem}
-
-\subsection{Mapping from the region to the disk}
-\subsubsection{Extremum Principles}
-% (WEG384)
-Both the \color{red} Bergman and the Szegö norms \color{black} are very useful for characterizing the conformal mapping from G to a disk by extremum principles:
-\begin{theorem}
-    Let F be the conformal mapping from G to a disk normalized by $f(0)=0, f'(0)=1$.
-    Then
-    \begin{enumerate}
-        \item (Principle of minimum area) F' is the unique function which minimizes $||f||_B$ among all functions $f \in B(G)$ satisfying $f (O) = 1$.
-        \item (Principle of minimum length) $\sqrt{F'}$ is the unique function which minimizes $||f||_S$ among all functions $f \in S(G)$ satisfying $f (O) = 1$.
-    \end{enumerate}
-\end{theorem}
-
-\subsubsection{Osculation Methods}
-The osculation method (Schmiegungsverfahren) of Koebe [ 140] approximates F by a com-
-position of elementary maps. It is universally applicable, since it requires no hypotheses at
-all concerning the boundary 0G of the region G.
-
-\color{green}
-\subsection{Mapping from the disk to the region}
