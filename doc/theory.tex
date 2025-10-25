@@ -111,12 +111,39 @@ Here follows some more theory on how to actually construct such conformal maps n
     The conformal mapping $\Phi:D\to G$ can be extended to a continuous mapping $\Phi:\bar{D}\to\bar{G}$ if and only if the boundary $\Gamma$ of $G$ consists of a closed curve.
 \end{theorem}
 
-\begin{theorem}[Implicit Mapping Theorem] \label{thm:ImplicitMappingTheorem}
-    XXXXXXXXXXXXXXXXXXXXx
+\begin{theorem}[Implicit Mapping Theorem \cite{EinsiedlerWieser2022AnalysisSkript}, p.573] \label{thm:ImplicitMappingTheorem}
+    Let $r > 0$ be a radius, and let $x_0 \in \mathbb{R}^n$, $y_0 \in \mathbb{R}^m$. Consider the open set $W = B_r(x_0) \times B_r(y_0) \subset \mathbb{R}^n \times \mathbb{R}^m$ defined as
+$$
+W = \{ (x, y) \in \mathbb{R}^n \times \mathbb{R}^m : \| x - x_0 \|_2 < r \text{ and } \| y - y_0 \|_2 < r \}.
+$$
+Let $F: W \to \mathbb{R}^m$ be a continuous function satisfying the following conditions:
+\begin{enumerate}
+    \item $F(x_0, y_0) = 0$.
+    \item The partial derivatives $\partial_{y_k} F : W \to \mathbb{R}^m$ exist for all $k \in \{1, \dots, m\}$ and are continuous on $W$.
+    \item The partial differential $D_y F(x_0, y_0)$ (the differential of the map $y \mapsto F(x_0, y)$ at $y_0$) is invertible.
+\end{enumerate}
+Then there exist radii $\alpha, \beta \in (0, r)$ such that for the open balls $U_0 = B_\alpha(x_0) \subset \mathbb{R}^n$ and $V_0 = B_\beta(y_0) \subset \mathbb{R}^m$, there exists a unique continuous function $f: U_0 \to V_0$ satisfying:
+\begin{itemize}
+    \item $f(x_0) = y_0$.
+    \item For all $(x, y) \in U_0 \times V_0$, we have 
+    $$ F(x, y) = 0 \quad \text{if and only if} \quad y = f(x). $$
+\end{itemize}
 \end{theorem}
 
-\subsection{Riemann-Hilbert Problem}
-\subsection{Hilbert Transform}
+\subsection{Riemann-Hilbert Problems}
+XXXXXXXXXXXXXX
+
+% \red{add section 2.5:} error of operator K_N for methods based on function conjugation
+\subsection{Boundary Value Problems}\label{operatorK_N}
+In Riemann's thesis \red{add citation}, conformal mappings are a mere special case of the more general family of boundary value problems of analytic functions on the unit disk $D$ or in its exterior $D^{-}:=\{z: |z|>1\}$. The simplest such problem can be described as finding $\Psi$ analytic in $D$, continuous in $\bar{D}$ and satisfying $$Re(\Psi(e^{it}))=\psi(t)$$ on the boundary of $D$, where $\psi$ is $2\pi$-periodic and Hölder continuous
+This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator $$K\Psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \Psi(t)cot(\frac{s-t}{2}) dt,$$ which is also known as \red{Hilbert Transform}.
+In order to use numerical methods efficiently via the \red{Fast Fourier Transform def?} we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\Psi$ will be written as $$\Psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ and the conjugation operator can be approximated by the operator $K_N$ defined as $$K_N\Psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
+The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\Psi$ at the grid points. This approximation of the actual operator $K$ satisfies $$\|K \Psi - K_N \Psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\Psi\in C^{\alpha}$ Hölder continuous.
+If $\Psi$ is smoother, e.g. $\Psi \in C^{k-1}$, the error decreases to $$\|K \Psi - K_N \Psi\|_{\infty} \in O(n^{-k}log(n) \|\Psi^{(k)}\|_{infty})$$ \cite{Wegmann2005} p. 362.
+\red{add more details on this operator?}
+
+\subsection{Hilbert Transform \cite{Castillo2025}}
+\red{probably way too much detail}
 \subsection{Mixed boundary conditions (Wec 4.3)(?)}
 \subsection{Hilbert theory and different inner products}
 
@@ -140,12 +167,6 @@ $$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) $$
 \iffalse
 \cite{Wechsung2019}: Mesh quality measures comment p 54
 \fi
-
-
-
-
-
-
 
 \subsection{Crowding}
 Wegmann \cite{Wegmann2005} proved the following result.

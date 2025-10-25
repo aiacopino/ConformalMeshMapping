@@ -55,3 +55,7 @@ Fourier calculation can be done very efficiently using FFT which makes AP one of
 
 \subsubsection{Interpolation}
 \subsubsection{Accuracy}
+Wegmann \cite{Wegmann2005} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
+Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
+Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005} p.415.\red{add figure?}
+\red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}

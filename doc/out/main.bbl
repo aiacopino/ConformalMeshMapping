@@ -1,5 +1,20 @@
 \begin{thebibliography}{Weg05}
 
+\bibitem[CR25]{Castillo2025}
+Ren{\'e}~E. Castillo and Edixon~M. Rojas.
+\newblock Revisiting the hilbert transform of periodic functions.
+\newblock {\em Mathematische Semesterberichte}, 72:29--49, 2025.
+
+\bibitem[EW22]{EinsiedlerWieser2022AnalysisSkript}
+Manfred Einsiedler and Andreas Wieser.
+\newblock Analysis i und ii.
+\newblock Vorlesungsskript 2021/2022, 2022.
+
+\bibitem[Gai64]{Gaier1964}
+Dieter Gaier.
+\newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em Springer Tracts in Natural Philosophy / Ergebnisse der angewandten Mathematik}.
+\newblock Springer-Verlag, Berlin, G{\"o}ttingen, Heidelberg, 1964.
+
 \bibitem[SS03]{SteinShakarchi2003}
 Elias~M. Stein and Rami. Shakarchi.
 \newblock {\em Complex analysis}.
