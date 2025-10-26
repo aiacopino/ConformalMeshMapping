@@ -8,16 +8,18 @@
 \usetikzlibrary{lindenmayersystems}
 
 \newcommand{\del}{\partial}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\disk}{\mathbb{D}}
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand{\green}[1]{\textcolor{green}{#1}}
 
-\newtheoremstyle{custom}{5pt}{5pt}{\normalfont}{0pt}{\bfseries}{}{\newline}{}
+\newtheoremstyle{custom}{3mm}{3mm}{\normalfont}{0pt}{\bfseries}{}{\newline}{}
 \theoremstyle{custom}
 
 %\newcommand{\mydef}[1]{\indent\textbf{Definition.}\newline #1\par}
-\newtheorem*{definition}{Definition}
-\newtheorem*{theorem}{Theorem}
-\newtheorem*{lemma}{Lemma}
-\newtheorem*{corollary}{Corollary}
-\newtheorem*{proposition}{Proposition}
-\newtheorem*{remark}{Remark}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}{Remark}

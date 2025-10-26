@@ -1,7 +1,5 @@
 \section{Theoretical Background}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %maybe change structure to section existence of a conformal map, section construction of a conformal map
-
 
 \subsection{Conformal Mappings}
 
@@ -11,12 +9,15 @@
 
 This type of mapping is useful as some mesh properties remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure \cite{Wechsung2019}. 
 In two dimensions, conformality can be achieved by enforcing that the mapping satisfies the Cauchy-Riemann equations. 
-\red{In higher dimensions, slmcoawrown}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\mydef{We call a subset $\Omega \subset \mathbb{C}$ proper if $\emptyset \neq \Omega \neq \mathbb{C}$.}
+
 \begin{definition}
     We call a subset $\Omega \in \mathbb{C}$ \textbf{proper} if $\emptyset \neq \Omega \neq \mathbb{C}$.
-\end{definition}    
+\end{definition}
+
+\begin{theorem}[\cite{Wegmann2005}, p. 357] \label{thm:ExtensionToBoundary}
+    The conformal mapping $\Phi:D\to G$ can be extended to a continuous mapping $\Phi:\bar{D}\to\bar{G}$ if and only if the boundary $\Gamma$ of $G$ consists of a closed curve.
+\end{theorem}
+
 
 \subsection{Riemann Mapping Theorem}
 The reason why we use conformal mappings for shape optimisation in two dimensions is the following
@@ -34,8 +35,15 @@ The existence of a conformal map between any two simply connected, open proper s
 We closely follow the proof by normal families in \cite{SteinShakarchi2003}.
 \subsubsection{Preliminary Results}
 \begin{lemma}[Schwarz Lemma] \label{thm:SchwarzLemma}
-    XXXXXXXXX
+    Let $f:\disk\to\disk$ be holomorphic with $f(0) = 0$. Then 
+    \begin{enumerate}
+    \item $|f(z)| \leq |z|$ for all $z \in \disk$.
+    \item If for some $z_0\neq 0$ we have $f(z_0)=z_0$ then f is a rotation.
+    \item $|f'(0)| \leq 1$ and if equality holds, then $f$ is a rotation.
+    \end{enumerate} 
 \end{lemma}
+\red{\textit{Proof.?}}
+
 \begin{definition}
     A family $\mathcal{F}$ of holomorphic functions on a domain $\Omega$ is called \textbf{normal} if every sequence in $\mathcal{F}$ contains a subsequence that converges uniformly on any compact subset of $\Omega$.
 \end{definition}    
@@ -48,7 +56,7 @@ We closely follow the proof by normal families in \cite{SteinShakarchi2003}.
 \begin{theorem}[Montel]
     A family $\mathcal{F}$ of holomorphic functions on $\Omega$ that is uniformly bounded on compact subsets of $\Omega$ is normal if and only if it is equicontinuous on compacta.
 \end{theorem}
-\color{red} DO I HAVE TO WRITE THIS PROOF? \color{black}
+\red{\textit{Proof.?}}
 
 \begin{proposition}[Uniform Convergence to Holomorphic Limit and Injectivity]
     Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f$. Then $f$ is either constant or injective.
@@ -59,7 +67,27 @@ We closely follow the proof by normal families in \cite{SteinShakarchi2003}.
     Let $f$ be holomorphic on an open set containing the closure of a ball $B_R(z_0)$ centered at $z_0$ of radius R. Then $$ |f^{(n)}(z_0)|\leq \frac{n! \lVert f \rVert _C}{R^n},$$ where $ \lVert f \rVert _C= \displaystyle \sup_{z\in C}|f(z)|$ on the boundary circle $C$.
 \end{proposition}
 
-\red{\textit{Proof.}}
+\red{\textit{Proof.?}}
+
+\begin{theorem}[Implicit Mapping Theorem \cite{EinsiedlerWieser2022AnalysisSkript}, p.573] \label{thm:ImplicitMappingTheorem}
+    Let $r > 0$ be a radius, and let $x_0 \in \mathbb{R}^n$, $y_0 \in \mathbb{R}^m$. Consider the open set $W = B_r(x_0) \times B_r(y_0) \subset \mathbb{R}^n \times \mathbb{R}^m$ defined as
+$$
+W = \{ (x, y) \in \mathbb{R}^n \times \mathbb{R}^m : \| x - x_0 \|_2 < r \text{ and } \| y - y_0 \|_2 < r \}.
+$$
+Let $F: W \to \mathbb{R}^m$ be a continuous function satisfying the following conditions:
+\begin{enumerate}
+    \item $F(x_0, y_0) = 0$.
+    \item The partial derivatives $\partial_{y_k} F : W \to \mathbb{R}^m$ exist for all $k \in \{1, \dots, m\}$ and are continuous on $W$.
+    \item The partial differential $D_y F(x_0, y_0)$ (the differential of the map $y \mapsto F(x_0, y)$ at $y_0$) is invertible.
+\end{enumerate}
+Then there exist radii $\alpha, \beta \in (0, r)$ such that for the open balls $U_0 = B_\alpha(x_0) \subset \mathbb{R}^n$ and $V_0 = B_\beta(y_0) \subset \mathbb{R}^m$, there exists a unique continuous function $f: U_0 \to V_0$ satisfying:
+\begin{itemize}
+    \item $f(x_0) = y_0$.
+    \item For all $(x, y) \in U_0 \times V_0$, we have 
+    $$ F(x, y) = 0 \quad \text{if and only if} \quad y = f(x). $$
+\end{itemize}
+\end{theorem}
+
 
 \subsubsection{Proof of Riemann Mapping Theorem}
 \textit{Step 1: Existence of a bounded injective conformal map to the unit disk} \\
@@ -92,7 +120,8 @@ Thus we can define a square root function on $U$ by $$ q(w)=e^{\frac{1}{2}log w}
 Next, consider the function $$F=\psi_{q(\alpha)}\circ q \circ \psi_{\alpha}\circ f.$$
 Then $F\in\mathcal{F}$ since $F(0) = 0$ and $F$ is holomorphic and injective since all the composing functions are. Also, $F$ maps into the unit disk since all the composing functions do.
 But now if $h$ denotes the square function $h(w)=w^2$, then we must have $$f = \psi_{\alpha}^{-1}\circ h \circ \psi_{q(\alpha)}^{-1} \circ F = \Psi \circ F.$$
-But $\Psi:\mathbb{D}\to\mathbb{D}$ satisfies $\Psi(0) = 0$ and is not injective since $F$ is but $h$ is not. By the \red{Schwarz lemma} \ref{thm:SchwarzLemma} we get $|\Psi'(0)| < 1$ and hence
+But $\Psi:\mathbb{D}\to\mathbb{D}$ satisfies $\Psi(0) = 0$ and is not injective since $F$ is but $h$ is not. 
+By the Schwarz lemma \ref{thm:SchwarzLemma} we get $|\Psi'(0)| < 1$ and hence
 $$|f'(0)| = |\Psi'(0)||F'(0)| < |F'(0)|,$$
 contradicting maximality of $|f'(0)|$ in $\mathcal{F}$.
 
@@ -102,40 +131,17 @@ Finally, multiplying $f$ with a suitable unimodular complex number gives the des
     Any two simple connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
 \end{corollary}
 \textit{Proof.} This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
-\\
+$\hfill\qed$ \\
+ \\
 This completes the theory for why shape optimisation of two dimensional simply connected regions works in the first place.
 Here follows some more theory on how to actually construct such conformal maps numerically.
 
-\subsection{Conformal Mapping and Prerequisites}
-\begin{theorem}[\cite{Wegmann2005}, p. 357] \label{thm:ExtensionToBoundary}
-    The conformal mapping $\Phi:D\to G$ can be extended to a continuous mapping $\Phi:\bar{D}\to\bar{G}$ if and only if the boundary $\Gamma$ of $G$ consists of a closed curve.
-\end{theorem}
+Existence established, the problem now becomes the explicit construction of a conformal mapping. A priori there are infinitely many conformal mappings from $\mathbb{D}$ to any simply connected bounded region $\Omega$, which is why the introduction of boundary conditions is needed to get uniqueness of $\Phi$ and thus well-posedness of the problem. This results in the problem being translated into solving a Boundary Value Problem (BVP) for analytic functions. 
 
-\begin{theorem}[Implicit Mapping Theorem \cite{EinsiedlerWieser2022AnalysisSkript}, p.573] \label{thm:ImplicitMappingTheorem}
-    Let $r > 0$ be a radius, and let $x_0 \in \mathbb{R}^n$, $y_0 \in \mathbb{R}^m$. Consider the open set $W = B_r(x_0) \times B_r(y_0) \subset \mathbb{R}^n \times \mathbb{R}^m$ defined as
-$$
-W = \{ (x, y) \in \mathbb{R}^n \times \mathbb{R}^m : \| x - x_0 \|_2 < r \text{ and } \| y - y_0 \|_2 < r \}.
-$$
-Let $F: W \to \mathbb{R}^m$ be a continuous function satisfying the following conditions:
-\begin{enumerate}
-    \item $F(x_0, y_0) = 0$.
-    \item The partial derivatives $\partial_{y_k} F : W \to \mathbb{R}^m$ exist for all $k \in \{1, \dots, m\}$ and are continuous on $W$.
-    \item The partial differential $D_y F(x_0, y_0)$ (the differential of the map $y \mapsto F(x_0, y)$ at $y_0$) is invertible.
-\end{enumerate}
-Then there exist radii $\alpha, \beta \in (0, r)$ such that for the open balls $U_0 = B_\alpha(x_0) \subset \mathbb{R}^n$ and $V_0 = B_\beta(y_0) \subset \mathbb{R}^m$, there exists a unique continuous function $f: U_0 \to V_0$ satisfying:
-\begin{itemize}
-    \item $f(x_0) = y_0$.
-    \item For all $(x, y) \in U_0 \times V_0$, we have 
-    $$ F(x, y) = 0 \quad \text{if and only if} \quad y = f(x). $$
-\end{itemize}
-\end{theorem}
-
-\subsection{Riemann-Hilbert Problems}
-XXXXXXXXXXXXXX
 
 % \red{add section 2.5:} error of operator K_N for methods based on function conjugation
-\subsection{Boundary Value Problems}\label{operatorK_N}
-In Riemann's thesis \red{add citation}, conformal mappings are a mere special case of the more general family of boundary value problems of analytic functions on the unit disk $D$ or in its exterior $D^{-}:=\{z: |z|>1\}$. The simplest such problem can be described as finding $\Psi$ analytic in $D$, continuous in $\bar{D}$ and satisfying $$Re(\Psi(e^{it}))=\psi(t)$$ on the boundary of $D$, where $\psi$ is $2\pi$-periodic and Hölder continuous
+\subsection{Boundary Value Problems}\label{chap:BoundaryValueProblems}\label{operatorK_N}
+In Riemann's thesis, conformal mappings are a mere special case of the more general family of boundary value problems of analytic functions on the unit disk $D$ or in its exterior $D^{-}:=\{z: |z|>1\}$. The simplest such problem can be described as finding $\Psi$ analytic in $D$, continuous in $\bar{D}$ and satisfying $$Re(\Psi(e^{it}))=\psi(t)$$ on the boundary of $D$, where $\psi$ is $2\pi$-periodic and Hölder continuous
 This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator $$K\Psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \Psi(t)cot(\frac{s-t}{2}) dt,$$ which is also known as \red{Hilbert Transform}.
 In order to use numerical methods efficiently via the \red{Fast Fourier Transform def?} we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\Psi$ will be written as $$\Psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ and the conjugation operator can be approximated by the operator $K_N$ defined as $$K_N\Psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
 The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\Psi$ at the grid points. This approximation of the actual operator $K$ satisfies $$\|K \Psi - K_N \Psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\Psi\in C^{\alpha}$ Hölder continuous.
@@ -155,18 +161,24 @@ $$B:= \begin{pmatrix}
 \end{pmatrix}$$
 we want to find a deformation $\Phi$ such that $B\Phi = 0$.
 
+As a byproduct of the Cauchy-Riemann equations, both components of a conformal map are harmonic functions, i.e. they satisfy Laplace's equation $\Delta u = 0$.
+Thus, one way to construct conformal maps is to solve Laplace's equation with suitable boundary conditions. \ref{chap:BoundaryValueProblems}
 
 The Cauchy-Riemann equations however do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\mathbb{R}^ 2$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies [PROOF]. Thus, the choice of parametrization of the target region's boundary is another challenge posed when solving conformal mapping problems, along with finding a holomorphic deformation $\Phi$.
 
-In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells 
-\color{red}
-(?) where for a mesh $\mathcal{M}:= {K}$ of triangles $K$ such that $\bar{\Omega}= \Cup_{K\in\mathcal{M}}K$ we define $h(K)$ the diameter of the smallest $K$-circumscribing ball and $\rho(K)$ the diameter of the largest ball inscribed in K. Then a measure for the quality of K is the ratio of these diameters
-$$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) $$
-\cite{Wechsung2019}.
-\color{black}
+In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that $$\overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K$$ we define $h(K)$ the diameter of the smallest $K$-circumscribing ball and $\rho(K)$ the diameter of the largest ball inscribed in K. Then a measure \cite{Wechsung2019} for the quality of K is the ratio of these diameters
+$$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) .$$
+
 \iffalse
 \cite{Wechsung2019}: Mesh quality measures comment p 54
 \fi
+
+\subsection{Numerical Construction of Conformal Mappings}
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+\subsection{Riemann-Hilbert Problems}
+XXXXXXXXXXXXXX
 
 \subsection{Crowding}
 Wegmann \cite{Wegmann2005} proved the following result.

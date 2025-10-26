@@ -10,6 +10,11 @@ Manfred Einsiedler and Andreas Wieser.
 \newblock Analysis i und ii.
 \newblock Vorlesungsskript 2021/2022, 2022.
 
+\bibitem[FZ87]{FLORYAN1987}
+J.M Floryan and Charles Zemach.
+\newblock Schwarz-christoffel mappings: A general approach.
+\newblock {\em Journal of Computational Physics}, 72(2):347--371, 1987.
+
 \bibitem[Gai64]{Gaier1964}
 Dieter Gaier.
 \newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em Springer Tracts in Natural Philosophy / Ergebnisse der angewandten Mathematik}.

@@ -7,9 +7,13 @@
 \fi
 \section{Existing Methods}
 Let $G$ be a simply connected region in the complex plane with $0\in G$ and boundary $\gamma$. The Riemann mapping theorem guarantees the existence of a conformal map from the unit disk to $G$. Several numerical methods exist to construct such maps. This chapter aims to give an overview and compare the methods in terms of input/output format suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
+GIVEN MESH ON UNIT DISK AND BOUNDARY OF OMEGA, FIND PHI. 
 
 \subsection{Potential Theoretic Methods}
 % starting p 369 weg05
+
+The accuracy of the conformal mapping depends to a large extent on the smoothness of the boundary curve $\gamma$. 
+
 \subsubsection{Bergman Kernel Method}
 
 \iffalse
@@ -35,7 +39,7 @@ all concerning the boundary 0G of the region G.
 
 \subsection{Mapping from the Disk to the Region}
 When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\bar{D}$ by Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, s. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
-By the \red{implicit mapping theorem}\ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
+By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
 
 \red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
 
@@ -59,3 +63,44 @@ Wegmann \cite{Wegmann2005} \red{section 2.5 } proved that accuracy of methods ba
 Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
 Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005} p.415.\red{add figure?}
 \red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
+
+
+\subsection{Schwarz-Christoffel Method}
+$R_w = \mathbb{D}$ disk \\
+$B_w = \del\mathbb {D}$ boundary of D\\
+$R_z = \Omega$ = polygon \\
+
+One class of methods for finding the conformal mapping $\Phi$ is given by the Schwarz-Christoffel equation, which relates the derivative of $\Phi$ to an integral over the boundary of the target domain $\Omega$ when $\Omega$ is a polygon.
+\subsubsection{Preliminaries and Notation}
+\begin{definition}
+    A \textbf{Polygon} is a planar figure whose boundary is made of a chain of connected line segments which we will call arcs, connecting corner points.
+\end{definition} 
+
+The unit disk $\mathbb{D}$ is in particular a polygon, and we parametrize the boundaries $\del\mathbb{D}$ and $\del\Omega=\Gamma$ by collections of arcs $s_{\mathbb{D}}$ and $s_{\Omega}$ respectively, in positive mathematical orientation. 
+These arcs being smooth yields tangents with well-defined derivatives at every point of the boundary curves except for corners, and we denote the angles of these tangents with $\theta_{\mathbb{D}}(s_{\mathbb{D}})$ and $\theta_{\Omega}(s_{\Omega})$ respectively. If $z_0$ is a corner it will have a turning angle of 
+$$\measuredangle\theta_{\mathbb{D}}(z_0)=\theta_{\mathbb{D}}(z_0+\eps)-\theta_{\mathbb{D}}(z_0-\eps),$$ 
+where $\eps\to0$. The same applies to corners of $\Omega$. Then,
+$\frac{\del\theta_{\mathbb{D}}}{\del s_{\mathbb{D}}} = \measuredangle\theta_{\mathbb{D}}(z_0)\delta(s_{\mathbb{D}}-z_0)$ for $\delta$ the Dirac function, and similarly for $\theta_{\Omega}$ and thus $\theta_{\mathbb{D}}$ and $\theta_{\Omega}$ are piecewise continuously differentiable functions with jump discontinuities at the corner points.
+
+\red{\subsubsection{the log derivative of Phi}}
+
+\subsubsection{Green's Functions}
+\begin{definition} 
+    A Green's function is generally a concept for solving differential equations containing a linear operator and some initial and boundary conditions.
+\end{definition}
+In the case of the SCE the Green's function are defined as $G(z,z'):\mathbb{D}\to\mathbb{R}$ satisfying $$\nabla^2 G(z,z') = 2\pi \delta(u-u')\delta(v-v') $$ inside the disk and $$\frac{\del G(z_B, z')}{\del n} = \beta_i$$ where $n$ is the outward normal vector at the boundary point $z_B \in \del\mathbb{D}$ and $\beta_i$ is a real constant associated with the $i$'th arc's length $l_i$ such that $\sum l_i\beta_i = 2\pi$. It can be shown according to Floryan and Zemach that this defines a unique Green's function up to an additive constant \cite{FLORYAN1987}.
+The SCE can be written explicitly whenever the Green's function is \red{obtainable in closed analytic form, i.e. expressable via a finite number of elementary operations (is that what is meant on p348? i looked up wikipedia for closed analytic form)}.
+
+\subsubsection{Schwarz-Christoffel Equation Variants}
+Let $\mathcal{G}(z, z_B')$ be a complex extension of the above defined $G(z,z_B')$, i.e. $\mathcal{G}(z, z_B')$ is analytic with real part $G(z,z_B')$.
+A Schwarz-Christoffel equation for a conformal mapping $\Phi(z):\mathbb{D}\to\Omega$ has the form $$ log \frac{d\Phi}{dz}= C+\displaystyle\sum_i Q_i,$$ where $C\in\mathbb{C}$ is a constant and the $Q_i$ are the Green's function integrals over the boundary arcs of $\mathbb{D}$.
+Some parameters and constants have to be determined in order to get a unique $\Phi$ for a particular given $\Omega$. The Riemann mapping theorem allows \red{HOW?} for the first three real parameters to be preassigned, for example to three boundary points in the case of simply connected bounded $\Omega$. The remaining degrees of freedom must be solved for using properties of the arcs $s_{\Omega}(s_z)$ and $s_{\mathbb{D}}(s_z)$. 
+
+The most general form is called Schwarz-Christoffel equation with subtraction \cite{FLORYAN1987}:
+$$log(\frac{d\Phi}{dz}) = C_0 - \frac{1}{2\pi}\displaystyle\int_{\del\mathbb {D}} [\mathcal{G}(z, z_B')-\mathcal{G}(z_0, z_B')] \times [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
+where $C_0\in\mathbb{C}$ is a constant, $z_0$ is a fixed point in $\mathbb{D}$\red{or del?}, $\mathcal{G}(z,z_B')$ is the fundamental solution of the Laplace equation in $\del\mathbb{D}$ with singularity at $z_B' \in \del\mathbb{D}$\red{not at the boundary of omega?}. However, we can use an unsubtracted form of this equation since the integrals converge separately and we know our $\Omega$ is bounded (hence we need not care about behaviours at infinity), yielding the simpler form
+$$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z, z_B') [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
+
+
+
+\red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book [8].}
