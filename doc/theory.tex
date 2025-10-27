@@ -132,12 +132,14 @@ Finally, multiplying $f$ with a suitable unimodular complex number gives the des
 \end{corollary}
 \textit{Proof.} This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
 $\hfill\qed$ \\
- \\
+
+
 This completes the theory for why shape optimisation of two dimensional simply connected regions works in the first place.
 Here follows some more theory on how to actually construct such conformal maps numerically.
 
 Existence established, the problem now becomes the explicit construction of a conformal mapping. A priori there are infinitely many conformal mappings from $\mathbb{D}$ to any simply connected bounded region $\Omega$, which is why the introduction of boundary conditions is needed to get uniqueness of $\Phi$ and thus well-posedness of the problem. This results in the problem being translated into solving a Boundary Value Problem (BVP) for analytic functions. 
 
+\red{SOMEWHERE WE NEED TO ADD THE RESTRICTION OF $\Phi(0)=0, \quad\Phi'(0)>0$ FOR LATER REFERENCE} \label{InitialConditionsOnPhi}
 
 % \red{add section 2.5:} error of operator K_N for methods based on function conjugation
 \subsection{Boundary Value Problems}\label{chap:BoundaryValueProblems}\label{operatorK_N}
@@ -151,7 +153,7 @@ If $\Psi$ is smoother, e.g. $\Psi \in C^{k-1}$, the error decreases to $$\|K \Ps
 \subsection{Hilbert Transform \cite{Castillo2025}}
 \red{probably way too much detail}
 \subsection{Mixed boundary conditions (Wec 4.3)(?)}
-\subsection{Hilbert theory and different inner products}
+\subsection{Hilbert theory and different inner products} 
 
 From complex analysis we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
 Denoting 
@@ -166,15 +168,49 @@ Thus, one way to construct conformal maps is to solve Laplace's equation with su
 
 The Cauchy-Riemann equations however do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\mathbb{R}^ 2$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies [PROOF]. Thus, the choice of parametrization of the target region's boundary is another challenge posed when solving conformal mapping problems, along with finding a holomorphic deformation $\Phi$.
 
-In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that $$\overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K$$ we define $h(K)$ the diameter of the smallest $K$-circumscribing ball and $\rho(K)$ the diameter of the largest ball inscribed in K. Then a measure \cite{Wechsung2019} for the quality of K is the ratio of these diameters
-$$ \eta(K) := \frac{h(K)}{\rho(K)} \in [1,\infty) .$$
+In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that $$\overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K$$ we define $d(K)$ the diameter of the smallest $K$-circumscribing ball (aka diameter of $K$) and $\mu(K)$ the diameter of the largest ball inscribed in K. Then a measure \cite{Wechsung2019} for the quality of K is the ratio of these diameters
+$$ \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty) .$$
 
 \iffalse
 \cite{Wechsung2019}: Mesh quality measures comment p 54
 \fi
 
+\subsubsection{Sobolev Spaces}
+Let $L^2$ be the space of all $2\pi$-periodic complex functions $f$ which are square integrable over $[0, 2\pi]$ equipped with the inner product 
+$$(f,g)_2= \frac{1}{2\pi}Re \int_{0}^{2\pi} f(f) \overline{g(t)} dt.$$
+\begin{definition}
+    The \textbf{Sobolev space $W$ }is defined as the space of all absolutely continuous functions $f\in L^2$ such that the derivative $f'$ exists and is also in $L^2$. The inner product on $W$ is defined as
+    $$(f,g)_W = (f,g)_2 + (f',g')_2.$$
+\end{definition}
+This is a Hilbert space over $\reals$. The subspaces of real functions are denoted $L_{\reals}^2$ and $W_{\reals}$ respectively. Note that we can decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ where $f \in L^2$ is decomposed as follows into its Fourier series:
+$$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} = 
+    \underbrace{\sum_{-\infty}^{0} a_n e^{int} +i(\text{Im}(a_1))e^{int}}_{=:f^{-}\in W^{-}} + 
+    \underbrace{(\text{Re}(a_1))e^{int} + \sum_{n=2}^{\infty} a_n e^{int}}_{=:f^{+}\in W^{+}}.
+$$
+Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{InitialConditionsOnPhi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
+Then, since the boundary function \ref{boundaryCorrespondence} maps the unit circle to $\Gamma$ there exists \red{why} a function $\hat{u}$ such that 
+$$\Phi(t)=\eta(t+\hat{u}(t)) \quad \forall t.$$
+By the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\reals}$.
+This tells us that the function $\Phi$ we are looking for lies in the intersection of a certain manifold $M:= \{u \in W_{\reals}: \eta(t+u(t))\}$ with our space $W^{+}$. This formulation is used in chapter \ref{chap:AlternatingProjections}.
+
+
 \subsection{Numerical Construction of Conformal Mappings}
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+\subsubsection{Alternating Projections à la von Neumann} \label{chap:AlternatingProjections}
+For two closed convex sets $P,Q$ in a Hilbert space $H$, the method of alternating projections constructs a sequence $(x_n)_n$ as follows: Starting from an arbitrary point $x_0 \in H$, we define 
+$$x_{n+1} := \begin{cases}
+    \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
+    \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
+\end{cases}$$ 
+where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively.
+It can be shown that the sequence $(x_n)_n$ converges in norm to a point tuple $(x*,y*)$ satisfying 
+$$
+\begin{cases}
+    x*=\Pi_P(y*), \\
+    y*=\Pi_Q(x*), \\
+    d_H(x*,y*)= min_{(x,y)\in P\times Q} \| x-y \|^2
+\end{cases}
+$$ 
+In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. \cite{Braun2023AltProjections}
 
 
 \subsection{Riemann-Hilbert Problems}

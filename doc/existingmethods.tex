@@ -6,8 +6,12 @@
 - Input and output formats
 \fi
 \section{Existing Methods}
-Let $G$ be a simply connected region in the complex plane with $0\in G$ and boundary $\gamma$. The Riemann mapping theorem guarantees the existence of a conformal map from the unit disk to $G$. Several numerical methods exist to construct such maps. This chapter aims to give an overview and compare the methods in terms of input/output format suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
-GIVEN MESH ON UNIT DISK AND BOUNDARY OF OMEGA, FIND PHI. 
+This chapter aims to give an overview and compare existing methods in terms of input/output format, suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
+When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\overline{D}$ by Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, p. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
+By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
+
+\red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
+
 
 \subsection{Potential Theoretic Methods}
 % starting p 369 weg05
@@ -36,39 +40,57 @@ position of elementary maps. It is universally applicable, since it requires no 
 all concerning the boundary 0G of the region G.
 \subsubsection{Accuracy}
 \fi 
+\subsection{Alternating Projections Method}\label{APMethod}
+Various methods for numerical construction of $\Phi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator K \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
+The method of alternating projections uses both these sequences and alternates between them to find $\Phi$ \cite{Wegmann1989_287}.
 
-\subsection{Mapping from the Disk to the Region}
-When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\bar{D}$ by Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, s. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
-By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
+\subsubsection{Prerequisites}
+For this method we suppose $\Gamma=\del\Omega$ is a smooth Jordan curve parametrized by a $2\pi$-periodic function $\eta(s)$ with continuous non-vanishing derivative $\eta'(s)\neq0$ having winding number $1$ on $[0,2\pi)$, i.e. $\Gamma$ surrounds $\Omega$ exactly once.
+Furthermore, we utilize the spaces and notation from chapter \ref{chap:AlternatingProjections}.
 
-\red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
+\subsubsection{Algorithm}
+\begin{algorithm}
+    \caption{AP-Method}
+    \begin{algorithmic}
+    \STATE Start with a function $U_0\in W_{\reals}$.
+    \STATE Given $U_k$ for $k\geq 0$,
+        \FOR {$n = 1,0,-1,-2,...$}
+            \STATE $a_n = \frac{1}{2\pi}\int_{0}^{2\pi} \eta(t+U_k(t))e^{-int} dt$ \hfill [Calculate Fourier coefficients]
+        \ENDFOR
+    \STATE $U_{k+1}(t) := U_k(t) - \text{Re}\frac{i (\text{Im}(a_1))e^{it}+\sum_{n=-\infty}^{0} a_n e^{int}}{\dot{\eta}(t+U_k(t))}$ \hfill [Calculate the new iterate]
 
-
-\subsubsection{Projection Methods}
-Alternating Projection Method à la Neumann \cite{Wegmann2005} p389
-\red{
-Algo:
-Start iteration with a $2\pi$-periodic function $S_0(t)$, e.g. $S_0(t)=t$.
-Calculate Fourier coefficients $B_k$ of the boundary function using...
-}
-AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $S_0$ is sufficiently close to the actual boundary correspondence function $S$.
-Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably size grids, and converges very slowly for finer meshes.
-
-\red{various improvements}
-\subsubsection{Newton Methods}
-
-\subsubsection{Interpolation}
-\subsubsection{Accuracy}
-Wegmann \cite{Wegmann2005} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
-Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
-Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005} p.415.\red{add figure?}
-\red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
+    %continue here
+    \end{algorithmic}
+\end{algorithm}
 
 
+\subsubsection{Convergence}
+The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function $\eta??????$ \cite{Wegmann1989_287} p.292.
+Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite{Wegmann2005} p. 389.
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Newton Methods}
+
+\subsection{Interpolation}
+
+\subsection{Theodorsen's Method}
+\cite{Song2012}
 \subsection{Schwarz-Christoffel Method}
+\iffalse
 $R_w = \mathbb{D}$ disk \\
 $B_w = \del\mathbb {D}$ boundary of D\\
 $R_z = \Omega$ = polygon \\
+\fi 
 
 One class of methods for finding the conformal mapping $\Phi$ is given by the Schwarz-Christoffel equation, which relates the derivative of $\Phi$ to an integral over the boundary of the target domain $\Omega$ when $\Omega$ is a polygon.
 \subsubsection{Preliminaries and Notation}
@@ -101,6 +123,20 @@ $$log(\frac{d\Phi}{dz}) = C_0 - \frac{1}{2\pi}\displaystyle\int_{\del\mathbb {D}
 where $C_0\in\mathbb{C}$ is a constant, $z_0$ is a fixed point in $\mathbb{D}$\red{or del?}, $\mathcal{G}(z,z_B')$ is the fundamental solution of the Laplace equation in $\del\mathbb{D}$ with singularity at $z_B' \in \del\mathbb{D}$\red{not at the boundary of omega?}. However, we can use an unsubtracted form of this equation since the integrals converge separately and we know our $\Omega$ is bounded (hence we need not care about behaviours at infinity), yielding the simpler form
 $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z, z_B') [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
 
+\subsubsection{Convergence}
+\red{accuracy, input/output formats}\\
+\subsubsection{Implementation}
+\cite{Brown1990}
+\cite{Trefethen1980}
 
+\subsection{Shirokova's Method}
+\cite{Shirokova2014}
 
 \red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book [8].}
+\red{
+\subsection{Accuracy}
+Wegmann \cite{Wegmann2005} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
+Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
+Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005} p.415.\red{add figure?}
+\red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
+}
