@@ -7,7 +7,7 @@
 \fi
 \section{Existing Methods}
 This chapter aims to give an overview and compare existing methods in terms of input/output format, suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
-When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\overline{D}$ by Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, p. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
+When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\overline{D}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, p. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
 By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
 
 \red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
@@ -107,9 +107,11 @@ $\frac{\del\theta_{\mathbb{D}}}{\del s_{\mathbb{D}}} = \measuredangle\theta_{\ma
 \red{\subsubsection{the log derivative of Phi}}
 
 \subsubsection{Green's Functions}
+A Green's function is a general concept for solving differential equations containing a linear operator.
 \begin{definition} 
-    A Green's function is generally a concept for solving differential equations containing a linear operator and some initial and boundary conditions.
+    A \textbf{Green's function} or \textbf{Green function $G(x,s)$} is any solution to $$LG(x,s)=\delta(x-s)$$ where $L=L(x)$ is a linear operator acting on distributions over $\reals^{n}$ and $\delta$ is the Dirac delta function.
 \end{definition}
+This definition can be exploited to solve inhomogeneous differential equations of the form $Lu=f(x)$.
 In the case of the SCE the Green's function are defined as $G(z,z'):\mathbb{D}\to\mathbb{R}$ satisfying $$\nabla^2 G(z,z') = 2\pi \delta(u-u')\delta(v-v') $$ inside the disk and $$\frac{\del G(z_B, z')}{\del n} = \beta_i$$ where $n$ is the outward normal vector at the boundary point $z_B \in \del\mathbb{D}$ and $\beta_i$ is a real constant associated with the $i$'th arc's length $l_i$ such that $\sum l_i\beta_i = 2\pi$. It can be shown according to Floryan and Zemach that this defines a unique Green's function up to an additive constant \cite{FLORYAN1987}.
 The SCE can be written explicitly whenever the Green's function is \red{obtainable in closed analytic form, i.e. expressable via a finite number of elementary operations (is that what is meant on p348? i looked up wikipedia for closed analytic form)}.
 
@@ -124,19 +126,76 @@ where $C_0\in\mathbb{C}$ is a constant, $z_0$ is a fixed point in $\mathbb{D}$\r
 $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z, z_B') [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
 
 \subsubsection{Convergence}
-\red{accuracy, input/output formats}\\
+\cite{banjaitrefethen2006SCmultipolemethod}
+
 \subsubsection{Implementation}
 \cite{Brown1990}
 \cite{Trefethen1980}
+Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008schwarzchristoffelcrowdingworkaround}
+
+\subsection{Zipper Method}
+This algorithm was fonud independently by Kühnau and Marshall in the 1980's has the advantage of finding $\Phi$ and its inverse at the same time. 
+The computed map is only approximately conformal, and is obtained as a composition of conformal maps onto slit halfplanes. Depending on the shape of the slits, the Zipper algorithm looks a bit different. 
+In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006convergencezipperalgorithmconformal} which is quite beautiful from a geometric perspective.
+\subsubsection{The Geodesic Algorithm}
+The most elementary version of this algorithm is based on a function 
+$$f_a: \mathbb{H}\setminus \gamma \to \mathbb{H}$$
+where $\mathbb{H}$ is the upper half plane and $\gamma$ is a circular arc from $0$ to $a\in\mathbb{H}$ which is orthogonal to the real axis. The orthogonal circle also meets the real axis again at $b=|a^2|/Im(a)$. Then the map can be expressed in closed form as 
+$$f_a(z) = \sqrt{g_a \circ h_a (z)}$$ where $g_a(z) = z^2 + c^2$ and $h_a(z) = \frac{z}{1-z/b}$.
+
+\red{INSERT IMAGE}
+
+Now suppose $z_0, z_1, ..., z_n$ are points arranged counterclockwise on a Jordan curve $\Gamma$ in the upper half plane. The geodesic algorithm basically iterates over the arcs from $z_i$ to $z_{i+1}$ and "unzips" them one by one using the map $f_{a_i}$ where $a_i$ is the image of $z_{i+1}$ under the composition of all previous maps.
+\red{The original geodesic algorithm proposed by Marshall and Rohde constructs a conformal map from the upper half plane to the region bounded by $\Gamma$, but it can be adapted to map from the unit disk as well via a Möbius transformation mapping the half plane to the unit disk and back first (hopefully?).}
+
+\begin{algorithm}
+    \caption{Geodesic Zipper Algorithm}
+    \begin{algorithmic}
+    \STATE \textbf{Input:} Points $z_0, z_1, ..., z_n$ on a Jordan curve $\Gamma$ in the upper half plane.
+    \STATE \textbf{Output:} $\Psi$: conformal map from $\mathbb{H}$ to the region bounded by $\Gamma$ and its inverse $\Psi^{-1}$.
+    \STATE $\phi_1(z) := i\sqrt{(z-z_1)/(z-z_0)}$
+    \STATE $\zeta_2:= \phi_1(z_2)$
+    \STATE $\phi_2(z) := f_{\zeta_2}(z)$
+    \FOR{k in n}
+        \STATE $\zeta_k := \phi_{k-1} \circ \ldots \circ \phi_1 (z_k)$
+        \STATE $\phi_k(z) := f_{\zeta_k}(z)$
+    \ENDFOR
+    \STATE Finally, $\zeta_{n+1} := \phi_n \circ \ldots \circ \phi_1 (z_{0})\in\reals$ and $\phi_{n+1}(z) := -(\frac{z}{1 - z/\zeta_{n+1}})^2$
+    \STATE Then $\Psi(z) := \phi_1^{-1} \circ \phi_2^{-1} \circ \ldots \circ \phi_{n+1}^{-1}(z)$ and $\Psi^{-1}(z) := \phi_{n+1} \circ \ldots \circ \phi_2 \circ \phi_1 (z)$
+    \end{algorithmic}
+\end{algorithm}
+\red{INSERT IMAGE}
+
+\subsubsection{The Slit Algorithm}
+The above geodesic algorithm is only as accurate as the approximation of the boundary curve $\Gamma$ by circular arcs between the points $z_i$. A more accurate version is given by the slit algorithm, which uses straight line segments instead of circular arcs.
+We therefore exchange the map $f_a$ for a map $g_a: \mathbb{H}\setminus L \to \mathbb{H}$ where $L$ is the line segment from $0$ to $a\in\mathbb{H}$. This map does not have a closed form expression, but can be computed numerically using Newton's method.
+
+\subsubsection{The Zipper Algorithm}
+The approximation of $\Gamma$ by circular arcs or straight line segments can be further improved by using circular arcs which meet $\Gamma$ tangentially at the points $z_i$. Each arc is determined by the points $z_i, z_{i+1}$ and $z_{i+2}$, hence we assume an even number of boundary points. 
+The first arc is replaced by $$\phi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z_1-z_2)}}.$$ At each subsequent step that circular arc through $\zeta_k$ and $\zeta_{k+1}$ is mapped onto a straight line segment by a Möbius transform, and then the Slit Algorithm is applied to unzip that segment.
+\red{This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one.}
+
+\subsubsection{Convergence}
+Marshall and Rohde \cite{marshall2006convergencezipperalgorithmconformal} proved that if $\Gamma=\del\Omega$ is a $C^{3/2}$ closed Jordan curve with points $\{ z_i\}\subset\del\Omega$ having mesh size $\mu=max|z_j-z_{j+1}|$ there is a constant $C$ depending on the geometry of $\del\Omega$ such that the conformal map $\Psi$ satisfies accuracy of $\bigO(C\mu^{3/2})$.
+The geodesic algorithm works only with elementary functions, as a result its speed depends only on the number of points on the boundary (i.e. mesh size) and not on the shape of the region. The accuracy can be measured explicitly if the true conformal map is known, which is our case. \red{ADD COMPUTATION AND IMAGES LIKE IN MnR'S PAPER <3}
+\red{VERY GOOD PAPER FOR IMPLEMENTATION ESPECIALLY END NOTES}
+
 
 \subsection{Shirokova's Method}
 \cite{Shirokova2014}
+\subsection{Conjugate Function Method}
+\cite{Hakula_2013conjugatefunctionmethod}
+\subsection{Amano's Method}
+\cite{Sakakibara2019AmanosMethod}
 
-\red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book [8].}
+\subsection{Probabilistic Uniformization Method}
+In 2007, Binder, Braverman ans Yampolsky proposed \red{the random walks solution to the general Dirichlet problem} to produce a solution to the uniformization problem, yielding an algorithm with precision $2^{-n}$ pixels running in linear space (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function) and $2^{n}$ time. \cite{binder2007computationalcomplexityriemannmapping}
 \red{
-\subsection{Accuracy}
+\subsection{Comparison}
 Wegmann \cite{Wegmann2005} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
 Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
 Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005} p.415.\red{add figure?}
 \red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
 }
+
+\red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book [8].}

@@ -1,5 +1,14 @@
 \begin{thebibliography}{BPW23}
 
+\bibitem[Ban08]{Banjai2008schwarzchristoffelcrowdingworkaround}
+L.~Banjai.
+\newblock Revisiting the crowding phenomenon in schwarz–christoffel mapping.
+\newblock {\em SIAM Journal on Scientific Computing}, 30(2):618--636, 2008.
+
+\bibitem[BBY07]{binder2007computationalcomplexityriemannmapping}
+Ilia Binder, Mark Braverman, and Michael Yampolsky.
+\newblock On computational complexity of riemann mapping, 2007.
+
 \bibitem[BPW23]{Braun2023AltProjections}
 Gábor Braun, Sebastian Pokutta, and Robert Weismantel.
 \newblock Alternating linear minimization: Revisiting von neumann's alternating projections, 2023.
@@ -8,6 +17,11 @@ Gábor Braun, Sebastian Pokutta, and Robert Weismantel.
 Philip~Raymond Brown.
 \newblock {\em The use of the Schwarz-Christoffel transformation in finite element mesh generation}.
 \newblock Phd, University of Leicester, 1990.
+
+\bibitem[BT03]{banjaitrefethen2006SCmultipolemethod}
+Lehel Banjai and L.~N. Trefethen.
+\newblock A multipole method for schwarz--christoffel mapping of polygons with thousands of sides.
+\newblock {\em SIAM Journal on Scientific Computing}, 25(3):1042--1065, 2003.
 
 \bibitem[CR25]{Castillo2025}
 Ren{\'e}~E. Castillo and Edixon~M. Rojas.
@@ -28,6 +42,19 @@ J.M Floryan and Charles Zemach.
 Dieter Gaier.
 \newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em Springer Tracts in Natural Philosophy / Ergebnisse der angewandten Mathematik}.
 \newblock Springer-Verlag, Berlin, G{\"o}ttingen, Heidelberg, 1964.
+
+\bibitem[HQR13]{Hakula_2013conjugatefunctionmethod}
+Harri Hakula, Tri Quach, and Antti Rasila.
+\newblock Conjugate function method for numerical conformal mappings.
+\newblock {\em Journal of Computational and Applied Mathematics}, 237(1):340–353, January 2013.
+
+\bibitem[MR06]{marshall2006convergencezipperalgorithmconformal}
+Donald~E. Marshall and Steffen Rohde.
+\newblock Convergence of the zipper algorithm for conformal mapping, 2006.
+
+\bibitem[Sak19]{Sakakibara2019AmanosMethod}
+Koya Sakakibara.
+\newblock Bidirectional numerical conformal mapping based on the dipole simulation method, 2019.
 
 \bibitem[Shi14]{Shirokova2014}
 E.~A. Shirokova.
