@@ -1,39 +1,29 @@
 \begin{thebibliography}{BPW23}
 
-\bibitem[Ban08]{Banjai2008schwarzchristoffelcrowdingworkaround}
+\bibitem[Ban08]{Banjai2008_SC_crowdingworkaround}
 L.~Banjai.
 \newblock Revisiting the crowding phenomenon in schwarz–christoffel mapping.
 \newblock {\em SIAM Journal on Scientific Computing}, 30(2):618--636, 2008.
 
-\bibitem[BBY07]{binder2007computationalcomplexityriemannmapping}
+\bibitem[BBY07]{binder2007_computationalcomplexityriemannmapping}
 Ilia Binder, Mark Braverman, and Michael Yampolsky.
 \newblock On computational complexity of riemann mapping, 2007.
 
-\bibitem[BPW23]{Braun2023AltProjections}
+\bibitem[BPW23]{Braun2023_AltProjections}
 Gábor Braun, Sebastian Pokutta, and Robert Weismantel.
 \newblock Alternating linear minimization: Revisiting von neumann's alternating projections, 2023.
 
-\bibitem[Bro90]{Brown1990}
+\bibitem[Bro90]{Brown1990_SC_meshgen}
 Philip~Raymond Brown.
 \newblock {\em The use of the Schwarz-Christoffel transformation in finite element mesh generation}.
 \newblock Phd, University of Leicester, 1990.
 
-\bibitem[BT03]{banjaitrefethen2006SCmultipolemethod}
-Lehel Banjai and L.~N. Trefethen.
-\newblock A multipole method for schwarz--christoffel mapping of polygons with thousands of sides.
-\newblock {\em SIAM Journal on Scientific Computing}, 25(3):1042--1065, 2003.
-
-\bibitem[CR25]{Castillo2025}
+\bibitem[CR25]{Castillo2025_hilberttransform}
 Ren{\'e}~E. Castillo and Edixon~M. Rojas.
 \newblock Revisiting the hilbert transform of periodic functions.
 \newblock {\em Mathematische Semesterberichte}, 72:29--49, 2025.
 
-\bibitem[EW22]{EinsiedlerWieser2022AnalysisSkript}
-Manfred Einsiedler and Andreas Wieser.
-\newblock Analysis i und ii.
-\newblock Vorlesungsskript 2021/2022, 2022.
-
-\bibitem[FZ87]{FLORYAN1987}
+\bibitem[FZ87]{FLORYAN1987_SC_general}
 J.M Floryan and Charles Zemach.
 \newblock Schwarz-christoffel mappings: A general approach.
 \newblock {\em Journal of Computational Physics}, 72(2):347--371, 1987.
@@ -43,50 +33,55 @@ Dieter Gaier.
 \newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em Springer Tracts in Natural Philosophy / Ergebnisse der angewandten Mathematik}.
 \newblock Springer-Verlag, Berlin, G{\"o}ttingen, Heidelberg, 1964.
 
-\bibitem[HQR13]{Hakula_2013conjugatefunctionmethod}
+\bibitem[HQR13]{Hakula_2013_conjugatefunctionmethod}
 Harri Hakula, Tri Quach, and Antti Rasila.
 \newblock Conjugate function method for numerical conformal mappings.
 \newblock {\em Journal of Computational and Applied Mathematics}, 237(1):340–353, January 2013.
 
-\bibitem[MR06]{marshall2006convergencezipperalgorithmconformal}
+\bibitem[MR06]{marshall2006_convergencezipperalgorithmconformal}
 Donald~E. Marshall and Steffen Rohde.
 \newblock Convergence of the zipper algorithm for conformal mapping, 2006.
 
-\bibitem[Sak19]{Sakakibara2019AmanosMethod}
+\bibitem[Sak19]{Sakakibara2019_AmanosMethod}
 Koya Sakakibara.
 \newblock Bidirectional numerical conformal mapping based on the dipole simulation method, 2019.
 
-\bibitem[Shi14]{Shirokova2014}
-E.~A. Shirokova.
-\newblock On the approximate conformal mapping of the unit disk on a simply connected domain.
-\newblock {\em Russian Mathematics}, 58(3):47--56, 2014.
-
-\bibitem[Son12]{Song2012}
+\bibitem[Son12]{Song2012_theodorsen_equation}
 Eun-Jee Song.
 \newblock A study on the methods for solving the theodorsen equation for numerical conformal mapping.
 \newblock {\em Journal of the Korea Society of Computer and Information}, 17(3):11--18, March 2012.
 
-\bibitem[SS03]{SteinShakarchi2003}
+\bibitem[SS03]{SteinShakarchi2003_complexanalysis}
 Elias~M. Stein and Rami. Shakarchi.
 \newblock {\em Complex analysis}.
 \newblock Princeton lectures in analysis ; 2. Princeton University Press, Princeton, N.J, 2003.
 
-\bibitem[Tre80]{Trefethen1980}
+\bibitem[Tre80]{Trefethen1980_SCnumericalcomputation}
 Lloyd~N. Trefethen.
 \newblock Numerical computation of the schwarz–christoffel transformation.
 \newblock {\em SIAM Journal on Scientific and Statistical Computing}, 1(1):82--102, 1980.
 
-\bibitem[Wec19]{Wechsung2019}
+\bibitem[Wec19]{Wechsung2019_shapeopt_robustsolvers_incompressible}
 F~Wechsung.
 \newblock {\em Shape optimisation and robust solvers for incompressible flow}.
 \newblock PhD thesis, University of Oxford, 2019.
 
-\bibitem[Weg89]{Wegmann1989_287}
+\bibitem[Weg78]{Wegmann1978_newtonverfahren}
+Rudolf Wegmann.
+\newblock Ein iterationsverfahren zur konformen abbildung.
+\newblock {\em Numerische Mathematik}, 30(4):453--466, 1978.
+
+\bibitem[Weg84]{Wegmann1984_convergence_iterative_method}
+Rudolf Wegmann.
+\newblock Convergence proofs and error estimates for an iterative method for conformal mapping.
+\newblock {\em Numerische Mathematik}, 44:435--461, 1984.
+
+\bibitem[Weg89]{Wegmann1989_alternating_projections}
 Rudolf Wegmann.
 \newblock Conformal mapping by the method of alternating projections.
 \newblock {\em Numerische Mathematik}, 56:291--307, 1989.
 
-\bibitem[Weg05]{Wegmann2005}
+\bibitem[Weg05]{Wegmann2005_num_methods_confmapping}
 Rudolf Wegmann.
 \newblock Chapter 9 - methods for numerical conformal mapping.
 \newblock In R.~Kühnau, editor, {\em Geometric Function Theory}, volume~2 of {\em Handbook of Complex Analysis}, pages 351--477. North-Holland, 2005.

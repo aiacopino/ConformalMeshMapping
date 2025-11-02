@@ -1,7 +1,12 @@
 \section{Introduction}
-\subsection{Motivation \red{maybe leave out}}
-The mathematics curriculum at ETHZ is renowned for its rigorous foundation in theoretical principles. This emphasis builds a robust understanding of foundational theory, but often at the expense of practical computational skills. As a result, students may find themselves well-versed in abstract concepts yet less prepared to tackle real-world problems that require numerical methods and algorithmic implementations. This thesis serves as a deliberate effort to bridge that gap. The project's primary motivation is to connect a core area of theoretical mathematics (Function Theory) with its computational implementation.
-\subsection{Problem Setting}
-Given a 2D triangular mesh $\widehat{\mathcal{M}}$ of the unit disk $\mathbb{D}$, whose triangles are all nicely shape-regular (in the sense that the ratio of their diameter to the radius of the largest inscribed circle is uniformly bounded for all triangles), we are guaranteed the existence of a conformal mapping $\Phi$ from $\mathbb{D}$ to any simply connected bounded domain $\Omega$ by the Riemann mapping theorem. This allows for a sufficiently "nice" mesh $\mathcal{M}$ on $\Omega$ to be obtained as the image of $\widehat{\mathcal{M}}$ under $\Phi$, i.e. $\mathcal{M}=\Phi(\widehat{\mathcal{M}})$. The challenge lies in the numerical construction/ approximation of this conformal mapping $\Phi$.
+Given a 2D triangular mesh $\widehat{\mathcal{M}}$ of the unit disk $\mathbb{D}$, whose triangles are all nicely shape-regular (in the sense that the ratio of their diameter to the radius of the largest inscribed circle is uniformly bounded for all triangles), we are guaranteed the existence of a conformal mapping $\Phi$ from $\mathbb{D}$ to any simply connected bounded domain $\Omega$ by the Riemann mapping theorem. This allows for a sufficiently "nice" mesh $\mathcal{M}$ on $\Omega$ to be obtained as the image of $\widehat{\mathcal{M}}$ under $\Phi$, i.e. $\mathcal{M}=\Phi(\widehat{\mathcal{M}})$. 
+\bigskip
 
-We compare several different numerical approximations of this conformal mapping $\Phi$. The comparison focuses on accuracy, runtime, and the representation of the resulting map, particularly emphasizing the efficiency of point evaluations for both the mapping $\Phi$ itself and its derivative (Jacobian) $D\Phi$. Finally, we implement \red{Algorithm Name}.
+In this article we study the problem of numerically constructing conformal mappings, given a mesh on the disk and the target domain by its boundary.
+We first review the theoretical background of conformal mappings and present a proof of the famous Riemann Mapping Theorem.
+We then review several existing numerical methods for approximating such mappings.
+The methods are compared in terms of accuracy of the approximation, computational complexity and efficiency of point evaluations for both the mapping $\Phi$ itself and its derivative (Jacobian) $D\Phi$. 
+\bigskip
+
+Finally, \red{Algorithm Name} is implemented in Python.
+The algorithm is tested on several target domains and the results are discussed.

@@ -1,29 +1,30 @@
 \section{Theoretical Background}
 %maybe change structure to section existence of a conformal map, section construction of a conformal map
-
+\red{THROUGHOUT THIS PAPER, WE ASSUME TO BE GIVEN A SIMPLE CONNECTED REGION $\Omega\subset\C$ GIVEN BY ITS BOUNDARY $\del\Omega$ WHICH IS PARAMETRIZED BY A DIFFERENTIABLE $2\pi$-PERIODIC COMPLEX FUNCTION $\eta(s)$ WITH CONTINUOUS NON-VANISHING DERIVATIVE.}
 \subsection{Conformal Mappings}
 
-\begin{definition}
+\begin{definition} \label{def:ConformalMap}
     A \textbf{conformal mapping}, also called a conformal map, conformal transformation, angle-preserving transformation, or biholomorphic map, is a transformation $f(z)$ that preserves local angles. An analytic function is conformal at any point where it has a nonzero derivative.
 \end{definition}
 
-This type of mapping is useful as some mesh properties remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure \cite{Wechsung2019}. 
-In two dimensions, conformality can be achieved by enforcing that the mapping satisfies the Cauchy-Riemann equations. 
+\begin{definition}
+    A \textbf{complex analytic function} or \textbf{holomorphic function} on an open subset $U\subset\C$ is locally given by a convergent power series, i.e. for any $x_0\in U$ there exists a neighborhood $V\subset U$ of $x_0$ such that for all $z\in V$ we have $$ f(z) = \sum_{n=0}^{\infty} a_n (z - z_0)^n $$ for some complex coefficients $a_n \in \C$.
+    The terms analytic and holomorphic are used interchangeably.
+\end{definition}
 
+% This type of mapping is useful as some mesh properties (in particular angles) remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure as experienced by Wechsung \cite{Wechsung2019}. 
+\iffalse
+\begin{definition}
+    \red{Ahlfors map} too general, not needed
+\end{definition}
+\fi
+
+\subsection{Riemann Mapping Theorem}
 \begin{definition}
     We call a subset $\Omega \in \mathbb{C}$ \textbf{proper} if $\emptyset \neq \Omega \neq \mathbb{C}$.
 \end{definition}
 
-\begin{theorem}[Carathéodory] \label{thm:ExtensionToBoundary}
-    The conformal mapping $\Phi:D\to G$ can be extended to a continuous mapping $\Phi:\bar{D}\to\bar{G}$ if the boundary $\Gamma$ of $G$ consists of a closed curve. \cite{Wegmann2005}, p. 357
-\end{theorem}
-\begin{definition}
-    \red{Ahlfors map}
-\end{definition}
-
-\subsection{Riemann Mapping Theorem}
-The reason why we use conformal mappings for shape optimisation in two dimensions is the following
-\begin{theorem}[Riemann Mapping Theorem]
+\begin{theorem}[Riemann Mapping Theorem]\label{thm:RiemannMappingTheorem}
     If $\Omega$ is a non-empty simply connected open proper subset of the complex plane $\mathbb{C}$, then there exists a biholomorphic mapping $f$ (i.e. a bijective holomorphic mapping whose inverse is also holomorphic) from $\Omega$ onto the open unit disk
     $$ D = \{z \in \mathbb{C}: |z|<1 \}. $$
     This mapping is known as a Riemann mapping.
@@ -33,8 +34,8 @@ The beauty of the Riemann mapping theorem lies in its weight of implications, i.
 Simply connected open sets in the plane can be highly complicated, for instance, the boundary can be a nowhere-differentiable fractal curve of infinite length, even if the set itself is bounded. One such example is the Koch curve. The fact that such a set can be mapped in an angle-preserving manner from the nice and regular unit disc seems counter-intuitive.
 \input{kochtikz.tex}
 
-The existence of a conformal map between any two simply connected, open proper subsets of $\mathbb{C}$ is what allows us to perform shape optimisation in two dimensions by solving the optimisation problem on a simple reference domain (e.g. the unit disk) and then mapping the solution to the complicated target domain.
-We closely follow the proof by normal families in \cite{SteinShakarchi2003}.
+We closely follow the proof by normal families in \cite{SteinShakarchi2003_complexanalysis}.
+
 \subsubsection{Preliminary Results}
 \begin{lemma}[Schwarz Lemma] \label{thm:SchwarzLemma}
     Let $f:\disk\to\disk$ be holomorphic with $f(0) = 0$. Then 
@@ -55,23 +56,33 @@ We closely follow the proof by normal families in \cite{SteinShakarchi2003}.
 \begin{definition}
     A family $\mathcal{F}$ of holomorphic functions on a domain $\Omega$ is called \textbf{equicontinuous} if for every $\epsilon > 0$ there exists a $\delta > 0$ such that if $z \in \Omega$ with $|z-z_0| < \delta$ we have $|f(z) - f(z_0)| < \epsilon$ for all $f \in \mathcal{F}$.
 \end{definition}
-\begin{theorem}[Montel]
+\begin{theorem}[Montel]\label{thm:Montel}
     A family $\mathcal{F}$ of holomorphic functions on $\Omega$ that is uniformly bounded on compact subsets of $\Omega$ is normal if and only if it is equicontinuous on compacta.
 \end{theorem}
 \red{\textit{Proof.?}}
 
-\begin{proposition}[Uniform Convergence to Holomorphic Limit and Injectivity]
+\begin{theorem}[Hurwicz]
+    Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f\neq 0$. 
+    If $f$ has a zero of order $m$ at $z_0$ then for every $\eps>0$ and sufficientlly large $k=k(\eps)\in\N$ $f_k$ has precisely $m$ zeros in $B_{\eps}(z_0)$ including multiplicities. Moreover, the zeros converge to $z_0$ as $k\to\infty$. 
+    
+\end{theorem}
+We will use the following corollary of Hurwicz' theorem in the proof of \ref{thm:RiemannMappingTheorem}:
+\begin{corollary}[Uniform Convergence to Holomorphic Limit and Injectivity] \label{thm:HurwiczCor}
     Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f$. Then $f$ is either constant or injective.
-\end{proposition}
+\end{corollary}
 
-\begin{proposition}[Cauchy Inequality]
-\label{thm:CauchyInequality}
+\begin{proposition}[Cauchy Inequality] \label{thm:CauchyInequality}
     Let $f$ be holomorphic on an open set containing the closure of a ball $B_R(z_0)$ centered at $z_0$ of radius R. Then $$ |f^{(n)}(z_0)|\leq \frac{n! \lVert f \rVert _C}{R^n},$$ where $ \lVert f \rVert _C= \displaystyle \sup_{z\in C}|f(z)|$ on the boundary circle $C$.
 \end{proposition}
 
 \red{\textit{Proof.?}}
 
-\begin{theorem}[Implicit Mapping Theorem \cite{EinsiedlerWieser2022AnalysisSkript}, p.573] \label{thm:ImplicitMappingTheorem}
+\begin{theorem} [Maximum Modulus Principle] \label{thm:MaximumModulusPrinciple}
+    Let $\Omega\subset\C$ be a connected open bounded set and $f:\Omega\to\C$ holomorphic. If $z_0$ is a point in $\Omega$ such that $|f(z_0)| \geq |f(z)|$ for all $z$ in a neighborhood of $z_0$, then $f$ is constant on $\Omega$. 
+\end{theorem}
+\red{\textit{Proof?}}
+
+\begin{theorem}[Implicit Mapping Theorem] \label{thm:ImplicitMappingTheorem}
     Let $r > 0$ be a radius, and let $x_0 \in \mathbb{R}^n$, $y_0 \in \mathbb{R}^m$. Consider the open set $W = B_r(x_0) \times B_r(y_0) \subset \mathbb{R}^n \times \mathbb{R}^m$ defined as
 $$
 W = \{ (x, y) \in \mathbb{R}^n \times \mathbb{R}^m : \| x - x_0 \|_2 < r \text{ and } \| y - y_0 \|_2 < r \}.
@@ -85,79 +96,81 @@ Let $F: W \to \mathbb{R}^m$ be a continuous function satisfying the following co
 Then there exist radii $\alpha, \beta \in (0, r)$ such that for the open balls $U_0 = B_\alpha(x_0) \subset \mathbb{R}^n$ and $V_0 = B_\beta(y_0) \subset \mathbb{R}^m$, there exists a unique continuous function $f: U_0 \to V_0$ satisfying:
 \begin{itemize}
     \item $f(x_0) = y_0$.
-    \item For all $(x, y) \in U_0 \times V_0$, we have 
-    $$ F(x, y) = 0 \quad \text{if and only if} \quad y = f(x). $$
+    \item $\forall (x, y) \in U_0 \times V_0: F(x, y) = 0 \quad \iff \quad y = f(x). $
 \end{itemize}
 \end{theorem}
-
+\red{\textit{Proof?}}
 
 \subsubsection{Proof of Riemann Mapping Theorem}
-\textit{Step 1: Existence of a bounded injective conformal map to the unit disk} \\
+\textit{Step 1: Existence of a bounded injective holomorphic map to the unit disk} \\
 Let $\Omega$ be a simply connected open proper subset of $\mathbb{C}$. We show that $\Omega$ is conformally equivalent to an open subset of the unit disk containing the origin. 
-Indeed, choose $\alpha \notin \Omega$ and consider the function $f(z) = log(z-\alpha)$ on $\Omega$, which is well-posed and holomorphic since $z-\alpha$ never vanishes on $\Omega$. 
-Note $f$ is injective since $e^{f(z)} = z-\alpha$ ($f(z_1) = f(z_2) \implies z_1 - \alpha = z_2 - \alpha$).
-Then for a point $\omega \in \Omega$ we get $f(z) \neq f(\omega) + 2\pi i \forall z \in \Omega$ since otherwise we would find $z = \omega$ again by exponentiating.
+Indeed, choose $\alpha \notin \Omega$ and consider the function $$f(z) := log(z-\alpha)$$ on $\Omega$, which is well-defined and holomorphic since $z-\alpha$ never vanishes on $\Omega$. 
+Note $f$ is injective since $e^{f(z)} = z-\alpha$ is ($f(z_1) = f(z_2) \implies z_1 - \alpha = z_2 - \alpha$).
+Then for a point $\omega \in \Omega$ we get $f(z) \neq f(\omega) + 2\pi i \quad\forall z \in \Omega$ since otherwise we would find $z = \omega$ again by exponentiating.
 In fact, $f(z)\cap B_{\epsilon}(f(\omega) + 2\pi i) = \emptyset$ for some $\epsilon > 0$ since otherwise we would find a sequence $z_n \to \omega$ with $f(z_n) \to f(\omega) + 2\pi i$, contradicting the continuity of $f$.
-Finally, the function $g(z) = \frac{1}{f(z) - (f(\omega) + 2\pi i)}$ is well-defined, holomorphic and injective on $\Omega$ and maps $\Omega$ to a bounded subset $g(\Omega)\subset\mathbb{C}$, so $g$ is conformal. By boundedness of $g(z) < \frac{1}{\epsilon}$ we can scale and translate $g(\Omega)$ to contain the origin and fit into the unit disk.
+Finally, the function $$g(z) := \frac{1}{f(z) - (f(\omega) + 2\pi i)}$$ is well-defined, holomorphic and injective on $\Omega$ and maps $\Omega$ to a bounded subset $g(\Omega)\subset\mathbb{C}$, so $g$ is conformal. By boundedness of $g(z) < \frac{1}{\epsilon}$ we can scale and translate $g(\Omega)$ to contain the origin and fit into the unit disk.
+\bigskip
 
-\textit{Step 2:} \\
+\textit{Step 2: Normalization and non-zero derivative} \\
 By step 1 we can assume $\Omega$ to be an open subset of the unit disk with $0\in\Omega$.
-Consider the family $\mathcal{F}$ of all injective holomorphic functions $f: \Omega \to \mathbb{D}$ with $f(0) = 0$.
+Consider the family $$\mathcal{F}:= \{ f: \Omega \xhookrightarrow{} \mathbb{D} | f(0) = 0\}$$ of all injective holomorphic functions which map the origin to itself.
 Note that $\mathcal{F}\neq\emptyset$ since it contains the identity, and it is a uniformly bounded family by construction (maps into unit disk). 
-We now want to find a function $f \in \mathcal{F}$ that maximizes $|f'(0)|$. \red{(WHY?)}
-Observe that by the Cauchy inequality \red{ \ref{thm:CauchyInequality}} $|f'(0)|$ are uniformly bounded for $f$ in $\mathcal{F}$.
-\red{Next, let $$s:= \displaystyle \sup_{f\in\mathcal{F}} |f'(0)|.$$ and choose a sequence {$f_n$}$\subset\mathcal{F}$ such that $|f_n'(0)| \to s$ as $n\to\infty$.}
+In order to use the Hurwicz corollary and get injectivity, we now want to find a function $f \in \mathcal{F}$ that maximizes $|f'(0)|$ (to rule out constant functions yielded otherwise by the application of said corollary).
+Observe that by the Cauchy inequality \ref{thm:CauchyInequality} $|f'(0)|$ are uniformly bounded for $f$ in $\mathcal{F}$.
+Next, let $$s:= \displaystyle \sup_{f\in\mathcal{F}} |f'(0)|.$$ and choose a sequence {$f_n$}$\subset\mathcal{F}$ such that $|f_n'(0)| \to s$ as $n\to\infty$.
 By Montel's theorem, {$f_n$} has a subsequence converging uniformly on compacta to a holomorphic $f$ on $\Omega$.
-Since $s\geq 1$ (the identity is in $\mathcal{F}$), $f$ is non-constant and by the proposition on uniform convergence to holomorphic limit and injectivity, $f$ is injective.
-By continuity we have $|f(z)\leq 1$ for all $z\in\Omega$, and by the \red{maximum modulus principle} $|f(z)|<1$.
+Since $s\geq 1$ (the identity is in $\mathcal{F}$), $f$ is non-constant. Hence by the Hurwicz corollary \ref{thm:HurwiczCor}, $f$ must be injective.
+By continuity we have $|f(z)| \leq 1$ for all $z\in\Omega$, and since $f$ is non-constant, by the Maximum Modulus Principle \ref{thm:MaximumModulusPrinciple} $|f(z)|<1$.
 Finally and since $f(0) = 0$, we have $f\in\mathcal{F}$ and $|f'(0)| = s$.
+\bigskip
 
-\textit{Step 3: $f$ is a conformal map from $\Omega$ to $\mathbb{D}$.} \\
-By step 1 we have injectivity, hence it suffices to show $f$ is surjective.
+\textit{Step 3: Conformal mapping to the entire disk} \\
+By injectivity it suffices to show $f$ is surjective.
 Suppose towards a contradiction that $f$ is not surjective, we will construct a function in $\mathcal{F}$ with derivative greater than $s$ at the origin.
 So let $\alpha\in\mathbb{D}$ be such that $\alpha\notin f(\Omega)$ and consider the automorphism of the unit disk that interchanges 0 and $\alpha$,
-$$\psi_{\alpha}(z) = \frac{\alpha-z}{1-\bar{\alpha}z}.$$
+$$\psi_{\alpha}(z) := \frac{\alpha-z}{1-\bar{\alpha}z}.$$
 Since $\Omega$ is simply connected and by continuity of $f$ and $\psi_{\alpha}(\Omega)$, the set $U:= (\psi_{\alpha}\circ f)(\Omega)$ is simply connected and does not contain the origin.
 Thus we can define a square root function on $U$ by $$ q(w)=e^{\frac{1}{2}log w}.$$
 Next, consider the function $$F=\psi_{q(\alpha)}\circ q \circ \psi_{\alpha}\circ f.$$
 Then $F\in\mathcal{F}$ since $F(0) = 0$ and $F$ is holomorphic and injective since all the composing functions are. Also, $F$ maps into the unit disk since all the composing functions do.
-But now if $h$ denotes the square function $h(w)=w^2$, then we must have $$f = \psi_{\alpha}^{-1}\circ h \circ \psi_{q(\alpha)}^{-1} \circ F = \Psi \circ F.$$
-But $\Psi:\mathbb{D}\to\mathbb{D}$ satisfies $\Psi(0) = 0$ and is not injective since $F$ is but $h$ is not. 
-By the Schwarz lemma \ref{thm:SchwarzLemma} we get $|\Psi'(0)| < 1$ and hence
-$$|f'(0)| = |\Psi'(0)||F'(0)| < |F'(0)|,$$
+But now if $h$ denotes the square function $h(w)=w^2$, then we must have $$f = \psi_{\alpha}^{-1}\circ h \circ \psi_{q(\alpha)}^{-1} \circ F = \Phi \circ F.$$
+But $\Phi:\mathbb{D}\to\mathbb{D}$ satisfies $\Phi(0) = 0$ and is not injective since $F$ is but $h$ is not. 
+By the Schwarz lemma \ref{thm:SchwarzLemma} we get $|\Phi'(0)| < 1$ and hence
+$$|f'(0)| = |\Phi'(0)||F'(0)| < |F'(0)|,$$
 contradicting maximality of $|f'(0)|$ in $\mathcal{F}$.
 
-Finally, multiplying $f$ with a suitable unimodular complex number gives the desired conformal map from $\Omega$ to $\mathbb{D}$ with $f(0) = 0$ and $f'(0) > 0$. $\hfill\qed$
+Finally, multiplying $f$ with a suitable unimodular complex number gives the desired conformal map from $\Omega$ to $\mathbb{D}$ with $$f(0) = 0 \text{ and } f'(0) > 0.$$ \label{InitialConditionsOnPhi} $\hfill\qed$
 
 \begin{corollary}
     Any two simple connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
 \end{corollary}
 \textit{Proof.} This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
-$\hfill\qed$ \\
+$\hfill\qed$
 
+\begin{theorem}[Carathéodory] \label{thm:ExtensionToBoundary}
+    The conformal mapping $\Phi:\disk\to \Omega$ can be extended to a continuous mapping $\Phi:\bar{\disk}\to\bar{\Omega}$ if the boundary $\Gamma=\del\Omega$ consists of a closed curve. \cite{Wegmann2005_num_methods_confmapping}, p. 357
+\end{theorem}
+\red{\textit{Proof?}}
+\bigskip
 
-This completes the theory for why shape optimisation of two dimensional simply connected regions works in the first place.
-Here follows some more theory on how to actually construct such conformal maps numerically.
+Existence established, the problem now becomes the explicit construction of a conformal mapping.
+Once the boundaries of the domain and target region are conformally mapped, the interior can be deduced from the boundary by the Cauchy Integral Formula. Hence why the main focus of the task lies on mapping boundary to boundary.
 
-Existence established, the problem now becomes the explicit construction of a conformal mapping. A priori there are infinitely many conformal mappings from $\mathbb{D}$ to any simply connected bounded region $\Omega$, which is why the introduction of boundary conditions is needed to get uniqueness of $\Phi$ and thus well-posedness of the problem. This results in the problem being translated into solving a Boundary Value Problem (BVP) for analytic functions. 
+The strategy for numerical construction of the boundary mapping is to transform it into a boundary value problem.
 
-\red{SOMEWHERE WE NEED TO ADD THE RESTRICTION OF $\Phi(0)=0, \quad\Phi'(0)>0$ FOR LATER REFERENCE} \label{InitialConditionsOnPhi}
 
 % \red{add section 2.5:} error of operator K_N for methods based on function conjugation
-\subsection{Boundary Value Problems}\label{chap:BoundaryValueProblems}\label{operatorK_N}
-In Riemann's thesis, conformal mappings are a mere special case of the more general family of boundary value problems of analytic functions on the unit disk $D$ or in its exterior $D^{-}:=\{z: |z|>1\}$. The simplest such problem can be described as finding $\Psi$ analytic in $D$, continuous in $\bar{D}$ and satisfying $$Re(\Psi(e^{it}))=\psi(t)$$ on the boundary of $D$, where $\psi$ is $2\pi$-periodic and Hölder continuous
-This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator $$K\Psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \Psi(t)cot(\frac{s-t}{2}) dt,$$ which is also known as \red{Hilbert Transform}.
-In order to use numerical methods efficiently via the \red{Fast Fourier Transform def?} we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\Psi$ will be written as $$\Psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ and the conjugation operator can be approximated by the operator $K_N$ defined as $$K_N\Psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
-The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\Psi$ at the grid points. This approximation of the actual operator $K$ satisfies $$\|K \Psi - K_N \Psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\Psi\in C^{\alpha}$ Hölder continuous.
-If $\Psi$ is smoother, e.g. $\Psi \in C^{k-1}$, the error decreases to $$\|K \Psi - K_N \Psi\|_{\infty} \in O(n^{-k}log(n) \|\Psi^{(k)}\|_{infty})$$ \cite{Wegmann2005} p. 362.
-\red{add more details on this operator?}
+\subsection{Reformulation as Boundary Value Problem}\label{chap:BoundaryValueProblems}\label{operatorK_N}
+\red{finding $\psi$ means solving Laplace's equation}
+In Riemann's thesis, conformal mappings are a mere special case of the more general family of boundary value problems of analytic functions on the unit disk $\disk$ or in its exterior $\disk^{-}:=\{z: |z|>1\}$. The simplest such problem is called \textbf{Dirichlet problem} and can be described as finding $\psi$ analytic in $\disk$, continuous in $\bar{\disk}$ and satisfying $$Re(\psi(e^{it}))=\psi(t)$$ on the boundary of $\disk$, where $\psi$ is $2\pi$-periodic and Hölder continuous.
+This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator $$K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)cot(\frac{s-t}{2}) dt,$$ which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}).
+\red{
+In principle, we have two options for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their \red{kernels} must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive.
+}
 
-\subsection{Hilbert Transform \cite{Castillo2025}}
-\red{probably way too much detail}
-\subsection{Mixed boundary conditions (Wec 4.3)(?)}
-\subsection{Hilbert theory and different inner products} 
 
-From complex analysis we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
+\subsection{Boundary Conditions} 
+From Definition \ref{def:ConformalMap} we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
 Denoting 
 $$B:= \begin{pmatrix}
     \partial_x & -\partial_y \\
@@ -166,60 +179,71 @@ $$B:= \begin{pmatrix}
 we want to find a deformation $\Phi$ such that $B\Phi = 0$.
 
 As a byproduct of the Cauchy-Riemann equations, both components of a conformal map are harmonic functions, i.e. they satisfy Laplace's equation $\Delta u = 0$.
-Thus, one way to construct conformal maps is to solve Laplace's equation with suitable boundary conditions. \ref{chap:BoundaryValueProblems}
+Thus, one way to construct conformal maps is to solve Laplace's equation with suitable boundary conditions. This formulation of the problem is called Riemann-Hilbert problem, and it is a special kind of boundary value problem.
 
-The Cauchy-Riemann equations however do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\mathbb{R}^ 2$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies [PROOF]. Thus, the choice of parametrization of the target region's boundary is another challenge posed when solving conformal mapping problems, along with finding a holomorphic deformation $\Phi$.
+Note that the Cauchy-Riemann equations do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\C$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies \red{[PROOF]}. Thus, the choice of parametrization of the target region's boundary is usually another challenge posed when solving conformal mapping problems, but for the scope of this article we assume to be given a suitable parametrization of $\del\Omega$.
+\subsubsection{Dirichlet Boundary Conditions}
+\subsubsection{Neumann Boundary Conditions}
+% \subsection{Mixed boundary conditions (Wec 4.3)(?)}
 
-In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that $$\overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K$$ we define $d(K)$ the diameter of the smallest $K$-circumscribing ball (aka diameter of $K$) and $\mu(K)$ the diameter of the largest ball inscribed in K. Then a measure \cite{Wechsung2019} for the quality of K is the ratio of these diameters
-$$ \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty) .$$
+
+In order to use numerical methods efficiently via the \red{Fast Fourier Transform def?} we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as $$\psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ and the conjugation operator can be approximated by the operator $K_N$ defined as $$K_N\psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
+The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\psi$ at the grid points. This approximation of the actual operator $K$ satisfies $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\psi\in C^{\alpha}$ Hölder continuous.
+If $\psi$ is smoother, e.g. $\psi \in C^{k-1}$, the error decreases to $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-k}log(n) \|\psi^{(k)}\|_{infty})$$ \cite{Wegmann2005_num_methods_confmapping} p. 362.
+\red{add more details on this operator?}
+
+
+\subsection{Solution of the Boundary Value Problem via Fredholm Integral Equations of the Second Kind}
+We often numerically solve BVPs by transforming them into integral equations. Integral equations are equations in which an unknown function appears under an integral sign. 
+They are classified into two main types: Fredholm and Volterra integral equations. Fredholm integral equations have fixed limits of integration, while Volterra integral equations have variable limits of integration. Both types can be further categorized into first kind and second kind, depending on whether the unknown function appears only under the integral sign or also outside of it.
+
+\begin{definition}
+    A Fredholm integral equation of the second kind is an equation of the form
+    $$ f(x) = \lambda \int_{a}^{b} K(x,t) \phi(t) dt + g(x) $$
+    where $f$ and $g$ are known functions, $\phi$ is the unknown function to be solved for, $K(x,t)$ is a given kernel function, and $\lambda$ is a constant.
+\end{definition}
+
+There are several methods to solve Fredholm integral equations of the second kind, which we will explore in what follows\dots
+\subsubsection{Neumann Kernel}
+\red{NEUMANN KERNEL?\cite{Gaier1964} used to solve fredholm integral eq of the second kind}
+
+\subsubsection{Hilbert Transform}
+
 
 \iffalse
 \cite{Wechsung2019}: Mesh quality measures comment p 54
 \fi
 
-\subsubsection{Sobolev Spaces}
+\subsection{Sobolev Spaces}
 Let $L^2$ be the space of all $2\pi$-periodic complex functions $f$ which are square integrable over $[0, 2\pi]$ equipped with the inner product 
 $$(f,g)_2= \frac{1}{2\pi}Re \int_{0}^{2\pi} f(f) \overline{g(t)} dt.$$
 \begin{definition}
     The \textbf{Sobolev space $W$ }is defined as the space of all absolutely continuous functions $f\in L^2$ such that the derivative $f'$ exists and is also in $L^2$. The inner product on $W$ is defined as
     $$(f,g)_W = (f,g)_2 + (f',g')_2.$$
 \end{definition}
-This is a Hilbert space over $\reals$. The subspaces of real functions are denoted $L_{\reals}^2$ and $W_{\reals}$ respectively. Note that we can decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ where $f \in L^2$ is decomposed as follows into its Fourier series:
+This is a Hilbert space over $\R$. The subspaces of real functions are denoted $L_{\R}^2$ and $W_{\R}$ respectively. Note that we can decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ where $f \in L^2$ is decomposed as follows into its Fourier series:
 $$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} = 
     \underbrace{\sum_{-\infty}^{0} a_n e^{int} +i(\text{Im}(a_1))e^{int}}_{=:f^{-}\in W^{-}} + 
     \underbrace{(\text{Re}(a_1))e^{int} + \sum_{n=2}^{\infty} a_n e^{int}}_{=:f^{+}\in W^{+}}.
 $$
 Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{InitialConditionsOnPhi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
-Then, since the boundary function \ref{boundaryCorrespondence} maps the unit circle to $\Gamma$ there exists \red{why} a function $\hat{u}$ such that 
+Then, since the boundary function \ref{eq:boundaryCorrespondence} maps the unit circle to $\Gamma$ there exists \red{why} a function $\hat{u}$ such that 
 $$\Phi(t)=\eta(t+\hat{u}(t)) \quad \forall t.$$
-By the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\reals}$.
-This tells us that the function $\Phi$ we are looking for lies in the intersection of a certain manifold $M:= \{u \in W_{\reals}: \eta(t+u(t))\}$ with our space $W^{+}$. This formulation is used in chapter \ref{chap:AlternatingProjections}.
-
-
-\subsection{Numerical Construction of Conformal Mappings}
-\subsubsection{Alternating Projections à la von Neumann} \label{chap:AlternatingProjections}
-For two closed convex sets $P,Q$ in a Hilbert space $H$, the method of alternating projections constructs a sequence $(x_n)_n$ as follows: Starting from an arbitrary point $x_0 \in H$, we define 
-$$x_{n+1} := \begin{cases}
-    \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
-    \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
-\end{cases}$$ 
-where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively.
-It can be shown that the sequence $(x_n)_n$ converges in norm to a point tuple $(x*,y*)$ satisfying 
-$$
-\begin{cases}
-    x*=\Pi_P(y*), \\
-    y*=\Pi_Q(x*), \\
-    d_H(x*,y*)= min_{(x,y)\in P\times Q} \| x-y \|^2
-\end{cases}
-$$ 
-In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. \cite{Braun2023AltProjections}
+By the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\R}$.
+This tells us that the function $\Phi$ we are looking for lies in the intersection of a certain manifold $M:= \{u \in W_{\R}: \eta(t+u(t))\}$ with our space $W^{+}$. This formulation is used in chapter \ref{chap:AlternatingProjections}.
 
 
 \subsection{Riemann-Hilbert Problems}
 XXXXXXXXXXXXXX
 
+\subsection{Mesh Structure}
+In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that $$\overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K$$ we define $d(K)$ the diameter of the smallest $K$-circumscribing ball (aka diameter of $K$) and $\mu(K)$ the diameter of the largest ball inscribed in K. Then a measure \cite{Wechsung2019_shapeopt_robustsolvers_incompressible} for the quality of K is the ratio of these diameters
+$$ \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty) .$$
+
+
 \subsection{Crowding}
-Wegmann \cite{Wegmann2005} proved the following result.
+Crowding is the phenomenon that occurs when a set of more or less equally distributed points on the domain are mapped to a much more dense set of points on the target region, thereby causing numerical issues due to the angles on the grid becoming very small. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. 
+Wegmann \cite{Wegmann2005_num_methods_confmapping} proved the following result.
 
 \begin{theorem}
     When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides then the conformal mapping $\phi : D \rightarrow G$ satisfies
@@ -232,21 +256,17 @@ Wegmann \cite{Wegmann2005} proved the following result.
     $$
 \end{theorem} 
 
-Crowding is cumbersome for all methods which work with grid points. On the other hand, methods which approximate the mapping functions by polynomials also face severe problems when the target region is elongated. 
-It follows that, for the mapping of the disk to a region of aspect ratio 1 910 by a polynomial, the degree must be of several millions.
-In any case, the number of grid points and the degree of the approximating polynomials increase both like exp(zr/2r) as the aspect ratio, r, tends to zero.
-DeLillo [37] has shown how crowding affects the accuracy of numerical computations.
-Crowding also limits the practical usefulness of conformal maps. This was demonstrated by DeLillo [36] for the Laplace equation. Crowding has also been observed for regions with elongated sections ("fingers"). For "pinched" regions, such as the interior of an inverted ellipse, ill conditioning occurs of a less severe, algebraic nature (DeLillo [37]).
-
+\red{DeLillo has shown how crowding affects the accuracy of numerical computations.}
 \subsubsection{The operator R}
+\red{
 In some conformal mapping methods, boundary value problems as follows occur,
-$$ \Psi(e^{it})=B(t) + A(t)U(t) $$
-where $A, B: \mathbb{C}\to \mathbb{C}$ and $U:\mathbb{C}\to \mathbb{R}$. Multiplication with $\bar{A}$ yields the RH problem $$ Im(\bar{A(t)}\Psi(e^{it})) = Im(\bar{A(t)}B(t))$$
+$$ \psi(e^{it})=B(t) + A(t)U(t) $$
+where $A, B: \mathbb{C}\to \mathbb{C}$ and $U:\mathbb{C}\to \mathbb{R}$. Multiplication with $\bar{A}$ yields the RH problem $$ Im(\bar{A(t)}\psi(e^{it})) = Im(\bar{A(t)}B(t))$$
 This problem can be solved by the operator $R_{\beta}$, which is defined as follows:
-
+}
 This follows from the following theorem:
 \begin{theorem}
-    There exists a function $\Psi$ analytic in $D$ with $\Psi(0)= 0$ satisfying the boundary problem if and only if U is a solution of the Fredholm integral equation of the second kind
+    There exists a function $\psi$ analytic in $D$ with $\psi(0)= 0$ satisfying the boundary problem if and only if U is a solution of the Fredholm integral equation of the second kind
     $$(I+R_{\beta})U=g$$
     with the right-hand side
     $$g := -Re ( e ^{-i\beta} ( I - iK + J)/B).$$ 

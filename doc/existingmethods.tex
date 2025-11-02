@@ -4,21 +4,25 @@
 - Mesh quality preservation - how does the mapping affect triangle quality?
 - Computational complexity
 - Input and output formats
+- https://www.desmos.com/calculator/g9asjc6xph
 \fi
 \section{Existing Methods}
 This chapter aims to give an overview and compare existing methods in terms of input/output format, suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
-When the region $G$ is bounded by a closed curve $\Gamma$ the mapping $\Phi:D\to G$ can be extended continuously to the closure $\overline{D}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005}, p. 387) and the mapping $\Phi$ is determined by its boundary values $$\Phi(e^{is})=\eta(s) \label{boundaryCorrespondence}$$ for $s\in[0,2\pi)$. 
-By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\Phi$ depends on the boundary curve of $G$ by the boundary correspondence equation \ref{boundaryCorrespondence}.
+When the region $\Omega$ is bounded by a closed curve $\Gamma$ the mapping $\psi:\disk\to \Omega$ can be extended continuously to the closure $\overline{\disk}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005_num_methods_confmapping}, p. 387) and the mapping $\psi$ is determined by its boundary values 
+\begin{equation} \label{eq:boundaryCorrespondence}
+    \psi(e^{is})=\eta(s)
+\end{equation}
+for $s\in[0,2\pi)$. 
+By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\psi$ depends on the boundary curve of $\Omega$ by the boundary correspondence equation \ref{eq:boundaryCorrespondence}.
 
 \red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
 
 
-\subsection{Potential Theoretic Methods}
+% \subsection{Potential Theoretic Methods}
 % starting p 369 weg05
 
-The accuracy of the conformal mapping depends to a large extent on the smoothness of the boundary curve $\gamma$. 
 
-\subsubsection{Bergman Kernel Method}
+% \subsubsection{Bergman Kernel Method}
 
 \iffalse
 \subsection{Mapping from the Region to the Disk}
@@ -38,21 +42,37 @@ Both the \color{red} Bergman and the Szegö norms \color{black} are very useful 
 The osculation method (Schmiegungsverfahren) of Koebe [ 140] approximates F by a com-
 position of elementary maps. It is universally applicable, since it requires no hypotheses at
 all concerning the boundary 0G of the region G.
-\subsubsection{Accuracy}
 \fi 
-\subsection{Alternating Projections Method}\label{APMethod}
-Various methods for numerical construction of $\Phi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator K \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
-The method of alternating projections uses both these sequences and alternates between them to find $\Phi$ \cite{Wegmann1989_287}.
 
-\subsubsection{Prerequisites}
-For this method we suppose $\Gamma=\del\Omega$ is a smooth Jordan curve parametrized by a $2\pi$-periodic function $\eta(s)$ with continuous non-vanishing derivative $\eta'(s)\neq0$ having winding number $1$ on $[0,2\pi)$, i.e. $\Gamma$ surrounds $\Omega$ exactly once.
-Furthermore, we utilize the spaces and notation from chapter \ref{chap:AlternatingProjections}.
+\subsection{Alternating Projections Method}\label{APMethod}
+Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator K \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
+The method of alternating projections uses both these sequences and alternates between them to find $\psi$ \cite{Wegmann1989_alternating_projections}.
+
+\red{MOVE THIS TO THE BEGINNING OF THE ARTICLE For this method we suppose $\Gamma=\del\Omega$ is a smooth Jordan curve parametrized by a $2\pi$-periodic function $\eta(s)$ with continuous non-vanishing derivative $\eta'(s)\neq0$ having winding number $1$ on $[0,2\pi)$, i.e. $\Gamma$ surrounds $\Omega$ exactly once.}
+\subsubsection{Alternating Projections à la von Neumann} \label{chap:AlternatingProjections}
+For two closed convex sets $P,Q$ in a Hilbert space $H$, the method of alternating projections constructs a sequence $(x_n)_n$ as follows: Starting from an arbitrary point $x_0 \in H$, we define 
+$$x_{n+1} := \begin{cases}
+    \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
+    \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
+\end{cases}$$ 
+where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively.
+It can be shown that the sequence $(x_n)_n$ converges in norm to a point tuple $(x*,y*)$ satisfying 
+$$
+\begin{cases}
+    x*=\Pi_P(y*), \\
+    y*=\Pi_Q(x*), \\
+    d_H(x*,y*)= min_{(x,y)\in P\times Q} \| x-y \|^2
+\end{cases}
+$$ 
+In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. \cite{Braun2023_AltProjections}
+
+This exact idea is now applied to function spaces:
 
 \subsubsection{Algorithm}
 \begin{algorithm}
     \caption{AP-Method}
     \begin{algorithmic}
-    \STATE Start with a function $U_0\in W_{\reals}$.
+    \STATE Start with a function $U_0\in W_{\R}$.
     \STATE Given $U_k$ for $k\geq 0$,
         \FOR {$n = 1,0,-1,-2,...$}
             \STATE $a_n = \frac{1}{2\pi}\int_{0}^{2\pi} \eta(t+U_k(t))e^{-int} dt$ \hfill [Calculate Fourier coefficients]
@@ -63,28 +83,6 @@ Furthermore, we utilize the spaces and notation from chapter \ref{chap:Alternati
     \end{algorithmic}
 \end{algorithm}
 
-
-\subsubsection{Convergence}
-The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function $\eta??????$ \cite{Wegmann1989_287} p.292.
-Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite{Wegmann2005} p. 389.
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Newton Methods}
-
-\subsection{Interpolation}
-
-\subsection{Theodorsen's Method}
-\cite{Song2012}
 \subsection{Schwarz-Christoffel Method}
 \iffalse
 $R_w = \mathbb{D}$ disk \\
@@ -109,10 +107,10 @@ $\frac{\del\theta_{\mathbb{D}}}{\del s_{\mathbb{D}}} = \measuredangle\theta_{\ma
 \subsubsection{Green's Functions}
 A Green's function is a general concept for solving differential equations containing a linear operator.
 \begin{definition} 
-    A \textbf{Green's function} or \textbf{Green function $G(x,s)$} is any solution to $$LG(x,s)=\delta(x-s)$$ where $L=L(x)$ is a linear operator acting on distributions over $\reals^{n}$ and $\delta$ is the Dirac delta function.
+    A \textbf{Green's function} or \textbf{Green function $G(x,s)$} is any solution to $$LG(x,s)=\delta(x-s)$$ where $L=L(x)$ is a linear operator acting on distributions over $\R^{n}$ and $\delta$ is the Dirac delta function.
 \end{definition}
 This definition can be exploited to solve inhomogeneous differential equations of the form $Lu=f(x)$.
-In the case of the SCE the Green's function are defined as $G(z,z'):\mathbb{D}\to\mathbb{R}$ satisfying $$\nabla^2 G(z,z') = 2\pi \delta(u-u')\delta(v-v') $$ inside the disk and $$\frac{\del G(z_B, z')}{\del n} = \beta_i$$ where $n$ is the outward normal vector at the boundary point $z_B \in \del\mathbb{D}$ and $\beta_i$ is a real constant associated with the $i$'th arc's length $l_i$ such that $\sum l_i\beta_i = 2\pi$. It can be shown according to Floryan and Zemach that this defines a unique Green's function up to an additive constant \cite{FLORYAN1987}.
+In the case of the SCE the Green's function are defined as $G(z,z'):\mathbb{D}\to\mathbb{R}$ satisfying $$\nabla^2 G(z,z') = 2\pi \delta(u-u')\delta(v-v') $$ inside the disk and $$\frac{\del G(z_B, z')}{\del n} = \beta_i$$ where $n$ is the outward normal vector at the boundary point $z_B \in \del\mathbb{D}$ and $\beta_i$ is a real constant associated with the $i$'th arc's length $l_i$ such that $\sum l_i\beta_i = 2\pi$. It can be shown according to Floryan and Zemach that this defines a unique Green's function up to an additive constant \cite{FLORYAN1987_SC_general}.
 The SCE can be written explicitly whenever the Green's function is \red{obtainable in closed analytic form, i.e. expressable via a finite number of elementary operations (is that what is meant on p348? i looked up wikipedia for closed analytic form)}.
 
 \subsubsection{Schwarz-Christoffel Equation Variants}
@@ -120,23 +118,20 @@ Let $\mathcal{G}(z, z_B')$ be a complex extension of the above defined $G(z,z_B'
 A Schwarz-Christoffel equation for a conformal mapping $\Phi(z):\mathbb{D}\to\Omega$ has the form $$ log \frac{d\Phi}{dz}= C+\displaystyle\sum_i Q_i,$$ where $C\in\mathbb{C}$ is a constant and the $Q_i$ are the Green's function integrals over the boundary arcs of $\mathbb{D}$.
 Some parameters and constants have to be determined in order to get a unique $\Phi$ for a particular given $\Omega$. The Riemann mapping theorem allows \red{HOW?} for the first three real parameters to be preassigned, for example to three boundary points in the case of simply connected bounded $\Omega$. The remaining degrees of freedom must be solved for using properties of the arcs $s_{\Omega}(s_z)$ and $s_{\mathbb{D}}(s_z)$. 
 
-The most general form is called Schwarz-Christoffel equation with subtraction \cite{FLORYAN1987}:
+The most general form is called Schwarz-Christoffel equation with subtraction \cite{FLORYAN1987_SC_general}:
 $$log(\frac{d\Phi}{dz}) = C_0 - \frac{1}{2\pi}\displaystyle\int_{\del\mathbb {D}} [\mathcal{G}(z, z_B')-\mathcal{G}(z_0, z_B')] \times [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
 where $C_0\in\mathbb{C}$ is a constant, $z_0$ is a fixed point in $\mathbb{D}$\red{or del?}, $\mathcal{G}(z,z_B')$ is the fundamental solution of the Laplace equation in $\del\mathbb{D}$ with singularity at $z_B' \in \del\mathbb{D}$\red{not at the boundary of omega?}. However, we can use an unsubtracted form of this equation since the integrals converge separately and we know our $\Omega$ is bounded (hence we need not care about behaviours at infinity), yielding the simpler form
 $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z, z_B') [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
 
-\subsubsection{Convergence}
-\cite{banjaitrefethen2006SCmultipolemethod}
-
 \subsubsection{Implementation}
-\cite{Brown1990}
-\cite{Trefethen1980}
-Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008schwarzchristoffelcrowdingworkaround}
+\cite{Brown1990_SC_meshgen}
+\cite{Trefethen1980_SCnumericalcomputation}
+Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008_SC_crowdingworkaround}
 
 \subsection{Zipper Method}
 This algorithm was fonud independently by Kühnau and Marshall in the 1980's has the advantage of finding $\Phi$ and its inverse at the same time. 
 The computed map is only approximately conformal, and is obtained as a composition of conformal maps onto slit halfplanes. Depending on the shape of the slits, the Zipper algorithm looks a bit different. 
-In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006convergencezipperalgorithmconformal} which is quite beautiful from a geometric perspective.
+In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006_convergencezipperalgorithmconformal} which is quite beautiful from a geometric perspective.
 \subsubsection{The Geodesic Algorithm}
 The most elementary version of this algorithm is based on a function 
 $$f_a: \mathbb{H}\setminus \gamma \to \mathbb{H}$$
@@ -152,7 +147,7 @@ Now suppose $z_0, z_1, ..., z_n$ are points arranged counterclockwise on a Jorda
     \caption{Geodesic Zipper Algorithm}
     \begin{algorithmic}
     \STATE \textbf{Input:} Points $z_0, z_1, ..., z_n$ on a Jordan curve $\Gamma$ in the upper half plane.
-    \STATE \textbf{Output:} $\Psi$: conformal map from $\mathbb{H}$ to the region bounded by $\Gamma$ and its inverse $\Psi^{-1}$.
+    \STATE \textbf{Output:} $\psi$: conformal map from $\mathbb{H}$ to the region bounded by $\Gamma$ and its inverse $\psi^{-1}$.
     \STATE $\phi_1(z) := i\sqrt{(z-z_1)/(z-z_0)}$
     \STATE $\zeta_2:= \phi_1(z_2)$
     \STATE $\phi_2(z) := f_{\zeta_2}(z)$
@@ -160,8 +155,8 @@ Now suppose $z_0, z_1, ..., z_n$ are points arranged counterclockwise on a Jorda
         \STATE $\zeta_k := \phi_{k-1} \circ \ldots \circ \phi_1 (z_k)$
         \STATE $\phi_k(z) := f_{\zeta_k}(z)$
     \ENDFOR
-    \STATE Finally, $\zeta_{n+1} := \phi_n \circ \ldots \circ \phi_1 (z_{0})\in\reals$ and $\phi_{n+1}(z) := -(\frac{z}{1 - z/\zeta_{n+1}})^2$
-    \STATE Then $\Psi(z) := \phi_1^{-1} \circ \phi_2^{-1} \circ \ldots \circ \phi_{n+1}^{-1}(z)$ and $\Psi^{-1}(z) := \phi_{n+1} \circ \ldots \circ \phi_2 \circ \phi_1 (z)$
+    \STATE Finally, $\zeta_{n+1} := \phi_n \circ \ldots \circ \phi_1 (z_{0})\in\R$ and $\phi_{n+1}(z) := -(\frac{z}{1 - z/\zeta_{n+1}})^2$
+    \STATE Then $\psi(z) := \phi_1^{-1} \circ \phi_2^{-1} \circ \ldots \circ \phi_{n+1}^{-1}(z)$ and $\psi^{-1}(z) := \phi_{n+1} \circ \ldots \circ \phi_2 \circ \phi_1 (z)$
     \end{algorithmic}
 \end{algorithm}
 \red{INSERT IMAGE}
@@ -175,27 +170,83 @@ The approximation of $\Gamma$ by circular arcs or straight line segments can be 
 The first arc is replaced by $$\phi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z_1-z_2)}}.$$ At each subsequent step that circular arc through $\zeta_k$ and $\zeta_{k+1}$ is mapped onto a straight line segment by a Möbius transform, and then the Slit Algorithm is applied to unzip that segment.
 \red{This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one.}
 
+\red{GOOD PAPER FOR IMPLEMENTATION ESPECIALLY END NOTES}
+
+\subsection{Newton Method}
+For smooth $\del\Omega$, Integral equations of the second kind can also be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
+Let $\eta$ be a differentiable parametrization of $\Gamma$ and $\dot\eta(s)\neq 0\forall s$. Let $\kappa\geq 1$ be the winding number of $\dot\eta$ with regard to $0$, then we get \red{$\kappa -1$} additional degrees of freedom 
+\begin{equation}
+\psi_{\red{0}} (z_n) = c_n \quad n=0,1,2,...,\kappa \text{ where } z_0\in\del\disk, z_1, ..., z_{\kappa}\in\Omega, c_0 \in\Gamma
+\end{equation}to fix for the \red{initial?} interpolation. 
+Let $S(\zeta)$ be a $2\pi$-periodic function such that $\psi(\zeta)=\eta(S(\zeta))$.
+We approximate the conformal map $\psi$ as follows:
+%Assume a starting configuration of points $z_1, z_2, ..., z_N$ in $\disk$ and their images $\zeta_1, \zeta_2, ..., \zeta_N$ on $\Gamma$ such that $\psi(z_k)=\zeta_k$. 
+Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. We improve the approximation by moving the points along the tangent to the boundary curve, i.e. by finding a function $U_k(\zeta)$ such that
+\begin{equation}\label{eq:h_k+1}
+    \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = h_{k+1}(\zeta)
+\end{equation}
+where $h$ is analytic on $\overline\Omega$ and $h_{k+1}(\zeta)$ is the boundary value of the next approximation $\psi_{k+1}(z_n)=c_n$.
+For the boundary point $z_0$ we are given $c_0=\eta(s_0)\in\Gamma$. $h_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ \red{we cannot have $h_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$}. Therefore we set
+\begin{equation}
+    U_k(z_0)=s_0-S_k(z_0).
+\end{equation}
+$h_{k+1}$ is an approximation of $\psi$ but it does not generally take values on $\Gamma$. We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta).$$
+
+\subsubsection{Implementation}
+Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation:
+Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
+$$\theta_k = \theta_0 + \frac{\pi k}{n}, \quad k\in[2n-1]$$
+and write the integrals in terms of their Fourier transform
+\begin{equation}
+    F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
+\end{equation}
+where $\sigma_n(\zeta_k)=\sum_{i=-n}^{n} c_k \zeta_k^i$. This can be computed fast ($\in\bigO(n\log n)$) via FFT.
+% Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
+Each iteration is computed via interpolating polynomials.
+
+
+\subsection{Interpolation}
+
+\subsection{Theodorsen's Method} \label{TheodorsenMethod}
+\cite{Song2012_theodorsen_equation}
 \subsubsection{Convergence}
-Marshall and Rohde \cite{marshall2006convergencezipperalgorithmconformal} proved that if $\Gamma=\del\Omega$ is a $C^{3/2}$ closed Jordan curve with points $\{ z_i\}\subset\del\Omega$ having mesh size $\mu=max|z_j-z_{j+1}|$ there is a constant $C$ depending on the geometry of $\del\Omega$ such that the conformal map $\Psi$ satisfies accuracy of $\bigO(C\mu^{3/2})$.
-The geodesic algorithm works only with elementary functions, as a result its speed depends only on the number of points on the boundary (i.e. mesh size) and not on the shape of the region. The accuracy can be measured explicitly if the true conformal map is known, which is our case. \red{ADD COMPUTATION AND IMAGES LIKE IN MnR'S PAPER <3}
-\red{VERY GOOD PAPER FOR IMPLEMENTATION ESPECIALLY END NOTES}
+Theodorsen's method \ref{TheodorsenMethod} needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren} and even then only converges linearly
 
 
-\subsection{Shirokova's Method}
-\cite{Shirokova2014}
+% \subsection{Shirokova's Method}
+% \cite{Shirokova2014}
 \subsection{Conjugate Function Method}
-\cite{Hakula_2013conjugatefunctionmethod}
+Hakula, Quach and Rasila \cite{Hakula_2013_conjugatefunctionmethod} presented a new method in 2010 which is based on numerical solution of the Laplace equation subject to Dirichlet-Neumann mexed-type boundary conditions by using $hp$-FEM.  
+In their paper they construct the mapping starting from a quadrilateral, but it can be tweaked to map from the unit disk as well. 
+"It is well known that one can express the modulus of a quadrilateral Q in terms of the solution of the Dirichlet-Neumann mixed boundary value problem [\red{FIND HENRICI'S BOOK}, p. 431]."
+
+
 \subsection{Amano's Method}
-\cite{Sakakibara2019AmanosMethod}
+\cite{Sakakibara2019_AmanosMethod}
 
 \subsection{Probabilistic Uniformization Method}
-In 2007, Binder, Braverman ans Yampolsky proposed \red{the random walks solution to the general Dirichlet problem} to produce a solution to the uniformization problem, yielding an algorithm with precision $2^{-n}$ pixels running in linear space (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function) and $2^{n}$ time. \cite{binder2007computationalcomplexityriemannmapping}
+In 2007, Binder, Braverman ans Yampolsky proposed \red{the random walks solution to the general Dirichlet problem} to produce a solution to the uniformization problem, yielding an algorithm with precision $2^{-n}$ pixels running in linear space (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function) and $2^{n}$ time. \cite{binder2007_computationalcomplexityriemannmapping}
+
+
+
 \red{
 \subsection{Comparison}
-Wegmann \cite{Wegmann2005} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
+The accuracy of the conformal mapping depends to a large extent on the smoothness of the boundary curve $\Gamma$. 
+Wegmann \cite{Wegmann2005_num_methods_confmapping} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
 Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
-Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005} p.415.\red{add figure?}
+Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005_num_methods_confmapping} p.415.\red{add figure?}
 \red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
 }
 
-\red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book [8].}
+The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function \ref{eq:boundaryCorrespondence} $\eta(s)$ \cite{Wegmann1989_alternating_projections} p.292.
+Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite{Wegmann2005_num_methods_confmapping} p. 389.
+
+
+
+The Newton method converges locally quadratically if the domain is the unit disk $\disk$. Generally, the algorithm can achieve space efficiency of $\bigO(n)$ and computational efficiency of $\bigO(n^2)$ or $\bigO(nlogn)$ if FFT is used, just like in the conjugate function method. \cite{Wegmann1978_newtonverfahren}
+\cite{Wegmann1984_convergence_iterative_method}
+
+Marshall and Rohde \cite{marshall2006_convergencezipperalgorithmconformal} proved that if $\Gamma=\del\Omega$ is a $C^{3/2}$ closed Jordan curve with points $\{ z_i\}\subset\del\Omega$ having mesh size $\mu=max|z_j-z_{j+1}|$ there is a constant $C$ depending on the geometry of $\del\Omega$ such that the conformal map $\psi$ found by the zipper algorithm satisfies accuracy of $\bigO(C\mu^{3/2})$.
+The geodesic algorithm works only with elementary functions, as a result its speed depends only on the number of points on the boundary (i.e. mesh size) and not on the shape of the region. The accuracy can be measured explicitly if the true conformal map is known, which is our case. \red{ADD COMPUTATION AND IMAGES LIKE IN MnR'S PAPER <3}
+
+\red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book.}
