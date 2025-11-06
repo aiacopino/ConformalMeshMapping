@@ -8,21 +8,14 @@
 \fi
 \section{Existing Methods}
 This chapter aims to give an overview and compare existing methods in terms of input/output format, suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
-When the region $\Omega$ is bounded by a closed curve $\Gamma$ the mapping $\psi:\disk\to \Omega$ can be extended continuously to the closure $\overline{\disk}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta(s)$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005_num_methods_confmapping}, p. 387) and the mapping $\psi$ is determined by its boundary values 
-\begin{equation} \label{eq:boundaryCorrespondence}
-    \psi(e^{is})=\eta(s)
-\end{equation}
-for $s\in[0,2\pi)$. 
-By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\psi$ depends on the boundary curve of $\Omega$ by the boundary correspondence equation \ref{eq:boundaryCorrespondence}.
 
-\red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
+We give an overview of some existing methods and how to choose each depending on the application before explaining each of them in more detail.
+\input{flowchart.tex}
+*(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)
 
 
-% \subsection{Potential Theoretic Methods}
-% starting p 369 weg05
 
-
-% \subsubsection{Bergman Kernel Method}
+\red{\subsection{Bergman Kernel Method}}
 
 \iffalse
 \subsection{Mapping from the Region to the Disk}
@@ -37,12 +30,10 @@ Both the \color{red} Bergman and the Szegö norms \color{black} are very useful 
         \item (Principle of minimum length) $\sqrt{F'}$ is the unique function which minimizes $||f||_S$ among all functions $f \in S(G)$ satisfying $f (O) = 1$.
     \end{enumerate}
 \end{theorem}
-
-\subsubsection{Osculation Methods}
-The osculation method (Schmiegungsverfahren) of Koebe [ 140] approximates F by a com-
-position of elementary maps. It is universally applicable, since it requires no hypotheses at
-all concerning the boundary 0G of the region G.
 \fi 
+
+\subsection{Preprocessing}
+\subsubsection{Osculation Methods}
 
 \subsection{Alternating Projections Method}\label{APMethod}
 Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator K \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
@@ -63,7 +54,8 @@ $$
     y*=\Pi_Q(x*), \\
     d_H(x*,y*)= min_{(x,y)\in P\times Q} \| x-y \|^2
 \end{cases}
-$$ 
+$$
+
 In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. \cite{Braun2023_AltProjections}
 
 This exact idea is now applied to function spaces:
@@ -126,6 +118,8 @@ $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z,
 \subsubsection{Implementation}
 \cite{Brown1990_SC_meshgen}
 \cite{Trefethen1980_SCnumericalcomputation}
+\cite{banjaitrefethen2006_SCmultipolemethod}
+\cite{Bezrodnykh2022_lauricella}
 Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008_SC_crowdingworkaround}
 
 \subsection{Zipper Method}
@@ -172,25 +166,40 @@ The first arc is replaced by $$\phi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z
 
 \red{GOOD PAPER FOR IMPLEMENTATION ESPECIALLY END NOTES}
 
-\subsection{Newton Method}
+\subsection{Newton/ Wegmann Method}
 For smooth $\del\Omega$, Integral equations of the second kind can also be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
-Let $\eta$ be a differentiable parametrization of $\Gamma$ and $\dot\eta(s)\neq 0\forall s$. Let $\kappa\geq 1$ be the winding number of $\dot\eta$ with regard to $0$, then we get \red{$\kappa -1$} additional degrees of freedom 
+Let $\eta$ be a differentiable parametrization of $\Gamma$ and $\dot\eta(s)\neq 0\forall s$. 
+
+\iffalse NOT NEEDED SINCE WE ARE ISMPLY CONNECTED
+Let $\kappa\geq 1$ be the winding number of $\dot\eta$ with regard to $0$, then we get \red{$\kappa -1$} additional degrees of freedom 
 \begin{equation}
-\psi_{\red{0}} (z_n) = c_n \quad n=0,1,2,...,\kappa \text{ where } z_0\in\del\disk, z_1, ..., z_{\kappa}\in\Omega, c_0 \in\Gamma
+\psi_{\red{0}} (z_n) = c_n \quad n=0,1,2,...,\kappa \text{ where } z_0\in\del\disk, z_1, ..., z_{\kappa}\in\disk, c_0 \in\Gamma
 \end{equation}to fix for the \red{initial?} interpolation. 
+\fi
+
 Let $S(\zeta)$ be a $2\pi$-periodic function such that $\psi(\zeta)=\eta(S(\zeta))$.
+$$
+\begin{tikzpicture}[node distance=2cm, auto]
+\node (A) {$\disk$};
+\node(B) [right of=A] {$[0,2\pi]$};
+\node (C) [right of=B] {$\Gamma$};
+\draw[->](A) to node {$S$}(B);
+\draw[->](B) to node {$\eta$}(C);
+\draw[->, out = -40, in = -140, looseness = 0.5] (A) to node [below]{$\psi$}(C); % this should be a circular arrow under the diagram
+\end{tikzpicture}
+$$
 We approximate the conformal map $\psi$ as follows:
 %Assume a starting configuration of points $z_1, z_2, ..., z_N$ in $\disk$ and their images $\zeta_1, \zeta_2, ..., \zeta_N$ on $\Gamma$ such that $\psi(z_k)=\zeta_k$. 
-Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. We improve the approximation by moving the points along the tangent to the boundary curve, i.e. by finding a function $U_k(\zeta)$ such that
+Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. We improve the approximation by moving the points along the tangent towards the boundary curve, i.e. by finding a correction function $U_k:\del\disk\to[0,2\pi]$ such that
 \begin{equation}\label{eq:h_k+1}
     \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = h_{k+1}(\zeta)
 \end{equation}
 where $h$ is analytic on $\overline\Omega$ and $h_{k+1}(\zeta)$ is the boundary value of the next approximation $\psi_{k+1}(z_n)=c_n$.
-For the boundary point $z_0$ we are given $c_0=\eta(s_0)\in\Gamma$. $h_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ \red{we cannot have $h_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$}. Therefore we set
+For the boundary point $z_0$ we are given $c_0=\eta(s_0)\in\Gamma$. Note that since $h_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ we cannot have $h_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$. Therefore we set
 \begin{equation}
     U_k(z_0)=s_0-S_k(z_0).
 \end{equation}
-$h_{k+1}$ is an approximation of $\psi$ but it does not generally take values on $\Gamma$. We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta).$$
+Note also that $h_{k+1}$ is an approximation of $\psi$ but it does not generally take values on $\Gamma$. We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta).$$
 
 \subsubsection{Implementation}
 Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation:
@@ -205,12 +214,55 @@ where $\sigma_n(\zeta_k)=\sum_{i=-n}^{n} c_k \zeta_k^i$. This can be computed fa
 Each iteration is computed via interpolating polynomials.
 
 
-\subsection{Interpolation}
-
 \subsection{Theodorsen's Method} \label{TheodorsenMethod}
-\cite{Song2012_theodorsen_equation}
-\subsubsection{Convergence}
-Theodorsen's method \ref{TheodorsenMethod} needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren} and even then only converges linearly
+% \cite{Song2012_theodorsen_equation}
+\red{probably put this before wegmann method}
+
+We can reformulate the problem of finding the conformal mapping $\psi:\disk\to\Omega$ as solving Theodorsen's integral equation for the boundary correspondence function $\theta(s)$ \red{rename theta to S?} defined by 
+\begin{equation}
+    \psi(e^{is})=\eta(\theta(s)) \text{ and } \int_{0}^{2\pi} \theta(s) ds = 2\pi^2
+\end{equation} where $\eta$ is a parametrization of $\Gamma=\del\Omega$.
+$\psi$ is assumed to be normsalized such that $\psi(0)=0$ and $\psi'(0)>0$.
+Theodorsen's integral equation states that $Y:s\mapsto \theta(s)-s$ is  the conjugate periodic function of $X:s \mapsto \log(\eta(\theta(s)))$.
+After discretization, Theodorsen's integral equation becomes the fixed point equation
+\begin{equation}\label{eq:TheodorsenDiscretized}
+    y=\Psi(y):=K_{\Sigma} \log(\eta(s+y))
+\end{equation} for $s:=(\frac{k\pi}{N})_{k\in[2N-1]}$ where $y$ approximates $Y(s)$.
+The product $y$ can be computed efficiently using FFT (see \ref{operatorK_N}).
+If the discretization is based on trigonometric interpolation, $K_{\Sigma}$ is called \textbf{Wittich's matrix} \cite{Gutknecht1983_theodorsen_equation_FFT}.
+By a permutation $P$ the above components can be brought to the form
+\begin{equation}
+    PK_{\Sigma}P =
+    \begin{pmatrix}
+        0 & -L^T \\
+        L & 0
+    \end{pmatrix}, \quad
+    Py = \begin{pmatrix}
+        y^{"} \\
+        y^{' }
+    \end{pmatrix}, \quad
+    Ps = \begin{pmatrix}
+        s^{"} \\
+        s^{'}
+    \end{pmatrix}.
+\end{equation}
+By Niethammer, (\ref{eq:TheodorsenDiscretized}) can be solved using nonlinear successive over-relaxation (SOR) for given $y_0^{"}, y_0^{'}$ and $\omega$ (relaxation factor) and $m\geq 0$:
+\begin{equation}\label{eq:SOR}
+    \begin{matrix}
+        y_{m+1}^{"} &:= &(1-\omega)&y_m^{"} &- &\omega L^T \log(\eta(s^{'} + y_m^{'})) \\
+        y_{m+1}^{'} &:= &(1-\omega)&y_m^{'} &+ &\omega L \log(\eta(s^{"} + y_m^{"}))        
+    \end{matrix}
+\end{equation}
+Alternatively, nonlinear Jacobi iteration with relaxation (JOR) can be used:
+\begin{equation}\label{eq:JOR}
+    \begin{matrix}
+        y_{m+1} &:= &(1-\omega)&y_m + &\omega \Psi(y_m).
+    \end{matrix}
+\end{equation}
+
+In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \cite{Gutknecht1983_theodorsen_equation_FFT}. In this case, the boundary curve can be smoothed first using preliminary maps \red{see osculation methods}.
+
+Theodorsen's method \ref{TheodorsenMethod} needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren} and is particularly simple (fixed point equation) in this case.In practice, the star-shape requirement can be relaxed be smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
 
 
 % \subsection{Shirokova's Method}
@@ -221,11 +273,13 @@ In their paper they construct the mapping starting from a quadrilateral, but it 
 "It is well known that one can express the modulus of a quadrilateral Q in terms of the solution of the Dirichlet-Neumann mixed boundary value problem [\red{FIND HENRICI'S BOOK}, p. 431]."
 
 
-\subsection{Amano's Method}
+\subsection{Amano's Method of Fundamental Solutions}
 \cite{Sakakibara2019_AmanosMethod}
+\red{jordan region}
+\cite{Amano1998_Amanosmethod}
 
 \subsection{Probabilistic Uniformization Method}
-In 2007, Binder, Braverman ans Yampolsky proposed \red{the random walks solution to the general Dirichlet problem} to produce a solution to the uniformization problem, yielding an algorithm with precision $2^{-n}$ pixels running in linear space (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function) and $2^{n}$ time. \cite{binder2007_computationalcomplexityriemannmapping}
+In 2007, Binder, Braverman ans Yampolsky proposed a method for finding a conformal map using a random walks solver to the general Dirichlet problem. They conjectured an upper bound of polynomial space and time for an algorithm with precision $\frac{1}{n}$ pixels (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function). \cite{binder2007_computationalcomplexityriemannmapping}
 
 
 
@@ -242,6 +296,7 @@ The AP Method converges linearly if the boundary parametrization is 3-Hölder an
 Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite{Wegmann2005_num_methods_confmapping} p. 389.
 
 
+GMRES or CGS or SOR(Niethammer) for solving linear IER (Amano, Kerzman-Stein)
 
 The Newton method converges locally quadratically if the domain is the unit disk $\disk$. Generally, the algorithm can achieve space efficiency of $\bigO(n)$ and computational efficiency of $\bigO(n^2)$ or $\bigO(nlogn)$ if FFT is used, just like in the conjugate function method. \cite{Wegmann1978_newtonverfahren}
 \cite{Wegmann1984_convergence_iterative_method}
@@ -249,4 +304,34 @@ The Newton method converges locally quadratically if the domain is the unit disk
 Marshall and Rohde \cite{marshall2006_convergencezipperalgorithmconformal} proved that if $\Gamma=\del\Omega$ is a $C^{3/2}$ closed Jordan curve with points $\{ z_i\}\subset\del\Omega$ having mesh size $\mu=max|z_j-z_{j+1}|$ there is a constant $C$ depending on the geometry of $\del\Omega$ such that the conformal map $\psi$ found by the zipper algorithm satisfies accuracy of $\bigO(C\mu^{3/2})$.
 The geodesic algorithm works only with elementary functions, as a result its speed depends only on the number of points on the boundary (i.e. mesh size) and not on the shape of the region. The accuracy can be measured explicitly if the true conformal map is known, which is our case. \red{ADD COMPUTATION AND IMAGES LIKE IN MnR'S PAPER <3}
 
-\red{Alternative approaches to numerical conformal mapping are enumerated in Henrici’s book.}
+
+\begin{sidewaystable}[!p]
+\caption{Overview Table}
+\centering
+\small
+\resizebox{\textwidth}{!}{%
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+    \hline
+    Algorithm & $\Omega$ shape & Runtime & Space & Input & Output & Advantages & Disadvantages \\
+    \hline
+    Alternating projections& shape & Runtime & Space & Input & Output & Advantages & Disadvantages\\
+    \hline
+    Zipper &shape & Runtime & Space & Input & Output & Advantages & Disadvantages \\
+    \hline
+    Theodorsen & star-shaped & Runtime & Space & Input & Output & Advantages & Disadvantages \\
+    \hline
+    Schwarz-Christoffel & polygon  & Runtime & Space & Input & Output & corner-handling & disadvantages\\
+    \hline
+    Niethammer &shape & Runtime & Space & linear system of equations & Output & Advantages & Disadvantages\\
+    \hline
+    Wegmann & shape & Runtime & Space & non-linear Theodorsen Equation & Output & Advantages & Disadvantages \\
+    \hline
+    Conjugate fct & shape & Runtime & Space & Input & Output & Advantages & Disadvantages \\
+    \hline
+    Spare row & shape & Runtime & Space & Input & Output & Advantages & Disadvantages\\
+    \hline
+    \end{tabular}%
+}
+\end{sidewaystable}
+
+\red{The FFT is used in any method that needs to repeatedly calculate the conjugate function (the Hilbert transform) on a regular grid on the unit circle. enhances runtime from $n^2$ to $n log n$ }

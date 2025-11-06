@@ -1,5 +1,10 @@
 \begin{thebibliography}{BPW23}
 
+\bibitem[Ama98]{Amano1998_Amanosmethod}
+Kaname Amano.
+\newblock A charge simulation method for numerical conformal mapping onto circular and radial slit domains.
+\newblock {\em SIAM Journal on Scientific Computing}, 19(4):1169--1187, 1998.
+
 \bibitem[Ban08]{Banjai2008_SC_crowdingworkaround}
 L.~Banjai.
 \newblock Revisiting the crowding phenomenon in schwarz–christoffel mapping.
@@ -8,6 +13,11 @@ L.~Banjai.
 \bibitem[BBY07]{binder2007_computationalcomplexityriemannmapping}
 Ilia Binder, Mark Braverman, and Michael Yampolsky.
 \newblock On computational complexity of riemann mapping, 2007.
+
+\bibitem[Bez22]{Bezrodnykh2022_lauricella}
+S.~I. Bezrodnykh.
+\newblock Lauricella function and the conformal mapping of polygons.
+\newblock {\em Mathematical Notes}, 112(4):505--522, 2022.
 
 \bibitem[BPW23]{Braun2023_AltProjections}
 Gábor Braun, Sebastian Pokutta, and Robert Weismantel.
@@ -18,10 +28,20 @@ Philip~Raymond Brown.
 \newblock {\em The use of the Schwarz-Christoffel transformation in finite element mesh generation}.
 \newblock Phd, University of Leicester, 1990.
 
+\bibitem[BT03]{banjaitrefethen2006_SCmultipolemethod}
+Lehel Banjai and L.~N. Trefethen.
+\newblock A multipole method for schwarz--christoffel mapping of polygons with thousands of sides.
+\newblock {\em SIAM Journal on Scientific Computing}, 25(3):1042--1065, 2003.
+
 \bibitem[CR25]{Castillo2025_hilberttransform}
 Ren{\'e}~E. Castillo and Edixon~M. Rojas.
 \newblock Revisiting the hilbert transform of periodic functions.
 \newblock {\em Mathematische Semesterberichte}, 72:29--49, 2025.
+
+\bibitem[EW22]{EinsiedlerWieser2022AnalysisSkript}
+Manfred Einsiedler and Andreas Wieser.
+\newblock Analysis i und ii.
+\newblock Vorlesungsskript 2021/2022, 2022.
 
 \bibitem[FZ87]{FLORYAN1987_SC_general}
 J.M Floryan and Charles Zemach.
@@ -33,6 +53,11 @@ Dieter Gaier.
 \newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em Springer Tracts in Natural Philosophy / Ergebnisse der angewandten Mathematik}.
 \newblock Springer-Verlag, Berlin, G{\"o}ttingen, Heidelberg, 1964.
 
+\bibitem[Gut83]{Gutknecht1983_theodorsen_equation_FFT}
+Martin~H. Gutknecht.
+\newblock Numerical experiments on solving theodorsen's integral equation for conformal maps with the fast fourier transform and various nonlinear iterative methods.
+\newblock {\em SIAM Journal on Scientific and Statistical Computing}, 4(1):1--30, 1983.
+
 \bibitem[HQR13]{Hakula_2013_conjugatefunctionmethod}
 Harri Hakula, Tri Quach, and Antti Rasila.
 \newblock Conjugate function method for numerical conformal mappings.
@@ -42,14 +67,14 @@ Harri Hakula, Tri Quach, and Antti Rasila.
 Donald~E. Marshall and Steffen Rohde.
 \newblock Convergence of the zipper algorithm for conformal mapping, 2006.
 
+\bibitem[Pom92]{Pommerenke1992_bdarybehaviour_confmaps}
+Christian Pommerenke.
+\newblock {\em Boundary Behaviour of Conformal Maps}, volume 299 of {\em Grundlehren der mathematischen Wissenschaften}.
+\newblock Springer-Verlag, Berlin, 1992.
+
 \bibitem[Sak19]{Sakakibara2019_AmanosMethod}
 Koya Sakakibara.
 \newblock Bidirectional numerical conformal mapping based on the dipole simulation method, 2019.
-
-\bibitem[Son12]{Song2012_theodorsen_equation}
-Eun-Jee Song.
-\newblock A study on the methods for solving the theodorsen equation for numerical conformal mapping.
-\newblock {\em Journal of the Korea Society of Computer and Information}, 17(3):11--18, March 2012.
 
 \bibitem[SS03]{SteinShakarchi2003_complexanalysis}
 Elias~M. Stein and Rami. Shakarchi.

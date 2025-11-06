@@ -45,7 +45,7 @@ We closely follow the proof by normal families in \cite{SteinShakarchi2003_compl
     \item $|f'(0)| \leq 1$ and if equality holds, then $f$ is a rotation.
     \end{enumerate} 
 \end{lemma}
-\red{\textit{Proof.?}}
+\textit{Proof.} See \cite{SteinShakarchi2003_complexanalysis} page 218.
 
 \begin{definition}
     A family $\mathcal{F}$ of holomorphic functions on a domain $\Omega$ is called \textbf{normal} if every sequence in $\mathcal{F}$ contains a subsequence that converges uniformly on any compact subset of $\Omega$.
@@ -59,28 +59,29 @@ We closely follow the proof by normal families in \cite{SteinShakarchi2003_compl
 \begin{theorem}[Montel]\label{thm:Montel}
     A family $\mathcal{F}$ of holomorphic functions on $\Omega$ that is uniformly bounded on compact subsets of $\Omega$ is normal if and only if it is equicontinuous on compacta.
 \end{theorem}
-\red{\textit{Proof.?}}
+\textit{Proof.} See \cite{SteinShakarchi2003_complexanalysis} page 225.
 
 \begin{theorem}[Hurwicz]
     Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f\neq 0$. 
     If $f$ has a zero of order $m$ at $z_0$ then for every $\eps>0$ and sufficientlly large $k=k(\eps)\in\N$ $f_k$ has precisely $m$ zeros in $B_{\eps}(z_0)$ including multiplicities. Moreover, the zeros converge to $z_0$ as $k\to\infty$. 
-    
 \end{theorem}
 We will use the following corollary of Hurwicz' theorem in the proof of \ref{thm:RiemannMappingTheorem}:
 \begin{corollary}[Uniform Convergence to Holomorphic Limit and Injectivity] \label{thm:HurwiczCor}
     Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f$. Then $f$ is either constant or injective.
 \end{corollary}
+\red{\textit{Proof.?}}
+
 
 \begin{proposition}[Cauchy Inequality] \label{thm:CauchyInequality}
     Let $f$ be holomorphic on an open set containing the closure of a ball $B_R(z_0)$ centered at $z_0$ of radius R. Then $$ |f^{(n)}(z_0)|\leq \frac{n! \lVert f \rVert _C}{R^n},$$ where $ \lVert f \rVert _C= \displaystyle \sup_{z\in C}|f(z)|$ on the boundary circle $C$.
 \end{proposition}
 
-\red{\textit{Proof.?}}
+\textit{Proof.} See \cite{SteinShakarchi2003_complexanalysis} page 48.
 
 \begin{theorem} [Maximum Modulus Principle] \label{thm:MaximumModulusPrinciple}
     Let $\Omega\subset\C$ be a connected open bounded set and $f:\Omega\to\C$ holomorphic. If $z_0$ is a point in $\Omega$ such that $|f(z_0)| \geq |f(z)|$ for all $z$ in a neighborhood of $z_0$, then $f$ is constant on $\Omega$. 
 \end{theorem}
-\red{\textit{Proof?}}
+\textit{Proof.} See \cite{SteinShakarchi2003_complexanalysis} page 92.
 
 \begin{theorem}[Implicit Mapping Theorem] \label{thm:ImplicitMappingTheorem}
     Let $r > 0$ be a radius, and let $x_0 \in \mathbb{R}^n$, $y_0 \in \mathbb{R}^m$. Consider the open set $W = B_r(x_0) \times B_r(y_0) \subset \mathbb{R}^n \times \mathbb{R}^m$ defined as
@@ -99,7 +100,7 @@ Then there exist radii $\alpha, \beta \in (0, r)$ such that for the open balls $
     \item $\forall (x, y) \in U_0 \times V_0: F(x, y) = 0 \quad \iff \quad y = f(x). $
 \end{itemize}
 \end{theorem}
-\red{\textit{Proof?}}
+\textit{Proof.} See \cite{EinsiedlerWieser2022AnalysisSkript} page 573.
 
 \subsubsection{Proof of Riemann Mapping Theorem}
 \textit{Step 1: Existence of a bounded injective holomorphic map to the unit disk} \\
@@ -139,7 +140,12 @@ By the Schwarz lemma \ref{thm:SchwarzLemma} we get $|\Phi'(0)| < 1$ and hence
 $$|f'(0)| = |\Phi'(0)||F'(0)| < |F'(0)|,$$
 contradicting maximality of $|f'(0)|$ in $\mathcal{F}$.
 
-Finally, multiplying $f$ with a suitable unimodular complex number gives the desired conformal map from $\Omega$ to $\mathbb{D}$ with $$f(0) = 0 \text{ and } f'(0) > 0.$$ \label{InitialConditionsOnPhi} $\hfill\qed$
+Finally, multiplying $f$ with a suitable unimodular complex number gives the desired conformal map from $\Omega$ to $\mathbb{D}$ with
+\begin{equation}\label{eq:InitialConditionsOnPsi}
+    \psi(0)=0 , \quad \psi'(0)>0.
+\end{equation}
+\red{REPLACE F BY PSI EVERYWHERE}
+$\hfill\qed$
 
 \begin{corollary}
     Any two simple connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
@@ -150,7 +156,7 @@ $\hfill\qed$
 \begin{theorem}[Carathéodory] \label{thm:ExtensionToBoundary}
     The conformal mapping $\Phi:\disk\to \Omega$ can be extended to a continuous mapping $\Phi:\bar{\disk}\to\bar{\Omega}$ if the boundary $\Gamma=\del\Omega$ consists of a closed curve. \cite{Wegmann2005_num_methods_confmapping}, p. 357
 \end{theorem}
-\red{\textit{Proof?}}
+\textit{Proof.} See \cite{Pommerenke1992_bdarybehaviour_confmaps} page 24.
 \bigskip
 
 Existence established, the problem now becomes the explicit construction of a conformal mapping.
@@ -161,8 +167,42 @@ The strategy for numerical construction of the boundary mapping is to transform 
 
 % \red{add section 2.5:} error of operator K_N for methods based on function conjugation
 \subsection{Reformulation as Boundary Value Problem}\label{chap:BoundaryValueProblems}\label{operatorK_N}
-\red{finding $\psi$ means solving Laplace's equation}
-In Riemann's thesis, conformal mappings are a mere special case of the more general family of boundary value problems of analytic functions on the unit disk $\disk$ or in its exterior $\disk^{-}:=\{z: |z|>1\}$. The simplest such problem is called \textbf{Dirichlet problem} and can be described as finding $\psi$ analytic in $\disk$, continuous in $\bar{\disk}$ and satisfying $$Re(\psi(e^{it}))=\psi(t)$$ on the boundary of $\disk$, where $\psi$ is $2\pi$-periodic and Hölder continuous.
+
+When the region $\Omega$ is bounded by a closed Jordan curve $\Gamma$ the mapping $\psi:\disk\to \Omega$ can be extended continuously to the closure $\overline{\disk}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005_num_methods_confmapping}, page 387) and the mapping $\psi$ is determined by its boundary values 
+\begin{equation} \label{eq:boundaryCorrespondence}
+    \psi(e^{it})=\eta(S(t))
+\end{equation}
+for $t\in[0,2\pi)$ and $S$ the \textbf{boundary correspondence function}. 
+By the implicit mapping theorem \ref{thm:ImplicitMappingTheorem}, the conformal mapping $\psi$ depends on the boundary curve of $\Omega$ by the boundary correspondence equation \ref{eq:boundaryCorrespondence}.
+
+\red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
+
+From Definition \ref{def:ConformalMap} we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
+Denoting 
+$$J:= \begin{pmatrix}
+    \partial_x & -\partial_y \\
+    \partial_y & \partial_x
+\end{pmatrix}$$
+we want to find a deformation $\psi= u+iv$ such that $J\psi = 0$.
+
+As a byproduct of the Cauchy-Riemann equations, both components of a conformal map are harmonic functions, i.e. they satisfy Laplace's equation $\Delta u = 0 = \Delta v$ \red{PROOF}.
+Thus, one way to construct conformal maps is to solve Laplace's equation with suitable boundary conditions.
+% This formulation of the problem is called Riemann-Hilbert problem, and it is a special kind of boundary value problem.
+
+\begin{definition}
+    Two harmonic functions $u(x,y)$ and $v(x,y)$ on a domain are called \textbf{conjugate} if they satisfy the Cauchy-Riemann equations on the domain. E.g. $v$ is a conjugate for $u$, and $-u$ is a conjugate for $v$.
+\end{definition}
+
+This directly leads to the conclusion that it suffices to find only one of the components of $\psi=u+iv$, since the other one can then be deduced as its conjugate harmonic function.
+This formulation is called the \textbf {Dirichlet problem} for the Laplace equation.
+It can be described as finding $\psi$ analytic in $\disk$, continuous in $\overline{\disk}$ and satisfying 
+\begin{equation} \label{eq:DirichletProblem}
+    \begin{matrix}
+        Re(\psi(e^{it}))=\eta(S(t)) &\text{ on }\del\disk \\
+        \Delta u = 0 &\text{ in } \disk^{\circ},
+    \end{matrix}
+\end{equation}
+where $\psi$ is $2\pi$-periodic and Hölder continuous.
 This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator $$K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)cot(\frac{s-t}{2}) dt,$$ which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}).
 \red{
 In principle, we have two options for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their \red{kernels} must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive.
@@ -170,18 +210,10 @@ In principle, we have two options for finding conformal mappings, namely to solv
 
 
 \subsection{Boundary Conditions} 
-From Definition \ref{def:ConformalMap} we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
-Denoting 
-$$B:= \begin{pmatrix}
-    \partial_x & -\partial_y \\
-    \partial_y & \partial_x
-\end{pmatrix}$$
-we want to find a deformation $\Phi$ such that $B\Phi = 0$.
 
-As a byproduct of the Cauchy-Riemann equations, both components of a conformal map are harmonic functions, i.e. they satisfy Laplace's equation $\Delta u = 0$.
-Thus, one way to construct conformal maps is to solve Laplace's equation with suitable boundary conditions. This formulation of the problem is called Riemann-Hilbert problem, and it is a special kind of boundary value problem.
-
-Note that the Cauchy-Riemann equations do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\C$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies \red{[PROOF]}. Thus, the choice of parametrization of the target region's boundary is usually another challenge posed when solving conformal mapping problems, but for the scope of this article we assume to be given a suitable parametrization of $\del\Omega$.
+\begin{remark}
+    Note that the Cauchy-Riemann equations do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\C$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies \red{[PROOF]}. Thus, the choice of parametrization of the target region's boundary is usually another challenge posed when solving conformal mapping problems, but for the scope of this article we assume to be given a suitable parametrization of $\del\Omega$.
+\end{remark}
 \subsubsection{Dirichlet Boundary Conditions}
 \subsubsection{Neumann Boundary Conditions}
 % \subsection{Mixed boundary conditions (Wec 4.3)(?)}
@@ -226,7 +258,7 @@ $$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} =
     \underbrace{\sum_{-\infty}^{0} a_n e^{int} +i(\text{Im}(a_1))e^{int}}_{=:f^{-}\in W^{-}} + 
     \underbrace{(\text{Re}(a_1))e^{int} + \sum_{n=2}^{\infty} a_n e^{int}}_{=:f^{+}\in W^{+}}.
 $$
-Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{InitialConditionsOnPhi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
+Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{eq:InitialConditionsOnPsi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
 Then, since the boundary function \ref{eq:boundaryCorrespondence} maps the unit circle to $\Gamma$ there exists \red{why} a function $\hat{u}$ such that 
 $$\Phi(t)=\eta(t+\hat{u}(t)) \quad \forall t.$$
 By the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\R}$.
@@ -236,12 +268,27 @@ This tells us that the function $\Phi$ we are looking for lies in the intersecti
 \subsection{Riemann-Hilbert Problems}
 XXXXXXXXXXXXXX
 
+\subsection{Complex Analysis/ Function Theoretic Tools}
+\begin{definition}
+    A \textbf{Möbius transform} is a function on the extended complex plane $\hat\C:=\C\cup\{\infty\}$ which is uniquely determined by where it sends three points. It has the form
+    $$ f(z) = \frac{az + b}{cz + d} $$
+    with complex numbers $a,b,c,d$ such that $ad - bc \neq 0$.
+\end{definition}
+More explicitly, given three distinct points $z_1,z_2,z_3 \in \C$ and three distinct points $w_1,w_2,w_3 \in \C$ there exists a unique Möbius transform $f$ such that $f(z_i) = w_i$ for $i=1,2,3$:
+$$ f(z)=\frac{(z-z_1)(z_2-z_3)}{(z-z_3)(z_2-z_1)}$$
+In particular, Möbius transforms are conformal and more general than affine maps, since they can e.g. map $\infty$ to $0$ and vice versa.
+
+
+\subsection{Meshes}
+In order to numerically solve boundary value problems the domain is usually discretized by creating a mesh $\M$ of $N$ nodes (points) and $M$ elements (cells) covering the domain $\Omega$. 
+
 \subsection{Mesh Structure}
 In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that $$\overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K$$ we define $d(K)$ the diameter of the smallest $K$-circumscribing ball (aka diameter of $K$) and $\mu(K)$ the diameter of the largest ball inscribed in K. Then a measure \cite{Wechsung2019_shapeopt_robustsolvers_incompressible} for the quality of K is the ratio of these diameters
 $$ \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty) .$$
 
 
 \subsection{Crowding}
+\cite{Banjai2008_SC_crowdingworkaround}
 Crowding is the phenomenon that occurs when a set of more or less equally distributed points on the domain are mapped to a much more dense set of points on the target region, thereby causing numerical issues due to the angles on the grid becoming very small. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. 
 Wegmann \cite{Wegmann2005_num_methods_confmapping} proved the following result.
 

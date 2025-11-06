@@ -6,8 +6,19 @@
 \usepackage{algorithmic}
 \usepackage{algorithm}
 
+\usepackage{rotating} % rotated table
+\usepackage{array}
+
 \usepackage{tikz, xcolor}
-\usetikzlibrary{lindenmayersystems}
+\usetikzlibrary{lindenmayersystems} % fractals
+\usetikzlibrary{shapes.geometric, arrows, positioning} %flowchart
+% \usepackage{standalone}
+% definitions/ formatting for flowchart
+\tikzstyle{startend} = [ellipse, minimum width=3cm, minimum height=1cm, text centered, draw=black]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, aspect=2]
+\tikzstyle{arrow} = [thick, ->, >=stealth]
+
 
 \newcommand{\del}{\partial}
 \newcommand{\eps}{\varepsilon}
@@ -15,6 +26,7 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\M}{\mathcal{M}}
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand{\green}[1]{\textcolor{green}{#1}}
 \newcommand{\bigO}{\mathcal{O}}
