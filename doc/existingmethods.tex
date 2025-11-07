@@ -14,24 +14,6 @@ We give an overview of some existing methods and how to choose each depending on
 *(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)
 
 
-
-\red{\subsection{Bergman Kernel Method}}
-
-\iffalse
-\subsection{Mapping from the Region to the Disk}
-\subsubsection{Extremum Principles}
-% (WEG384)
-Both the \color{red} Bergman and the Szegö norms \color{black} are very useful for characterizing the conformal mapping from G to a disk by extremum principles:
-\begin{theorem}
-    Let F be the conformal mapping from G to a disk normalized by $f(0)=0, f'(0)=1$.
-    Then
-    \begin{enumerate}
-        \item (Principle of minimum area) F' is the unique function which minimizes $||f||_B$ among all functions $f \in B(G)$ satisfying $f (O) = 1$.
-        \item (Principle of minimum length) $\sqrt{F'}$ is the unique function which minimizes $||f||_S$ among all functions $f \in S(G)$ satisfying $f (O) = 1$.
-    \end{enumerate}
-\end{theorem}
-\fi 
-
 \subsection{Preprocessing}
 \subsubsection{Osculation Methods}
 
@@ -267,6 +249,7 @@ Theodorsen's method \ref{TheodorsenMethod} needs $\Omega$ to be star-shaped in o
 
 % \subsection{Shirokova's Method}
 % \cite{Shirokova2014}
+
 \subsection{Conjugate Function Method}
 Hakula, Quach and Rasila \cite{Hakula_2013_conjugatefunctionmethod} presented a new method in 2010 which is based on numerical solution of the Laplace equation subject to Dirichlet-Neumann mexed-type boundary conditions by using $hp$-FEM.  
 In their paper they construct the mapping starting from a quadrilateral, but it can be tweaked to map from the unit disk as well. 
@@ -283,28 +266,34 @@ In 2007, Binder, Braverman ans Yampolsky proposed a method for finding a conform
 
 
 
-\red{
 \subsection{Comparison}
-The accuracy of the conformal mapping depends to a large extent on the smoothness of the boundary curve $\Gamma$. 
-Wegmann \cite{Wegmann2005_num_methods_confmapping} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
-Theodorsen's method is known \cite{Gaier1964} \red {add page/argument} to have an error of order $O(R^{-n})$ for regions bounded by analytic curves, where $R>1$ is the index of the largest disk centered at the origin to which the boundary parametrization $\eta$ can be extended as a conformal map, and $n$ is the order of the polynomials approximating $\eta$.
-Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse \red{example 4?} and found that OAP is most efficient for low accuracy and Newton methods are best for high accuracy calculations \cite{Wegmann2005_num_methods_confmapping} p.415.\red{add figure?}
-\red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
-}
+We can directly rule out some of the options due to our project constraints: 
+First we note that Schwarz-Christoffel only works on polygons and Theodorsen's method is restricted to star-shaped regions. For general $\Omega$ as we are interested in, we therefore have to disregard these two methods. \red{put in each method's description what exactly it gets its restriction from, e.g. pinpoint the bottleneck}
+The Zipper method seems very well implementable and robust, but we have to fulfill efficient point evaluations of both $\psi$ and its derivative, which is not possible since the Zipper method essentially constructs $\psi$ as a composition of many maps, and \red{I'm not sure this is efficiently derivable}.
+We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy.
+Amano's Method of Fundamental Solutions seems good for fast point-evaluations of $\psi$ itself, but the derivative could be tricky due to $\psi$'s form. Moreover,we cannot use our Fourier parametrization nor our mesh in this method, so it will probably now be the best choice for our specific problem. Its accuracy and convergence depend on the right choice of charge points, which is another difficulty, especially given the generality of our target domain.
+The Conjugate Function Method is very beautiful mathematically, but it relies only on $hp$-FEM for which there already are powerful libraries, so there would not be much value in half-assing an FEM solver given the scope of this thesis. 
 
+On the other hand, the Alternating Projections Method uses our boundary parametrization in its Fourier series form, \red{remains to check efficient point evaluations}
+Also, Wegmann's Newton method seems very promising since it can be implemented efficiently using FFT and also uses our Fourier parametrization directly. 
 The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function \ref{eq:boundaryCorrespondence} $\eta(s)$ \cite{Wegmann1989_alternating_projections} p.292.
 Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite{Wegmann2005_num_methods_confmapping} p. 389.
 
 
-GMRES or CGS or SOR(Niethammer) for solving linear IER (Amano, Kerzman-Stein)
+\red{
+The accuracy of the conformal mapping depends to a large extent on the smoothness of the boundary curve $\Gamma$. 
+Wegmann \cite{Wegmann2005_num_methods_confmapping} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
+Wegmann also compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite{Wegmann2005_num_methods_confmapping} p.415.
+\red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
+}
 
 The Newton method converges locally quadratically if the domain is the unit disk $\disk$. Generally, the algorithm can achieve space efficiency of $\bigO(n)$ and computational efficiency of $\bigO(n^2)$ or $\bigO(nlogn)$ if FFT is used, just like in the conjugate function method. \cite{Wegmann1978_newtonverfahren}
 \cite{Wegmann1984_convergence_iterative_method}
+\red{The FFT is used in any method that needs to repeatedly calculate the conjugate function (the Hilbert transform) on a regular grid on the unit circle. enhances runtime from $n^2$ to $n log n$ }
+\bigskip
 
-Marshall and Rohde \cite{marshall2006_convergencezipperalgorithmconformal} proved that if $\Gamma=\del\Omega$ is a $C^{3/2}$ closed Jordan curve with points $\{ z_i\}\subset\del\Omega$ having mesh size $\mu=max|z_j-z_{j+1}|$ there is a constant $C$ depending on the geometry of $\del\Omega$ such that the conformal map $\psi$ found by the zipper algorithm satisfies accuracy of $\bigO(C\mu^{3/2})$.
-The geodesic algorithm works only with elementary functions, as a result its speed depends only on the number of points on the boundary (i.e. mesh size) and not on the shape of the region. The accuracy can be measured explicitly if the true conformal map is known, which is our case. \red{ADD COMPUTATION AND IMAGES LIKE IN MnR'S PAPER <3}
-
-
+\red{THEORY SECTION ON FFT???}
+\iffalse
 \begin{sidewaystable}[!p]
 \caption{Overview Table}
 \centering
@@ -334,4 +323,4 @@ The geodesic algorithm works only with elementary functions, as a result its spe
 }
 \end{sidewaystable}
 
-\red{The FFT is used in any method that needs to repeatedly calculate the conjugate function (the Hilbert transform) on a regular grid on the unit circle. enhances runtime from $n^2$ to $n log n$ }
+\fi

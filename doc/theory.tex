@@ -1,6 +1,9 @@
 \section{Theoretical Background}
 %maybe change structure to section existence of a conformal map, section construction of a conformal map
-\red{THROUGHOUT THIS PAPER, WE ASSUME TO BE GIVEN A SIMPLE CONNECTED REGION $\Omega\subset\C$ GIVEN BY ITS BOUNDARY $\del\Omega$ WHICH IS PARAMETRIZED BY A DIFFERENTIABLE $2\pi$-PERIODIC COMPLEX FUNCTION $\eta(s)$ WITH CONTINUOUS NON-VANISHING DERIVATIVE.}
+\textbf{Conventions}\\
+We are given a simply connected bounded domain $\Omega$ with boundary $\Gamma$ in the complex plane $\C$. The task is to find an angle-preserving mapping $\psi$ from the unit disk $\disk$ to $\Omega$. 
+We are also given a curvilinear triangular mesh $\widehat{\mathcal{M}}$ on $\disk$, and a $2\pi$-periodic parametrization $$\eta: [0, 2\pi]^2 \to \Gamma \quad \text{ with } \quad \eta \in C^0 ([0,2\pi])^2$$ by its fourier series representation.
+
 \subsection{Conformal Mappings}
 
 \begin{definition} \label{def:ConformalMap}
@@ -13,11 +16,6 @@
 \end{definition}
 
 % This type of mapping is useful as some mesh properties (in particular angles) remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure as experienced by Wechsung \cite{Wechsung2019}. 
-\iffalse
-\begin{definition}
-    \red{Ahlfors map} too general, not needed
-\end{definition}
-\fi
 
 \subsection{Riemann Mapping Theorem}
 \begin{definition}
@@ -168,7 +166,7 @@ The strategy for numerical construction of the boundary mapping is to transform 
 % \red{add section 2.5:} error of operator K_N for methods based on function conjugation
 \subsection{Reformulation as Boundary Value Problem}\label{chap:BoundaryValueProblems}\label{operatorK_N}
 
-When the region $\Omega$ is bounded by a closed Jordan curve $\Gamma$ the mapping $\psi:\disk\to \Omega$ can be extended continuously to the closure $\overline{\disk}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005_num_methods_confmapping}, page 387) and the mapping $\psi$ is determined by its boundary values 
+When the region $\Omega$ is bounded by a closed Jordan curve $\Gamma$ the mapping $$\psi:\disk\to \Omega$$ can be extended continuously to the closure $\overline{\disk}$ by Carathéodory's Extension Theorem \ref{thm:ExtensionToBoundary}. Then the boundary can be parametrized by a $2\pi$-periodic function $\eta$ in counterclockwise direction (positive orientation, aka \textit{normal representation} \cite{Wegmann2005_num_methods_confmapping}, page 387) and the mapping $\psi$ is determined by its boundary values 
 \begin{equation} \label{eq:boundaryCorrespondence}
     \psi(e^{it})=\eta(S(t))
 \end{equation}
@@ -204,6 +202,11 @@ It can be described as finding $\psi$ analytic in $\disk$, continuous in $\overl
 \end{equation}
 where $\psi$ is $2\pi$-periodic and Hölder continuous.
 This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator $$K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)cot(\frac{s-t}{2}) dt,$$ which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}).
+\begin{remark}
+    In order to use numerical methods efficiently via the \red{Fast Fourier Transform def?} we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as $$\psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ and the conjugation operator can be approximated by the operator $K_N$ defined as $$K_N\psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
+    The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\psi$ at the grid points. This approximation of the actual operator $K$ satisfies $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\psi\in C^{\alpha}$ Hölder continuous.
+    If $\psi$ is smoother, e.g. $\psi \in C^{k-1}$, the error decreases to $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-k}log(n) \|\psi^{(k)}\|_{infty})$$ \cite{Wegmann2005_num_methods_confmapping} p. 362.
+\end{remark}
 \red{
 In principle, we have two options for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their \red{kernels} must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive.
 }
@@ -214,15 +217,10 @@ In principle, we have two options for finding conformal mappings, namely to solv
 \begin{remark}
     Note that the Cauchy-Riemann equations do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\C$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies \red{[PROOF]}. Thus, the choice of parametrization of the target region's boundary is usually another challenge posed when solving conformal mapping problems, but for the scope of this article we assume to be given a suitable parametrization of $\del\Omega$.
 \end{remark}
-\subsubsection{Dirichlet Boundary Conditions}
-\subsubsection{Neumann Boundary Conditions}
+%\subsubsection{Dirichlet Boundary Conditions}
+%\subsubsection{Neumann Boundary Conditions}
 % \subsection{Mixed boundary conditions (Wec 4.3)(?)}
 
-
-In order to use numerical methods efficiently via the \red{Fast Fourier Transform def?} we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as $$\psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ and the conjugation operator can be approximated by the operator $K_N$ defined as $$K_N\psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
-The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\psi$ at the grid points. This approximation of the actual operator $K$ satisfies $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\psi\in C^{\alpha}$ Hölder continuous.
-If $\psi$ is smoother, e.g. $\psi \in C^{k-1}$, the error decreases to $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-k}log(n) \|\psi^{(k)}\|_{infty})$$ \cite{Wegmann2005_num_methods_confmapping} p. 362.
-\red{add more details on this operator?}
 
 
 \subsection{Solution of the Boundary Value Problem via Fredholm Integral Equations of the Second Kind}
@@ -237,9 +235,16 @@ They are classified into two main types: Fredholm and Volterra integral equation
 
 There are several methods to solve Fredholm integral equations of the second kind, which we will explore in what follows\dots
 \subsubsection{Neumann Kernel}
-\red{NEUMANN KERNEL?\cite{Gaier1964} used to solve fredholm integral eq of the second kind}
 
-\subsubsection{Hilbert Transform}
+The Neumann kernel is named after Carl Neumann, who first introduced it as a tool for solving Integral equations corresponding to the Dirichlet problem \cite{Gaier1964}.
+Let $\eta:[0,2\pi]\to\Gamma$ be a parametrization of the boundary and $s,t\in[0,2\pi]$. Consider the straight line segment from $\eta(t)$ to $\eta(s)$ and denote by $r_{st}$ its length. Moreover, let $\theta(t), \theta(s)$ denote the tangent angles (measured with regard to the positive real axis) to $\eta$ at $s, t$ respectively, and $\phi(s), phi(t)$ the angles between the positive real axis and the line from the origin to $\eta(s), \eta(t)$ respectively. 
+\input{neumannkernel.tex}
+The Neumann kernel is defined for $s \neq t$ as 
+\begin{equation}\label{eq:NeumannKernel}
+    K(s,t) = \frac{1}{\pi} \frac{\sin(\theta(t)-\varphi_s(t))}{r_{st}}
+\end{equation}
+
+%\subsubsection{Hilbert Transform}
 
 
 \iffalse
@@ -265,8 +270,7 @@ By the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is c
 This tells us that the function $\Phi$ we are looking for lies in the intersection of a certain manifold $M:= \{u \in W_{\R}: \eta(t+u(t))\}$ with our space $W^{+}$. This formulation is used in chapter \ref{chap:AlternatingProjections}.
 
 
-\subsection{Riemann-Hilbert Problems}
-XXXXXXXXXXXXXX
+%\subsection{Riemann-Hilbert Problems}
 
 \subsection{Complex Analysis/ Function Theoretic Tools}
 \begin{definition}
