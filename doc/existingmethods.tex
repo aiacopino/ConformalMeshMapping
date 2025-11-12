@@ -280,11 +280,13 @@ We refrain from using probabilistic methods due to their inherent randomness and
 Amano's Method of Fundamental Solutions seems good for fast point-evaluations of $\psi$ itself, but the derivative could be tricky due to $\psi$'s form. Moreover, we cannot use our Fourier parametrization nor our mesh in this method, so it will probably not be the best choice for our specific problem. Note also that the accuracy and convergence of this method depend on the right choice of charge points, which poses another difficulty, especially given the generality of our target domain.
 The Conjugate Function Method is very beautiful mathematically, but it relies only on $hp$-FEM for which there already are powerful libraries, so there would not be much value in half-assing an FEM solver given the scope of this thesis. 
 
-On the other hand, the Alternating Projections Method uses the boundary parametrization in its Fourier series form. The output of the discretized OAP is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$.
+On the other hand, the Alternating Projections Method uses the boundary parametrization in its Fourier series form.
+The output of the discretized OAP is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$.
 The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function (\ref{eq:boundaryCorrespondence}) \cite[p. 292]{Wegmann1989_alternating_projections}.
 The Alternating Projections Method is one of the simplest and most robust methods for conformal mapping. However, it is not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite[p. 389]{Wegmann2005_num_methods_confmapping}.
 
-Lastly, Wegmann's Method (\ref{chap:WegmannMethod}) uses the boundary parametrization  and its derivative in form of Fourier coefficients as well as the tangent angle as inputs. The output of the algorithm is an approximation by trigonometric interpolating polynomials at the grid points. This allows for efficient point evaluations of both $\psi$ and its derivative \cite{Wegmann1984_convergence_iterative_method}.
+Lastly, Wegmann's Method (\ref{chap:WegmannMethod}) uses the boundary parametrization and its derivative in form of Fourier coefficients as well as the tangent angle as inputs. 
+The output of the algorithm is an analytic function constructed from trigonometric polynomials. This allows for efficient point evaluations of both $\psi$ and its derivative \cite{Wegmann1984_convergence_iterative_method}.
 Convergence is quadratic for analytic boundaries (as is known for Newton methods) and superlinear ($\in\bigO(N^{1+\mu})$) for $\eta\in C^{2+\mu}$ but depends on a "good enough" initial guess for the correspondence function \cite{Wegmann1984_convergence_iterative_method}.
 Discretizing the operator $K$ (\ref{operatorK_N}) using \red{Wittich's method} yields the operator $K_N$ which can be computed efficiently using FFT.
 
