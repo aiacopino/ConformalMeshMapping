@@ -16,19 +16,17 @@ We give an overview of some existing methods and how to choose each depending on
 
 \subsection{Preprocessing}
 \subsubsection{Osculation Methods}
-
 \subsection{Alternating Projections Method}\label{APMethod}
 Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator K \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
 The method of alternating projections uses both these sequences and alternates between them to find $\psi$ \cite{Wegmann1989_alternating_projections}.
 
-\red{MOVE THIS TO THE BEGINNING OF THE ARTICLE For this method we suppose $\Gamma=\del\Omega$ is a smooth Jordan curve parametrized by a $2\pi$-periodic function $\eta(s)$ with continuous non-vanishing derivative $\eta'(s)\neq0$ having winding number $1$ on $[0,2\pi)$, i.e. $\Gamma$ surrounds $\Omega$ exactly once.}
 \subsubsection{Alternating Projections à la von Neumann} \label{chap:AlternatingProjections}
 For two closed convex sets $P,Q$ in a Hilbert space $H$, the method of alternating projections constructs a sequence $(x_n)_n$ as follows: Starting from an arbitrary point $x_0 \in H$, we define 
 $$x_{n+1} := \begin{cases}
     \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
     \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
 \end{cases}$$ 
-where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively.
+where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively (though there is also a more general algorithm by Braun, Pokutta and Weismantel \cite{Braun2023_AltProjections} in case no such projections exist).
 It can be shown that the sequence $(x_n)_n$ converges in norm to a point tuple $(x*,y*)$ satisfying 
 $$
 \begin{cases}
@@ -38,7 +36,7 @@ $$
 \end{cases}
 $$
 
-In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. \cite{Braun2023_AltProjections}
+In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. 
 
 This exact idea is now applied to function spaces:
 
@@ -52,10 +50,12 @@ This exact idea is now applied to function spaces:
             \STATE $a_n = \frac{1}{2\pi}\int_{0}^{2\pi} \eta(t+U_k(t))e^{-int} dt$ \hfill [Calculate Fourier coefficients]
         \ENDFOR
     \STATE $U_{k+1}(t) := U_k(t) - \text{Re}\frac{i (\text{Im}(a_1))e^{it}+\sum_{n=-\infty}^{0} a_n e^{int}}{\dot{\eta}(t+U_k(t))}$ \hfill [Calculate the new iterate]
-
-    %continue here
     \end{algorithmic}
 \end{algorithm}
+
+\subsubsection{Alternating Projections with Overrelaxation (OAP)}
+The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[p. 298]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
+This can be performed on a discretized grid of points on the boundary. In that case, the output is a set of Fourier coefficients, which allows for efficient point evaluations of $\psi$ and $D\psi$ using FFT.
 
 \subsection{Schwarz-Christoffel Method}
 \iffalse
@@ -76,7 +76,7 @@ $$\measuredangle\theta_{\mathbb{D}}(z_0)=\theta_{\mathbb{D}}(z_0+\eps)-\theta_{\
 where $\eps\to0$. The same applies to corners of $\Omega$. Then,
 $\frac{\del\theta_{\mathbb{D}}}{\del s_{\mathbb{D}}} = \measuredangle\theta_{\mathbb{D}}(z_0)\delta(s_{\mathbb{D}}-z_0)$ for $\delta$ the Dirac function, and similarly for $\theta_{\Omega}$ and thus $\theta_{\mathbb{D}}$ and $\theta_{\Omega}$ are piecewise continuously differentiable functions with jump discontinuities at the corner points.
 
-\red{\subsubsection{the log derivative of Phi}}
+%\red{\subsubsection{the log derivative of Phi}}
 
 \subsubsection{Green's Functions}
 A Green's function is a general concept for solving differential equations containing a linear operator.
@@ -104,102 +104,9 @@ $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z,
 \cite{Bezrodnykh2022_lauricella}
 Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008_SC_crowdingworkaround}
 
-\subsection{Zipper Method}
-This algorithm was fonud independently by Kühnau and Marshall in the 1980's has the advantage of finding $\Phi$ and its inverse at the same time. 
-The computed map is only approximately conformal, and is obtained as a composition of conformal maps onto slit halfplanes. Depending on the shape of the slits, the Zipper algorithm looks a bit different. 
-In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006_convergencezipperalgorithmconformal} which is quite beautiful from a geometric perspective.
-\subsubsection{The Geodesic Algorithm}
-The most elementary version of this algorithm is based on a function 
-$$f_a: \mathbb{H}\setminus \gamma \to \mathbb{H}$$
-where $\mathbb{H}$ is the upper half plane and $\gamma$ is a circular arc from $0$ to $a\in\mathbb{H}$ which is orthogonal to the real axis. The orthogonal circle also meets the real axis again at $b=|a^2|/Im(a)$. Then the map can be expressed in closed form as 
-$$f_a(z) = \sqrt{g_a \circ h_a (z)}$$ where $g_a(z) = z^2 + c^2$ and $h_a(z) = \frac{z}{1-z/b}$.
-
-\red{INSERT IMAGE}
-
-Now suppose $z_0, z_1, ..., z_n$ are points arranged counterclockwise on a Jordan curve $\Gamma$ in the upper half plane. The geodesic algorithm basically iterates over the arcs from $z_i$ to $z_{i+1}$ and "unzips" them one by one using the map $f_{a_i}$ where $a_i$ is the image of $z_{i+1}$ under the composition of all previous maps.
-\red{The original geodesic algorithm proposed by Marshall and Rohde constructs a conformal map from the upper half plane to the region bounded by $\Gamma$, but it can be adapted to map from the unit disk as well via a Möbius transformation mapping the half plane to the unit disk and back first (hopefully?).}
-
-\begin{algorithm}
-    \caption{Geodesic Zipper Algorithm}
-    \begin{algorithmic}
-    \STATE \textbf{Input:} Points $z_0, z_1, ..., z_n$ on a Jordan curve $\Gamma$ in the upper half plane.
-    \STATE \textbf{Output:} $\psi$: conformal map from $\mathbb{H}$ to the region bounded by $\Gamma$ and its inverse $\psi^{-1}$.
-    \STATE $\phi_1(z) := i\sqrt{(z-z_1)/(z-z_0)}$
-    \STATE $\zeta_2:= \phi_1(z_2)$
-    \STATE $\phi_2(z) := f_{\zeta_2}(z)$
-    \FOR{k in n}
-        \STATE $\zeta_k := \phi_{k-1} \circ \ldots \circ \phi_1 (z_k)$
-        \STATE $\phi_k(z) := f_{\zeta_k}(z)$
-    \ENDFOR
-    \STATE Finally, $\zeta_{n+1} := \phi_n \circ \ldots \circ \phi_1 (z_{0})\in\R$ and $\phi_{n+1}(z) := -(\frac{z}{1 - z/\zeta_{n+1}})^2$
-    \STATE Then $\psi(z) := \phi_1^{-1} \circ \phi_2^{-1} \circ \ldots \circ \phi_{n+1}^{-1}(z)$ and $\psi^{-1}(z) := \phi_{n+1} \circ \ldots \circ \phi_2 \circ \phi_1 (z)$
-    \end{algorithmic}
-\end{algorithm}
-\red{INSERT IMAGE}
-
-\subsubsection{The Slit Algorithm}
-The above geodesic algorithm is only as accurate as the approximation of the boundary curve $\Gamma$ by circular arcs between the points $z_i$. A more accurate version is given by the slit algorithm, which uses straight line segments instead of circular arcs.
-We therefore exchange the map $f_a$ for a map $g_a: \mathbb{H}\setminus L \to \mathbb{H}$ where $L$ is the line segment from $0$ to $a\in\mathbb{H}$. This map does not have a closed form expression, but can be computed numerically using Newton's method.
-
-\subsubsection{The Zipper Algorithm}
-The approximation of $\Gamma$ by circular arcs or straight line segments can be further improved by using circular arcs which meet $\Gamma$ tangentially at the points $z_i$. Each arc is determined by the points $z_i, z_{i+1}$ and $z_{i+2}$, hence we assume an even number of boundary points. 
-The first arc is replaced by $$\phi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z_1-z_2)}}.$$ At each subsequent step that circular arc through $\zeta_k$ and $\zeta_{k+1}$ is mapped onto a straight line segment by a Möbius transform, and then the Slit Algorithm is applied to unzip that segment.
-\red{This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one.}
-
-\red{GOOD PAPER FOR IMPLEMENTATION ESPECIALLY END NOTES}
-
-\subsection{Newton/ Wegmann Method}
-For smooth $\del\Omega$, Integral equations of the second kind can also be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
-Let $\eta$ be a differentiable parametrization of $\Gamma$ and $\dot\eta(s)\neq 0\forall s$. 
-
-\iffalse NOT NEEDED SINCE WE ARE ISMPLY CONNECTED
-Let $\kappa\geq 1$ be the winding number of $\dot\eta$ with regard to $0$, then we get \red{$\kappa -1$} additional degrees of freedom 
-\begin{equation}
-\psi_{\red{0}} (z_n) = c_n \quad n=0,1,2,...,\kappa \text{ where } z_0\in\del\disk, z_1, ..., z_{\kappa}\in\disk, c_0 \in\Gamma
-\end{equation}to fix for the \red{initial?} interpolation. 
-\fi
-
-Let $S(\zeta)$ be a $2\pi$-periodic function such that $\psi(\zeta)=\eta(S(\zeta))$.
-$$
-\begin{tikzpicture}[node distance=2cm, auto]
-\node (A) {$\disk$};
-\node(B) [right of=A] {$[0,2\pi]$};
-\node (C) [right of=B] {$\Gamma$};
-\draw[->](A) to node {$S$}(B);
-\draw[->](B) to node {$\eta$}(C);
-\draw[->, out = -40, in = -140, looseness = 0.5] (A) to node [below]{$\psi$}(C); % this should be a circular arrow under the diagram
-\end{tikzpicture}
-$$
-We approximate the conformal map $\psi$ as follows:
-%Assume a starting configuration of points $z_1, z_2, ..., z_N$ in $\disk$ and their images $\zeta_1, \zeta_2, ..., \zeta_N$ on $\Gamma$ such that $\psi(z_k)=\zeta_k$. 
-Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. We improve the approximation by moving the points along the tangent towards the boundary curve, i.e. by finding a correction function $U_k:\del\disk\to[0,2\pi]$ such that
-\begin{equation}\label{eq:h_k+1}
-    \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = h_{k+1}(\zeta)
-\end{equation}
-where $h$ is analytic on $\overline\Omega$ and $h_{k+1}(\zeta)$ is the boundary value of the next approximation $\psi_{k+1}(z_n)=c_n$.
-For the boundary point $z_0$ we are given $c_0=\eta(s_0)\in\Gamma$. Note that since $h_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ we cannot have $h_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$. Therefore we set
-\begin{equation}
-    U_k(z_0)=s_0-S_k(z_0).
-\end{equation}
-Note also that $h_{k+1}$ is an approximation of $\psi$ but it does not generally take values on $\Gamma$. We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta).$$
-
-\subsubsection{Implementation}
-Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation:
-Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
-$$\theta_k = \theta_0 + \frac{\pi k}{n}, \quad k\in[2n-1]$$
-and write the integrals in terms of their Fourier transform
-\begin{equation}
-    F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
-\end{equation}
-where $\sigma_n(\zeta_k)=\sum_{i=-n}^{n} c_k \zeta_k^i$. This can be computed fast ($\in\bigO(n\log n)$) via FFT.
-% Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
-Each iteration is computed via interpolating polynomials.
-
 
 \subsection{Theodorsen's Method} \label{TheodorsenMethod}
 % \cite{Song2012_theodorsen_equation}
-\red{probably put this before wegmann method}
-
 We can reformulate the problem of finding the conformal mapping $\psi:\disk\to\Omega$ as solving Theodorsen's integral equation for the boundary correspondence function $\theta(s)$ \red{rename theta to S?} defined by 
 \begin{equation}
     \psi(e^{is})=\eta(\theta(s)) \text{ and } \int_{0}^{2\pi} \theta(s) ds = 2\pi^2
@@ -247,6 +154,104 @@ In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \ci
 Theodorsen's method \ref{TheodorsenMethod} needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren} and is particularly simple (fixed point equation) in this case.In practice, the star-shape requirement can be relaxed be smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
 
 
+\subsection{Zipper Method}\label{chap:ZipperMethod}
+This algorithm was fonud independently by Kühnau and Marshall in the 1980's has the advantage of finding $\Phi$ and its inverse at the same time. 
+The computed map is only approximately conformal, and is obtained as a composition of conformal maps onto slit halfplanes. Depending on the shape of the slits, the Zipper algorithm looks a bit different. 
+In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006_convergencezipperalgorithmconformal} which is quite beautiful from a geometric perspective.
+\subsubsection{The Geodesic Algorithm}
+The most elementary version of this algorithm is based on a function 
+$$f_a: \mathbb{H}\setminus \gamma \to \mathbb{H}$$
+where $\mathbb{H}$ is the upper half plane and $\gamma$ is a circular arc from $0$ to $a\in\mathbb{H}$ which is orthogonal to the real axis. The orthogonal circle also meets the real axis again at $b=|a^2|/Im(a)$. Then the map can be expressed in closed form as 
+$$f_a(z) = \sqrt{g_a \circ h_a (z)}$$ where $g_a(z) = z^2 + c^2$ and $h_a(z) = \frac{z}{1-z/b}$.
+
+\red{INSERT IMAGE}
+
+Now suppose $z_0, z_1, ..., z_n$ are points arranged counterclockwise on a Jordan curve $\Gamma$ in the upper half plane. The geodesic algorithm basically iterates over the arcs from $z_i$ to $z_{i+1}$ and "unzips" them one by one using the map $f_{a_i}$ where $a_i$ is the image of $z_{i+1}$ under the composition of all previous maps.
+The original geodesic algorithm proposed by Marshall and Rohde constructs a conformal map from the upper half plane to the region bounded by $\Gamma$, but it can be adapted to map from the unit disk as well via a Möbius transformation mapping the half plane to the unit disk and back first.
+
+\begin{algorithm}
+    \caption{Geodesic Zipper Algorithm}
+    \begin{algorithmic}
+    \STATE \textbf{Input:} Points $z_0, z_1, ..., z_n$ on a Jordan curve $\Gamma$ in the upper half plane.
+    \STATE \textbf{Output:} $\psi$: conformal map from $\mathbb{H}$ to the region bounded by $\Gamma$ and its inverse $\psi^{-1}$.
+    \STATE $\phi_1(z) := i\sqrt{(z-z_1)/(z-z_0)}$
+    \STATE $\zeta_2:= \phi_1(z_2)$
+    \STATE $\phi_2(z) := f_{\zeta_2}(z)$
+    \FOR{k in n}
+        \STATE $\zeta_k := \phi_{k-1} \circ \ldots \circ \phi_1 (z_k)$
+        \STATE $\phi_k(z) := f_{\zeta_k}(z)$
+    \ENDFOR
+    \STATE Finally, $\zeta_{n+1} := \phi_n \circ \ldots \circ \phi_1 (z_{0})\in\R$ and $\phi_{n+1}(z) := -(\frac{z}{1 - z/\zeta_{n+1}})^2$
+    \STATE Then $\psi(z) := \phi_1^{-1} \circ \phi_2^{-1} \circ \ldots \circ \phi_{n+1}^{-1}(z)$ and $\psi^{-1}(z) := \phi_{n+1} \circ \ldots \circ \phi_2 \circ \phi_1 (z)$
+    \end{algorithmic}
+\end{algorithm}
+\red{INSERT IMAGE}
+
+\subsubsection{The Slit Algorithm}
+The above geodesic algorithm is only as accurate as the approximation of the boundary curve $\Gamma$ by circular arcs between the points $z_i$. A more accurate version is given by the slit algorithm, which uses straight line segments instead of circular arcs.
+We therefore exchange the map $f_a$ for a map $g_a: \mathbb{H}\setminus L \to \mathbb{H}$ where $L$ is the line segment from $0$ to $a\in\mathbb{H}$. This map does not have a closed form expression, but can be computed numerically using Newton's method.
+
+\subsubsection{The Zipper Algorithm}
+The approximation of $\Gamma$ by circular arcs or straight line segments can be further improved by using circular arcs which meet $\Gamma$ tangentially at the points $z_i$. Each arc is determined by the points $z_i, z_{i+1}$ and $z_{i+2}$, hence we assume an even number of boundary points. 
+The first arc is replaced by $$\phi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z_1-z_2)}}.$$ At each subsequent step that circular arc through $\zeta_k$ and $\zeta_{k+1}$ is mapped onto a straight line segment by a Möbius transform, and then the Slit Algorithm is applied to unzip that segment.
+\red{This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Wegmann's Method} \label{chap:WegmannMethod}
+For smooth $\del\Omega$, Integral equations of the second kind can also be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
+Recall $\eta$ the differentiable parametrization of $\del\Gamma$ and $\dot\eta(s)\neq 0 \text{ } \forall s$. 
+
+\iffalse NOT NEEDED SINCE WE ARE ISMPLY CONNECTED
+Let $\kappa\geq 1$ be the winding number of $\dot\eta$ with regard to $0$, then we get \red{$\kappa -1$} additional degrees of freedom 
+\begin{equation}
+\psi_{\red{0}} (z_n) = c_n \quad n=0,1,2,...,\kappa \text{ where } z_0\in\del\disk, z_1, ..., z_{\kappa}\in\disk, c_0 \in\Gamma
+\end{equation}to fix for the \red{initial?} interpolation. 
+\fi
+
+Let $S(\zeta)$ be a $2\pi$-periodic function such that $\psi(\zeta)=\eta(S(\zeta))$.
+$$
+\begin{tikzpicture}[node distance=2cm, auto]
+\node (A) {$\disk$};
+\node(B) [right of=A] {$[0,2\pi]$};
+\node (C) [right of=B] {$\Gamma$};
+\draw[->](A) to node {$S$}(B);
+\draw[->](B) to node {$\eta$}(C);
+\draw[->, out = -40, in = -140, looseness = 0.5] (A) to node [below]{$\psi$}(C); % this should be a circular arrow under the diagram
+\end{tikzpicture}
+$$
+We approximate the conformal map $\psi$ as follows:
+%Assume a starting configuration of points $z_1, z_2, ..., z_N$ in $\disk$ and their images $\zeta_1, \zeta_2, ..., \zeta_N$ on $\Gamma$ such that $\psi(z_k)=\zeta_k$. 
+Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. We improve the approximation by moving the points along the tangent towards the boundary curve, i.e. by finding a correction function $U_k:\del\disk\to[0,2\pi]$ such that
+\begin{equation}\label{eq:h_k+1}
+    \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = h_{k+1}(\zeta)
+\end{equation}
+where $h$ is analytic on $\overline\Omega$ and $h_{k+1}(\zeta)$ is the boundary value of the next approximation $\psi_{k+1}(z_n)=c_n$.
+For the boundary point $z_0$ we are given $c_0=\eta(s_0)\in\Gamma$. Note that since $h_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ we cannot have $h_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$. Therefore we set
+\begin{equation}
+    U_k(z_0)=s_0-S_k(z_0).
+\end{equation}
+Note also that $h_{k+1}$ is an approximation of $\psi$ but it does not generally take values on $\Gamma$. We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta).$$
+
+\subsubsection{Implementation}
+Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation:
+Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
+$$\theta_k = \theta_0 + \frac{\pi k}{n}, \quad k\in[2n-1]$$
+and write the integrals in terms of their Fourier transform
+\begin{equation}
+    F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
+\end{equation}
+where $\sigma_n(\zeta_k)=\sum_{i=-n}^{n} c_k \zeta_k^i$. This can be computed fast ($\in\bigO(n\log n)$) via FFT.
+% Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
+Each iteration is computed via interpolating polynomials.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % \subsection{Shirokova's Method}
 % \cite{Shirokova2014}
 
@@ -268,31 +273,32 @@ In 2007, Binder, Braverman ans Yampolsky proposed a method for finding a conform
 
 \subsection{Comparison}
 We can directly rule out some of the options due to our project constraints: 
-First we note that Schwarz-Christoffel only works on polygons and Theodorsen's method is restricted to star-shaped regions. For general $\Omega$ as we are interested in, we therefore have to disregard these two methods. \red{put in each method's description what exactly it gets its restriction from, e.g. pinpoint the bottleneck}
+First we note that Schwarz-Christoffel only works on polygons and Theodorsen's method is restricted to star-shaped regions. Since we want to be able to work with more general shapes of $\Omega$, we have to disregard these two methods.
 The Zipper method seems very well implementable and robust, but we have to fulfill efficient point evaluations of both $\psi$ and its derivative, which is not possible since the Zipper method essentially constructs $\psi$ as a composition of many maps, and \red{I'm not sure this is efficiently derivable}.
+
 We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy.
-Amano's Method of Fundamental Solutions seems good for fast point-evaluations of $\psi$ itself, but the derivative could be tricky due to $\psi$'s form. Moreover,we cannot use our Fourier parametrization nor our mesh in this method, so it will probably now be the best choice for our specific problem. Its accuracy and convergence depend on the right choice of charge points, which is another difficulty, especially given the generality of our target domain.
+Amano's Method of Fundamental Solutions seems good for fast point-evaluations of $\psi$ itself, but the derivative could be tricky due to $\psi$'s form. Moreover, we cannot use our Fourier parametrization nor our mesh in this method, so it will probably not be the best choice for our specific problem. Note also that the accuracy and convergence of this method depend on the right choice of charge points, which poses another difficulty, especially given the generality of our target domain.
 The Conjugate Function Method is very beautiful mathematically, but it relies only on $hp$-FEM for which there already are powerful libraries, so there would not be much value in half-assing an FEM solver given the scope of this thesis. 
 
-On the other hand, the Alternating Projections Method uses our boundary parametrization in its Fourier series form, \red{remains to check efficient point evaluations}
-Also, Wegmann's Newton method seems very promising since it can be implemented efficiently using FFT and also uses our Fourier parametrization directly. 
-The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function \ref{eq:boundaryCorrespondence} $\eta(s)$ \cite{Wegmann1989_alternating_projections} p.292.
-Fourier calculation can be done very efficiently using FFT which makes AP one of the simplest and most robust methods for conformal mapping. However, it is also not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite{Wegmann2005_num_methods_confmapping} p. 389.
+On the other hand, the Alternating Projections Method uses the boundary parametrization in its Fourier series form. The output of the discretized OAP is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$.
+The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function (\ref{eq:boundaryCorrespondence}) \cite[p. 292]{Wegmann1989_alternating_projections}.
+The Alternating Projections Method is one of the simplest and most robust methods for conformal mapping. However, it is not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite[p. 389]{Wegmann2005_num_methods_confmapping}.
 
+Lastly, Wegmann's Method (\ref{chap:WegmannMethod}) uses the boundary parametrization  and its derivative in form of Fourier coefficients as well as the tangent angle as inputs. The output of the algorithm is an approximation by trigonometric interpolating polynomials at the grid points. This allows for efficient point evaluations of both $\psi$ and its derivative \cite{Wegmann1984_convergence_iterative_method}.
+Convergence is quadratic for analytic boundaries (as is known for Newton methods) and superlinear ($\in\bigO(N^{1+\mu})$) for $\eta\in C^{2+\mu}$ but depends on a "good enough" initial guess for the correspondence function \cite{Wegmann1984_convergence_iterative_method}.
+Discretizing the operator $K$ (\ref{operatorK_N}) using \red{Wittich's method} yields the operator $K_N$ which can be computed efficiently using FFT.
 
-\red{
-The accuracy of the conformal mapping depends to a large extent on the smoothness of the boundary curve $\Gamma$. 
-Wegmann \cite{Wegmann2005_num_methods_confmapping} \red{section 2.5 } proved that accuracy of methods based on function conjugation is bounded by the error of the operator $K_N$ of the conjugation operator on the grid \ref{operatorK_N}.
-Wegmann also compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite{Wegmann2005_num_methods_confmapping} p.415.
-\red{Note the computational costs are mainly determined by the FFTs and this parameter is dependent on the number of grid points.}
-}
+Wegmann also compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite[p. 415]{Wegmann2005_num_methods_confmapping}.
+Note the computational costs of both of these methods are mainly determined by the FFTs and this parameter is dependent on the number of grid points.
 
-The Newton method converges locally quadratically if the domain is the unit disk $\disk$. Generally, the algorithm can achieve space efficiency of $\bigO(n)$ and computational efficiency of $\bigO(n^2)$ or $\bigO(nlogn)$ if FFT is used, just like in the conjugate function method. \cite{Wegmann1978_newtonverfahren}
-\cite{Wegmann1984_convergence_iterative_method}
-\red{The FFT is used in any method that needs to repeatedly calculate the conjugate function (the Hilbert transform) on a regular grid on the unit circle. enhances runtime from $n^2$ to $n log n$ }
+Hence, both OAP and Wegmann's method seem suitable for our problem, but Wegmann's Method is more accurate with faster convergence while OAP is easier to implement.
+
 \bigskip
 
 \red{THEORY SECTION ON FFT???}
+\red{put in each method's description what exactly it gets its restriction from, e.g. pinpoint the bottleneck}
+
+
 \iffalse
 \begin{sidewaystable}[!p]
 \caption{Overview Table}
@@ -322,5 +328,4 @@ The Newton method converges locally quadratically if the domain is the unit disk
     \end{tabular}%
 }
 \end{sidewaystable}
-
 \fi
