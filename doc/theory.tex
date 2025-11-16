@@ -1,8 +1,11 @@
 \section{Theoretical Background}
 %maybe change structure to section existence of a conformal map, section construction of a conformal map
 \textbf{Conventions}\\
-We are given a simply connected bounded domain $\Omega$ with boundary $\Gamma$ in the complex plane $\C$. The task is to find an angle-preserving mapping $\psi$ from the unit disk $\disk$ to $\Omega$. 
+Throughout this text, we identify $\R^2$ with the complex plane $\C$ and write $$\C\ni z=x+iy \text{ where } x,y\in\R.$$
+We are given a simply connected bounded domain $\Omega\subset\C$ with boundary $\Gamma$. The task is to find an angle-preserving mapping $\psi$ from the unit disk $\disk$ to $\Omega$. 
 We are also given a curvilinear triangular mesh $\widehat{\mathcal{M}}$ on $\disk$, and a $2\pi$-periodic parametrization $$\eta: [0, 2\pi]^2 \to \Gamma \quad \text{ with } \quad \eta \in C^0 ([0,2\pi])^2$$ by its fourier series representation.
+\red{DANN WÄRE $\eta$ HIER AUCH NUR EINDIMENSIONAL, WENN WIR $\C$ BENUTZEN STATT $\R^2$?}
+
 
 \subsection{Conformal Mappings}
 
@@ -243,7 +246,7 @@ The Neumann kernel is defined for $s \neq t$ as
 \begin{equation}\label{eq:NeumannKernel}
     K(s,t) = \frac{1}{\pi} \frac{\sin(\theta(t)-\varphi_s(t))}{r_{st}}
 \end{equation}
-
+\red{\cite{Kythe1998_symmsintegralequation}}
 %\subsubsection{Hilbert Transform}
 
 

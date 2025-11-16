@@ -1,4 +1,4 @@
-\begin{thebibliography}{BPW23}
+\begin{thebibliography}{{Wik}25}
 
 \bibitem[Ama98]{Amano1998_Amanosmethod}
 Kaname Amano.
@@ -58,10 +58,20 @@ Martin~H. Gutknecht.
 \newblock Numerical experiments on solving theodorsen's integral equation for conformal maps with the fast fourier transform and various nonlinear iterative methods.
 \newblock {\em SIAM Journal on Scientific and Statistical Computing}, 4(1):1--30, 1983.
 
+\bibitem[Hen86]{Henrici1986_vol3}
+Peter Henrici, editor.
+\newblock {\em Applied and computational complex analysis. Vol. 3: discrete Fourier analysis—Cauchy integrals—construction of conformal maps---univalent functions}.
+\newblock John Wiley \& Sons, Inc., USA, 1986.
+
 \bibitem[HQR13]{Hakula_2013_conjugatefunctionmethod}
 Harri Hakula, Tri Quach, and Antti Rasila.
 \newblock Conjugate function method for numerical conformal mappings.
 \newblock {\em Journal of Computational and Applied Mathematics}, 237(1):340–353, January 2013.
+
+\bibitem[Kyt98]{Kythe1998_symmsintegralequation}
+Prem~K. Kythe.
+\newblock {\em Symm's Integral Equation}, pages 237--268.
+\newblock Birkh{\"a}user Boston, Boston, MA, 1998.
 
 \bibitem[MR06]{marshall2006_convergencezipperalgorithmconformal}
 Donald~E. Marshall and Steffen Rohde.
@@ -71,10 +81,6 @@ Donald~E. Marshall and Steffen Rohde.
 Christian Pommerenke.
 \newblock {\em Boundary Behaviour of Conformal Maps}, volume 299 of {\em Grundlehren der mathematischen Wissenschaften}.
 \newblock Springer-Verlag, Berlin, 1992.
-
-\bibitem[Sak19]{Sakakibara2019_AmanosMethod}
-Koya Sakakibara.
-\newblock Bidirectional numerical conformal mapping based on the dipole simulation method, 2019.
 
 \bibitem[SS03]{SteinShakarchi2003_complexanalysis}
 Elias~M. Stein and Rami. Shakarchi.
@@ -110,5 +116,11 @@ Rudolf Wegmann.
 Rudolf Wegmann.
 \newblock Chapter 9 - methods for numerical conformal mapping.
 \newblock In R.~Kühnau, editor, {\em Geometric Function Theory}, volume~2 of {\em Handbook of Complex Analysis}, pages 351--477. North-Holland, 2005.
+
+\bibitem[{Wik}25]{wikipedia_autodiff}
+{Wikipedia contributors}.
+\newblock Automatic differentiation --- {Wikipedia}{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/w/index.php?title=Automatic_differentiation&oldid=1320248234}, 2025.
+\newblock [Online; accessed 14-November-2025].
 
 \end{thebibliography}
