@@ -1,0 +1,39 @@
+\bigskip
+\begin{center}
+% Define the marker style and markings BEFORE the tikzpicture
+\tikzset{
+    marker style/.style={star, star points=5, star point ratio=2, inner sep=0.5pt, draw=black},
+    % Define the decoration style: place a 'marker style' node every 10 degrees
+    markings/.style={postaction={decorate}, decoration={
+        markings,
+        % CORRECTED LINE: Calculate physical length equivalent to 10 degrees
+        mark=between positions 0 and 1 step 10/360*\pgfdecoratedpathlength with {\node[marker style] {};}
+    }}
+}
+
+% Define parameters (Must be defined outside a tikzpicture/scope if used globally)
+\def\semimajoraxis{2.5}
+\def\semiminoraxis{0.8}
+\def\circleradius{1.5}
+\def\separation{7} % Separation distance for xshift
+
+% Start the TikZ environment
+\begin{tikzpicture}[scale=1.1] 
+
+    % --- Left Side: Circle with Stars (Optimized) ---
+    \draw[black, thick, markings] (0,0) circle (\circleradius);
+    \node at (0,0) {$\disk$};
+
+    % --- Mapping Arrow ---
+    \draw [->, thick] (\circleradius + 0.5, 0) -- (\separation - \semimajoraxis - 0.5, 0) node [midway, above] {$\psi$};
+
+    % --- Right Side: Elongated Ellipse with Crowded Stars (Optimized) ---
+    \begin{scope}[xshift=\separation cm]
+        % Draw the ellipse itself and apply the markings
+        \draw[line width=0.8pt, markings] (0,0) ellipse (\semimajoraxis cm and \semiminoraxis cm);
+        \node at (0,0) {$\Omega$};
+    \end{scope}
+
+\end{tikzpicture}
+\end{center}
+\bigskip

@@ -1,0 +1,46 @@
+\bigskip
+\begin{center}
+\begin{tikzpicture}[scale=1.1,
+    % Define the common marker style globally
+    marker style/.style={star, star points=5, star point ratio=2, inner sep=0.5pt, draw=black},
+]
+
+    % Define parameters
+    \def\semimajoraxis{2.5}
+    \def\semiminoraxis{0.5}
+    \def\circleradius{1.5}
+    \def\separation{7}
+    \def\step{10}
+
+    % --- Left Side: Circle with Stars (Uniform Distribution) ---
+    % Use a simple foreach loop for the circle to ensure uniform angular spacing
+    \draw[black, thick] (0,0) circle (\circleradius);
+    \node at (0,0) {$\disk$};
+    
+    \foreach \angle in {0, \step, ..., 355} {
+        \pgfmathsetmacro{\xcoord}{\circleradius * cos(\angle)}
+        \pgfmathsetmacro{\ycoord}{\circleradius * sin(\angle)}
+        \node[marker style] at (\xcoord, \ycoord) {};
+    }
+
+    % --- Mapping Arrow ---
+    \draw [->, thick] (\circleradius + 0.5, 0) -- (\separation - \semimajoraxis - 0.5, 0) node [midway, above] {$\psi$};
+
+    % --- Right Side: Elongated Ellipse with Crowded Stars (NON-UNIFORM EFFECT) ---
+    \begin{scope}[xshift=\separation cm]
+        % Draw the ellipse itself (no decoration)
+        \draw[line width=0.8pt] (0,0) ellipse (\semimajoraxis cm and \semiminoraxis cm);
+        \node at (0,0) {$\Omega$};
+
+        % Place nodes using angle-based parametric equations
+        \foreach \angle in {0, \step, ..., 355} {
+            % Ellipse parametric equations:
+            \pgfmathsetmacro{\xcoord}{\semimajoraxis * cos(\angle)}
+            \pgfmathsetmacro{\ycoord}{\semiminoraxis * sin(\angle)}
+            \node[marker style] at (\xcoord, \ycoord) {};
+        }
+    \end{scope}
+
+\end{tikzpicture}
+\end{center}
+\bigskip
