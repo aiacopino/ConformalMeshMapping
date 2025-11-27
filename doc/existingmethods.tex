@@ -7,16 +7,35 @@
 - https://www.desmos.com/calculator/g9asjc6xph
 \fi
 \section{Existing Methods}
-This chapter aims to give an overview and compare existing methods in terms of input/output format, suitability/ boundary requirements, computational complexity, numerical stability and mesh quality preservation/ accuracy.
+This chapter aims to give an overview and compare some existing methods in terms of input/output format, requirements on the boundary or shape of the regions, computational complexity, numerical stability and mesh quality preservation/ accuracy. The list is non-exhaustive but covers some of the most well-known and widely used methods.
 
-We give an overview of some existing methods and how to choose each depending on the application before explaining each of them in more detail.
+We start with an overview of the methods covered and how to choose between them depending on the application before explaining each of them in more detail.
 \input{flowchart.tex}
-*(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)
+\red{*(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)}
 
 
 \subsection{Alternating Projections Method}\label{APMethod}
-Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator K \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
+Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator $K$ \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
 The method of alternating projections uses both these sequences and alternates between them to find $\psi$ \cite{Wegmann1989_alternating_projections}.
+We first introduce the necessary function spaces.
+
+\subsubsection{Sobolev Spaces}
+Let $L^2$ be the space of all $2\pi$-periodic complex functions $f$ which are square integrable over $[0, 2\pi]$ equipped with the inner product 
+$$(f,g)_2= \frac{1}{2\pi}Re \int_{0}^{2\pi} f(f) \overline{g(t)} dt.$$
+\begin{definition}
+    The \textbf{Sobolev space $W$ }is defined as the space of all absolutely continuous functions $f\in L^2$ such that the derivative $f'$ exists and is also in $L^2$. The inner product on $W$ is defined as
+    $$(f,g)_W = (f,g)_2 + (f',g')_2.$$
+\end{definition}
+This is a Hilbert space over $\R$. The subspaces of real functions are denoted $L_{\R}^2$ and $W_{\R}$ respectively. Note that we can decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ where $f \in L^2$ is decomposed as follows into its Fourier series:
+$$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} = 
+    \underbrace{\sum_{-\infty}^{0} a_n e^{int} +i(\text{Im}(a_1))e^{int}}_{=:f^{-}\in W^{-}} + 
+    \underbrace{(\text{Re}(a_1))e^{int} + \sum_{n=2}^{\infty} a_n e^{int}}_{=:f^{+}\in W^{+}}.
+$$
+In this framework, the conformal mapping $\psi$ we are looking for can be expressed as follows:
+%Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{eq:InitialConditionsOnPsi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
+$$\psi(t)=\eta(t+\hat{u}(t))\in W^{+}  \quad \forall t.$$
+By (\ref{eq:boundaryCorrespondence}) $\hat{u}$ exists and by the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\R}$.
+Thus, $\psi$ lies in the intersection of a certain manifold $M:= \{u \in W_{\R}: \eta(t+u(t))\}$ with our space $W^{+}$.
 
 \subsubsection{Alternating Projections à la von Neumann} \label{chap:AlternatingProjections}
 For two closed convex sets $P,Q$ in a Hilbert space $H$, the method of alternating projections constructs a sequence $(x_n)_n$ as follows: Starting from an arbitrary point $x_0 \in H$, we define 
@@ -25,7 +44,7 @@ $$x_{n+1} := \begin{cases}
     \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
 \end{cases}$$ 
 where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively (though there is also a more general algorithm by Braun, Pokutta and Weismantel \cite{Braun2023_AltProjections} in case no such projections exist).
-It can be shown that the sequence $(x_n)_n$ converges in norm to a point tuple $(x*,y*)$ satisfying 
+It can be shown that the sequence $(x_n)_n$ converges in the respectively used norm to a point tuple $(x*,y*)$ satisfying 
 $$
 \begin{cases}
     x*=\Pi_P(y*), \\
@@ -35,10 +54,8 @@ $$
 $$
 
 In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. 
-
 This exact idea is now applied to function spaces:
 
-\subsubsection{Algorithm}
 \begin{algorithm}
     \caption{AP-Method}
     \begin{algorithmic}
@@ -53,7 +70,7 @@ This exact idea is now applied to function spaces:
 
 \subsubsection{Alternating Projections with Overrelaxation (OAP)}
 The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[p. 298]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
-This can be performed on a discretized grid of points on the boundary. In that case, the output is a set of Fourier coefficients, which allows for efficient point evaluations of $\psi$ and $D\psi$ using FFT.
+This factor decreases the number of outer iterations, which in our case are the iterations indexed by $k$, performed until convergence. The complexity of each individual iteration remains of order $\bigO(N \log N)$ due to the FFT computation of the Fourier coefficients.
 
 \subsection{Schwarz-Christoffel Method}
 \iffalse
@@ -160,6 +177,18 @@ Theodorsen's method needs $\Omega$ to be star-shaped in order to converge \cite{
 This algorithm was found independently by Kühnau and Marshall in the 1980's and has the advantage of finding $\psi$ and its inverse at the same time. 
 The computed map is only approximately conformal, and is obtained as a composition of conformal maps onto slit halfplanes. Depending on the shape of the slits, the Zipper algorithm looks a bit different. 
 In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006_convergencezipperalgorithmconformal}.
+First, let us introduce the following definition:
+
+\subsubsection{Möbius Transforms}
+\begin{definition}
+    A \textbf{Möbius transform} is a function on the extended complex plane $\hat\C:=\C\cup\{\infty\}$ which is uniquely determined by where it sends three points. It has the form
+    $$ f(z) = \frac{az + b}{cz + d} $$
+    with complex numbers $a,b,c,d$ such that $ad - bc \neq 0$.
+\end{definition}
+More explicitly, given three distinct points $z_1,z_2,z_3 \in \C$ and three distinct points $w_1,w_2,w_3 \in \C$ there exists a unique Möbius transform $f$ such that $f(z_i) = w_i$ for $i=1,2,3$:
+$$ f(z)=\frac{(z-z_1)(z_2-z_3)}{(z-z_3)(z_2-z_1)}$$
+In particular, Möbius transforms are conformal and more general than affine maps, since they can e.g. map $\infty$ to $0$ and vice versa.
+
 \subsubsection{The Geodesic Algorithm}
 The most elementary version of this algorithm is based on a function 
 $$f_a: \mathbb{H}\setminus \gamma \to \mathbb{H}$$

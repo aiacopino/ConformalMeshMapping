@@ -207,22 +207,22 @@ It can be described as finding $\psi$ analytic in $\disk$, continuous in $\overl
     \end{matrix}
 \end{equation}
 where $\psi$ is $2\pi$-periodic and Hölder continuous \cite[page 362]{Wegmann2005_num_methods_confmapping}.
-This problem has a unique solution up to an imaginary constant, which can be constructed using the conjugation operator 
+This problem has a unique real solution, which then yields a unique solution for $\psi$ up to an imaginary constant \red{stimmt dieser Teil so?}, which can be constructed using the conjugation operator 
 \begin{equation}\label{eq:operatorK}
-    K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)cot(\frac{s-t}{2}) dt,
+    K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)\cot(\frac{s-t}{2}) dt,
 \end{equation}
 
 which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}).
 
 \begin{remark}
-    In order to implement numerical methods efficiently via the Fast Fourier Transform later, we will prefer the functions' Fourier series representations. Hence on a grid of $N = 2n$ equidistant \red{why? FFT requires it? has crowding as an effect...} points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as 
+    In order to implement numerical methods efficiently via the Fast Fourier Transform later, we will use the functions' Fourier series representations. Hence e.g. on a grid of $N = 2n$ equidistant points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as 
     $$\psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ 
     and the conjugation operator can be approximated by the operator $K_N$ defined as 
     $$K_N\psi(t_j) = \sum_{k=1}^{n-1} -i c_k e^{ikt_j} + ic_{-k} e^{-ilt_j}.$$
     The function $K_N$ is thus defined as a trigonometric polynomial obtained by interpolating $\psi$ at the grid points. This approximation of the actual operator $K$ satisfies 
-    $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\psi\in C^{\alpha}$ Hölder continuous.
+    $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-\alpha+1/2}) $$ for $\psi\in C^{\alpha}$ Hölder continuous \red{do i have to write a section on hölder spaces before this?}.
     If $\psi$ is smoother, e.g. $\psi \in C^{k-1}$, the error decreases to 
-    $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-k}log(n) \|\psi^{(k)}\|_{infty})$$ \cite[page 362]{Wegmann2005_num_methods_confmapping}. These considerations are of particular importance for all methods based on conjugation.
+    $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-k}\log(n) \|\psi^{(k)}\|_{infty})$$ \cite[page 362]{Wegmann2005_num_methods_confmapping}. These considerations are of particular importance for all methods based on conjugation.
 \end{remark}
 \red{In principle, we have two options for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their kernels must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive. But since we are mainly interested in solving the mapping problem for a fixed boundary shape, we will focus on linear methods in this article.}
 
@@ -274,37 +274,6 @@ A potential theoretic formulation of the Dirichlet problem (\ref{eq:DirichletPro
 \end{equation}
 It is more easily solvable by numerical methods than the above Fredholm integral equation of the second kind, where the kernel might have singularities near the boundary \cite[chapter 9]{Kythe1998_symmsintegralequation}.
 
-
-\subsection{Sobolev Spaces}
-Let $L^2$ be the space of all $2\pi$-periodic complex functions $f$ which are square integrable over $[0, 2\pi]$ equipped with the inner product 
-$$(f,g)_2= \frac{1}{2\pi}Re \int_{0}^{2\pi} f(f) \overline{g(t)} dt.$$
-\begin{definition}
-    The \textbf{Sobolev space $W$ }is defined as the space of all absolutely continuous functions $f\in L^2$ such that the derivative $f'$ exists and is also in $L^2$. The inner product on $W$ is defined as
-    $$(f,g)_W = (f,g)_2 + (f',g')_2.$$
-\end{definition}
-This is a Hilbert space over $\R$. The subspaces of real functions are denoted $L_{\R}^2$ and $W_{\R}$ respectively. Note that we can decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ where $f \in L^2$ is decomposed as follows into its Fourier series:
-$$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} = 
-    \underbrace{\sum_{-\infty}^{0} a_n e^{int} +i(\text{Im}(a_1))e^{int}}_{=:f^{-}\in W^{-}} + 
-    \underbrace{(\text{Re}(a_1))e^{int} + \sum_{n=2}^{\infty} a_n e^{int}}_{=:f^{+}\in W^{+}}.
-$$
-In this framework, the conformal mapping $\psi$ we are looking for can be expressed as follows:
-%Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{eq:InitialConditionsOnPsi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
-$$\psi(t)=\eta(t+\hat{u}(t))\in W^{+}  \quad \forall t.$$
-By (\ref{eq:boundaryCorrespondence}) $\hat{u}$ exists and by the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\R}$.
-Thus, $\psi$ lies in the intersection of a certain manifold $M:= \{u \in W_{\R}: \eta(t+u(t))\}$ with our space $W^{+}$. This formulation is used in chapter \ref{chap:AlternatingProjections}. \red{should I move this to the beginning of that chapter instead?}
-
-
-\subsection{Complex Analysis/ Function Theoretic Tools}
-\begin{definition}
-    A \textbf{Möbius transform} is a function on the extended complex plane $\hat\C:=\C\cup\{\infty\}$ which is uniquely determined by where it sends three points. It has the form
-    $$ f(z) = \frac{az + b}{cz + d} $$
-    with complex numbers $a,b,c,d$ such that $ad - bc \neq 0$.
-\end{definition}
-More explicitly, given three distinct points $z_1,z_2,z_3 \in \C$ and three distinct points $w_1,w_2,w_3 \in \C$ there exists a unique Möbius transform $f$ such that $f(z_i) = w_i$ for $i=1,2,3$:
-$$ f(z)=\frac{(z-z_1)(z_2-z_3)}{(z-z_3)(z_2-z_1)}$$
-In particular, Möbius transforms are conformal and more general than affine maps, since they can e.g. map $\infty$ to $0$ and vice versa.
-\red{move this to beginning of zipper method instead?}
-
 \subsection{Discretisation} \label{chap:Meshes}
 In order to numerically solve boundary value problems the domain is usually discretised by creating a mesh $\M$ of $N$ nodes (points) and $M$ elements (cells) covering the domain $\Omega$. 
 There are many methods to create such meshes, but for the scope of this article we will assume to be given a mesh on the domain and only briefly discuss some important properties of meshes and mesh generation methods. We highly recommend referring to \cite{Brown1990_SC_meshgen} for a more in-depth treatment of mesh generation techniques.
@@ -339,4 +308,4 @@ Wegmann \cite{Wegmann2005_num_methods_confmapping} proved the following result.
 \input{elongated.tex}
 This means that crowding increases exponentially with the aspect ratio of the target region.
 
-\red{DeLillo has shown how crowding affects the accuracy of numerical computations.}
+\red{DeLillo has shown how crowding affects the accuracy of numerical computations. Darf ich hier noch weiter ausführen oder wird das dann zu viel?}
