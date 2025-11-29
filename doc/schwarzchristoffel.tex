@@ -1,0 +1,164 @@
+\begin{center}
+\begin{tikzpicture}[
+    scale=.9,
+    % Define styles for consistent drawing
+    dot/.style={circle, fill=black, inner sep=1.2pt},
+    target/.style={circle, draw=black, inner sep=2.5pt}, % Removed 'thick'
+    axis/.style={densely dashed}, % Removed 'thick'
+    maparrow/.style={->} % Removed 'thick' and 'Stealth' tip, now default
+]
+
+% ==========================================
+% LEFT SIDE: The Unit Disk (v-plane)
+% ==========================================
+\begin{scope}[local bounding box=disk]
+    % Radius
+    \def\R{2}
+    
+    % Draw Circle (Standard line width)
+    \draw (0,0) circle (\R);
+    
+    % Center 0
+    \node[dot, label=above:$0$] (O) at (0,0) {};
+    
+    % Define coordinates for v points using polar angles
+    \coordinate (v10) at (0:\R);
+    \coordinate (v1)  at (40:\R);
+    \coordinate (v2)  at (65:\R);
+    \coordinate (v3)  at (105:\R);
+    \coordinate (v4)  at (165:\R);
+    \coordinate (v5)  at (200:\R);
+    \coordinate (v6)  at (235:\R);
+    \coordinate (v7)  at (275:\R);
+    \coordinate (v8)  at (315:\R);
+    \coordinate (v9)  at (340:\R);
+
+    % Draw internal dashed lines (Radii)
+    \draw[axis] (O) -- (v10);
+    \draw[axis] (O) -- (v1);
+    \draw[axis] (O) -- (v5);
+    \draw[axis] (O) -- (v7);
+    \draw[axis] (O) -- (v9); 
+    
+    % Draw internal dashed chords
+    \draw[axis] (v3) -- (v4);
+    \draw[axis] (v4) -- (v5);
+    \draw[axis] (v9) -- (v10);
+
+    % Draw Dots
+    \foreach \n in {1,2,3,4,5,6,7,8,9} {
+        \node[dot] at (v\n) {};
+    }
+    % v10 is a target circle
+    \node[dot] at (v10) {};
+    \node[target] at (v10) {};
+
+    % Labels
+    \node[right] at (v10) {$v_{10}$};
+    \node[right] at (v1) {$v_1$};
+    \node[above] at (v2) {$v_2$};
+    \node[above] at (v3) {$v_3$};
+    \node[left] at (v4) {$v_4$};
+    \node[left] at (v5) {$v_5$};
+    \node[below] at (v6) {$v_6$};
+    \node[below] at (v7) {$v_7$};
+    \node[right] at (v8) {$v_8$};
+    \node[right] at (v9) {$v_9$};
+
+\end{scope}
+
+% ==========================================
+% ARROW: The Mapping psi
+% ==========================================
+% Changed label to psi, used default arrow style
+\draw[maparrow] ($(disk.east)+(0.5,0)$) -- node[above, font=\large] {$\psi$} ($(disk.east)+(2.5,0)$);
+
+
+% ==========================================
+% RIGHT SIDE: The Polygon (z-plane)
+% ==========================================
+\begin{scope}[xshift=8cm, yshift=0cm]
+    
+    % Center z_c
+    \coordinate (zc) at (-0.5,0);
+    \node[dot, label=left:$z_c$] at (zc) {};
+
+    % Define Vertices
+    % Right Wall
+    \coordinate (z10) at (1.5, 0.5);
+    \coordinate (z1)  at (2.2, 2.0);
+    \coordinate (z9)  at (2.2, -1.0);
+    
+    % Left Wall Structure
+    \coordinate (z3)  at (0.0, 2.0);
+    \coordinate (z4)  at (-0.8, 0.5);
+    \coordinate (z5)  at (-1.8, -0.8);
+    \coordinate (z7)  at (-0.2, -1.8);
+
+    % --- DRAW BOUNDARIES (Standard line width) ---
+    
+    % Right Wall (Infinite up/down)
+    \draw (z1) -- (z10) -- (z9);
+    \draw (z1) -- +(0, 0.5);   % Up to infinity
+    \draw (z9) -- +(0, -1.8);  % Down to infinity
+
+    % Left Wall Top (Infinite up)
+    \draw (z3) -- +(0, .5);
+    
+    % Left Wall Middle Bump
+    \draw (z3) -- (z4) -- (z5);
+    
+    % Left Wall Exit
+    \draw (z5) -- +(-2.5, 0);  % Left to infinity
+
+    % Bottom Wall Feature (z7)
+    \draw (z7) -- +(-3.0, -1.0); % Angled down-left
+    \draw (z7) -- +(0, -1);    % Straight down
+
+    % --- DRAW MAPPED LINES (Dashed Curves) ---
+    
+    % zc to z10
+    \draw[axis] (zc) .. controls (0.5, 0.7) .. (z10);
+    
+    % zc to z1
+    \draw[axis] (zc) .. controls (0.5, 1.5) .. (z1);
+    
+    % zc to z9
+    \draw[axis] (zc) .. controls (0.3, -0.9) .. (z9);
+    
+    % zc to z7
+    \draw[axis] (zc) .. controls (-0.3, -1.0) .. (z7);
+    
+    % zc to z5 (S-curve)
+    \draw[axis] (zc) .. controls (-0.8, -0.2) and (-1.0, -0.5) .. (z5);
+
+    % Chord z3 to z4
+    \draw[axis] (z3) .. controls (-0.2, 1.0) .. (z4);
+    
+    % Chord z9 to z10
+    \draw[axis] (z9) .. controls (1.8, -0.2) .. (z10);
+    
+    % Chord z1 to z10
+    \draw[axis] (z1) .. controls (1.5, 1.5) .. (z10);
+
+    % --- DOTS AND LABELS ---
+
+    \foreach \pt/\pos in {z1/right, z3/left, z4/left, z5/above left, z7/below left, z9/right} {
+        \node[dot] at (\pt) {};
+    }
+    \node[right] at (z1) {$z_1$};
+    \node[right] at (z9) {$z_9$};
+    \node[right] at (z7) {$z_7$};
+    \node[above left] at (z5) {$z_5$};
+    \node[left] at (z4) {$z_4$};
+    \node[left] at (z3) {$z_3$};
+    
+    % z10 Target
+    \node[dot] at (z10) {};
+    \node[target] at (z10) {};
+    \node[right] at (z10) {$z_{10}$};
+
+\end{scope}
+
+\end{tikzpicture}
+\end{center}

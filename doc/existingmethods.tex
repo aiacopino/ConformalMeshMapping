@@ -43,6 +43,7 @@ $$x_{n+1} := \begin{cases}
     \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
     \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
 \end{cases}$$ 
+\red{ADD IMAGE IF PATIENCE REMAINS}
 where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively (though there is also a more general algorithm by Braun, Pokutta and Weismantel \cite{Braun2023_AltProjections} in case no such projections exist).
 It can be shown that the sequence $(x_n)_n$ converges in the respectively used norm to a point tuple $(x*,y*)$ satisfying 
 $$
@@ -72,23 +73,71 @@ This exact idea is now applied to function spaces:
 The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[p. 298]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
 This factor decreases the number of outer iterations, which in our case are the iterations indexed by $k$, performed until convergence. The complexity of each individual iteration remains of order $\bigO(N \log N)$ due to the FFT computation of the Fourier coefficients.
 
-\subsection{Schwarz-Christoffel Method}
-\iffalse
-$R_w = \mathbb{D}$ disk \\
-$B_w = \del\mathbb {D}$ boundary of D\\
-$R_z = \Omega$ = polygon \\
-\fi 
 
-One class of methods for finding the conformal mapping $\Phi$ is given by the Schwarz-Christoffel equation, which relates the derivative of $\Phi$ to an integral over the boundary of the target domain $\Omega$ when $\Omega$ is a polygon.
+\subsection{Schwarz-Christoffel Method}
+One class of methods for finding the conformal mapping $\psi$ is given by the Schwarz-Christoffel equation, which relates the derivative of $\psi$ to an integral over the boundary of the target domain $\Omega$ when $\Omega$ is a polygon.
 \subsubsection{Preliminaries and Notation}
 \begin{definition}
-    A \textbf{Polygon} is a planar figure whose boundary is made of a chain of connected line segments which we will call arcs, connecting corner points.
+    A \textbf{Polygon} is a piecewise linear Jordan curve with finitely many line segments connecting corner points $z_1, ..., z_N$.
 \end{definition} 
 
-The unit disk $\mathbb{D}$ is in particular a polygon, and we parametrize the boundaries $\del\mathbb{D}$ and $\del\Omega=\Gamma$ by collections of arcs $s_{\mathbb{D}}$ and $s_{\Omega}$ respectively, in positive mathematical orientation. 
-These arcs being smooth yields tangents with well-defined derivatives at every point of the boundary curves except for corners, and we denote the angles of these tangents with $\theta_{\mathbb{D}}(s_{\mathbb{D}})$ and $\theta_{\Omega}(s_{\Omega})$ respectively. If $z_0$ is a corner it will have a turning angle of 
+For each $z_i\in\Gamma$, denote the exterior angle by $\measuredangle z_i=\theta_i\pi$. Then for any polygon we have $$\sum_{i=1}^{k} \theta_i = 2$$ and we set $\theta_i\in[-1,1]\forall i$. 
+Note also that $P$ need not be bounded, since we can add vertices at complex infinity with exterior angles ranging from $[1,3]$. These angles are defined to be $2\pi$ minus the external angle formed in the plane by the two lines meeting at infinity \cite{Trefethen1980_SCnumericalcomputation}. 
+\input{exteriorangle.tex}
+
+\label{infinity}
+In the above example $Q$ we have the two lines joining at $z_3$ again joining at infinity ($z_2$), where their outer angle is $\theta_2=2 - \theta_3 = \frac{5}{3}$, and thus the angles are 
+$$\theta_1=\frac{1}{2}, \theta_2=\frac{5}{3}, \theta_3=\frac{1}{3}, \theta_4=\frac{1}{2}, \theta_5=-1 \implies \sum_{i=1}^{5} \theta_i = 2.$$
+Now pick prevertices $v_1, ..., v_N \in \del\mathbb{D}$ as well as two constants $z_c,C\in\C$ (these choices will be explained later) and consider the Schwarz-Christoffel formula:
+\begin{equation} % TREFETHEN W = MY Z, TREFETHEN Z = MY V
+    z=\psi(v)= z_c + C\int_{0}^{v} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta
+\end{equation}
+
+Note that $1-\frac{\zeta}{v_k} \in \{|z-1|<1 \}$ for $|v|<1$. Hence we can define a branch of logarithm with branch cut along the negative real axis and define $(1-\frac{\zeta}{v_k})^{-\theta_k} = exp(-\theta_k \log(1-\frac{\zeta}{v_k}))$, $\psi(v)$ defines an analytic function on $\disk$ which is continuous except at the vertices $v_k$.
+The formula is constructed such that the angles at the vertices correspong precisely to the exterior angles we need, hence the image of $\psi$ is a polygon with the correct angles. However, the lengths of the line segments need not be correct: This is where the choice of parameters $v_1, ..., v_N, z_c$ and $C$ comes in, and this is where the actual work in this method lies.
+For the mapping to be unique, we can fix three of these parameters arbitrarily according to the Riemann mapping theorem. The remaining parameters are determined by solving the so-called \textbf{parameter problem}, which consists of a system of nonlinear equations obtained by enforcing the side lengths of the polygon to be correct.
+
+For fixing of the initial three parameters one has two options in principle:
+\begin{enumerate}
+    \item Fix three of the prevertices $v_k$ on the unit circle.
+    \item Fix only one prevertex and the point $z_c=\psi(0)\in P$. 
+\end{enumerate}
+The first option results in a remaining system of size $(N-3)\times(N-3)$ which is computationally more attractive, but may be too restrictive when scaling to polygons with many more vertices, as it can lead to very uneven distribution of the prevertices on the unit circle. Hence why the second option is often preferred, even though it means solving a $(N-1)\times(N-1)$ system \cite[page 84]{Trefethen1980_SCnumericalcomputation}.
+Note that the Schwarz-Christoffel formula guarantees correctness of the angles and the prevertices are on the unit circle, hence defined by their angle; thus, it remains to tune lengths only, and our system of equations is actually real! 
+
+Thus, the first step is to fix $v_N=1\in\disk$ (1 real degree of freedom) and $z_c\in P$ (two real degrees of freedom) the image of the origin under $\psi$. This yields uniqueness of the mapping.
+
+Next, the scaling factor $C$ is defined by the formula 
+\begin{equation} \label{eq:fix_v_N}
+    \psi(v_N) - \psi(0) = z_N - z_C = C \int_{0}^{v_N=1} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta
+\end{equation}
+i.e. it is chosen such that the image of the segment from $v_N$ to the origin is correctly scaled to match the segment from $z_N$ to $z_c$.
+Then a first vertex is pinned down to fix the "orientation" of the polygon (rotation anchoring):
+\begin{equation} \label{eq:fix_v_1}
+        z_1 - z_C = C \int_{0}^{v_1} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta
+\end{equation}
+This defines two real constraints, hence it remains to formulate $N-3$ equations for our $(N-1)\times (N-1)$ system.
+
+\input{schwarzchristoffel.tex}
+
+These are found by enforcing the side lengths of the polygon to be correct between the remaining vertices.
+\begin{equation} \label{eq:N-3sidelengths}
+        |z_{i+1} - z_i| = |C \int_{v_i}^{v_{i+1}} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta| \quad  \forall i\in 2, ..., N-2
+\end{equation}
+Note that unboundedness of the polygon is not a problem, since it can be modeled by one vertex as described earlier (\ref{infinity}), which can be chosen to be $z_N$ without loss of generality; this way, it will be taken care of by the first equation (\ref{eq:fix_v_N}) and will not pose a problem when comparing lengths in (\ref{eq:N-3sidelengths}).
+
+\iffalse
+The system of equations then consists of the 2N conditions
+\begin{equation}
+    z_{k}-z_c = C\int_{0}^{v_{k}} \prod_{i=1}^{N} (1-\frac{\zeta}{v_i})^{-\theta_i} d\zeta \quad \text{ for } k=1,...,N.
+\end{equation}
+Note this system is highly overdetermined, so the tricky problem to solve is to delete $2N+1$ of those conditions without leaving any degrees of freedom in the final system. 
+\fi
+
+\iffalse
+These arcs being smooth yields tangents with well-defined derivatives at every point of the boundary curves except for (a finite number of) corners, and we denote the angles of these tangents with $\theta_{\mathbb{D}}(s_{\mathbb{D}})$ and $\theta_{\Omega}(s_{\Omega})$ respectively. If $z_0$ is a corner it will have a turning angle of 
 $$\measuredangle\theta_{\mathbb{D}}(z_0)=\theta_{\mathbb{D}}(z_0+\eps)-\theta_{\mathbb{D}}(z_0-\eps),$$ 
-where $\eps\to0$. The same applies to corners of $\Omega$. Then,
+where $\eps\to0$ \red{is this eps in 0,2pi or is it on the boundary, and if theta(s) for s in 0,2pi and z0 on boundary how can the above equation be well-def even}. The same applies to corners of $\Omega$. Then,
 $\frac{\del\theta_{\mathbb{D}}}{\del s_{\mathbb{D}}} = \measuredangle\theta_{\mathbb{D}}(z_0)\delta(s_{\mathbb{D}}-z_0)$ for $\delta$ the Dirac function, and similarly for $\theta_{\Omega}$ and thus $\theta_{\mathbb{D}}$ and $\theta_{\Omega}$ are piecewise continuously differentiable functions with jump discontinuities at the corner points.
 
 %\red{\subsubsection{the log derivative of Phi}}
@@ -112,13 +161,14 @@ $$log(\frac{d\Phi}{dz}) = C_0 - \frac{1}{2\pi}\displaystyle\int_{\del\mathbb {D}
 where $C_0\in\mathbb{C}$ is a constant, $z_0$ is a fixed point in $\mathbb{D}$\red{or del?}, $\mathcal{G}(z,z_B')$ is the fundamental solution of the Laplace equation in $\del\mathbb{D}$ with singularity at $z_B' \in \del\mathbb{D}$\red{not at the boundary of omega?}. However, we can use an unsubtracted form of this equation since the integrals converge separately and we know our $\Omega$ is bounded (hence we need not care about behaviours at infinity), yielding the simpler form
 $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z, z_B') [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
 
+
 \subsubsection{Implementation}
 \cite{Brown1990_SC_meshgen}
 \cite{Trefethen1980_SCnumericalcomputation}
 \cite{banjaitrefethen2006_SCmultipolemethod}
 \cite{Bezrodnykh2022_lauricella}
 Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008_SC_crowdingworkaround}
-
+\fi
 
 \red{\subsection{Theodorsen's Method CHECK EQUATIONS}} \label{TheodorsenMethod}
 % \cite{Song2012_theodorsen_equation}
@@ -163,14 +213,10 @@ Alternatively, nonlinear Jacobi iteration with relaxation (JOR) can be used:
     \end{matrix}
 \end{equation}
 
-In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \cite{Gutknecht1983_theodorsen_equation_FFT}. In this case, the boundary curve can be smoothed first using preliminary maps (see osculation methods in chapter \ref{chap:OsculationMethods}).
+In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \cite{Gutknecht1983_theodorsen_equation_FFT}.
+Theodorsen's method needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, but has the advantage of being an easily computable fixed point equation in this case. 
+In practice, the star-shape requirement can also be relaxed by smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
 
-Theodorsen's method needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, but has the advantage of being an easily computable fixed point equation in this case. In practice, the star-shape requirement can also be relaxed by smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ok from here
 
 \subsection{Zipper Method}\label{chap:ZipperMethod}
