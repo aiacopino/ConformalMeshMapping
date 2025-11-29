@@ -170,18 +170,37 @@ $$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z,
 Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008_SC_crowdingworkaround}
 \fi
 
-\red{\subsection{Theodorsen's Method CHECK EQUATIONS}} \label{TheodorsenMethod}
-% \cite{Song2012_theodorsen_equation}
-We can reformulate the problem of finding the conformal mapping $\psi:\disk\to\Omega$ as solving Theodorsen's integral equation for the boundary correspondence function $S(s)$ defined by 
+\subsection{Theodorsen's Method} \label{TheodorsenMethod}
+For $\Omega$ star-shaped with regard to the origin (wlog; otherwise we can precompose with a preliminary map), Theodorsen's method \cite[page 64]{Gaier1964} can be used to find the conformal mapping $\psi:\disk\to\Omega$ satisfying the initial conditions (\ref{eq:InitialConditionsOnPsi}).
+Theodorsen's integral equation is derived as follows:
+Note points on the unit circle are parametrised by $e^{i\varphi}$ while $\Gamma$ can be parametrised by $\rho(\theta)e^{i\theta}$ for $\varphi, \theta\in[0,2\pi]$ and $\rho(\theta)>0$ the radius function of $\Gamma$ (by star-shapedness of $\Omega$). Thus, the problem reduces to relating $\varphi$ and $\theta$ via a function $\theta(\phi)$.
+The trick is to introduce an auxiliary function involving a $\log$, which allows to separate the real and imaginary part of the problem: 
 \begin{equation}
-    \psi(e^{is})=\eta(S(s)) \text{ and } \int_{0}^{2\pi} S(s) ds = 2\pi^2
-\end{equation} where $\eta$ is a parametrization of $\Gamma=\del\Omega$ and $\psi$ is assumed to satisfy (\ref{eq:InitialConditionsOnPsi}).
-Theodorsen's integral equation states that $Y:s\mapsto S(s)-s$ is  the conjugate periodic function of $X:s \mapsto \log(\eta(S(s)))$.
-After discretization, Theodorsen's integral equation becomes the fixed point equation
+    Re^{i\alpha} = \log(R) + i\alpha
+\end{equation} 
+However, $\log$ has a singularity at $0$ which impedes direct application of the $\log$ as it contradicts with our normalization criterion on $\psi$ (\ref{eq:InitialConditionsOnPsi}).
+Thus the singularity is removed by dividing out $z$. This gives us the helper function 
+\begin{equation}\label{eq:helperfunctiontheodorsen}
+    F(z) := \log(\frac{\psi(z)}{z}) = \\ 
+    \log(\frac{\rho(\theta)e^{i\theta}}{e^{i\varphi}}) = \log(\rho(\theta)e^{i(\theta-\varphi)}) = \log(\rho(\theta))+i(\theta - \varphi).
+\end{equation}
+By the section on conjugate functions \ref{eq:operatorK} the real and imaginary parts of this helper function are conjugate. Thus, we can relate them by
+\begin{equation}
+    \theta - \varphi = K \log(\rho(\theta))
+\end{equation}
+which can be rewritten into Theodorsen's integral equation
+\begin{equation}
+    \theta(\varphi) = \varphi + K \log(\rho(\theta(\varphi))).
+\end{equation}
+
+The discretization as in \cite{Gutknecht1983_theodorsen_equation_FFT} is done by naming $Y := \theta - \varphi$ the conjugate function of $X:= \log(\rho(\theta))$.
+Theodorsen's integral equation becomes the fixed point equation
 \begin{equation}\label{eq:TheodorsenDiscretized}
     y=\psi(y):=K_{\Sigma} \log(\eta(s+y))
-\end{equation} for $s:=(\frac{k\pi}{N})_{k\in[2N-1]}$ where $y$ approximates $Y(s)$.
+\end{equation} 
+for $s:=(\frac{k\pi}{N})_{k\in[2N-1]}$ where $y$ approximates $Y(s)$ and $\eta$ is the boundary correspondence function (\ref{eq:boundaryCorrespondence}).
 The product $y$ can be computed efficiently using FFT (see chapter \ref{operatorK_N}).
+\iffalse
 If the discretization is based on trigonometric interpolation, $K_{\Sigma}$ is called \textbf{Wittich's matrix} \cite{Gutknecht1983_theodorsen_equation_FFT}.
 By a permutation $P$ the above components can be brought to the form
 \begin{equation}
@@ -212,9 +231,9 @@ Alternatively, nonlinear Jacobi iteration with relaxation (JOR) can be used:
         y_{m+1} &:= &(1-\omega)&y_m + &\omega \psi(y_m).
     \end{matrix}
 \end{equation}
-
+\fi
 In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \cite{Gutknecht1983_theodorsen_equation_FFT}.
-Theodorsen's method needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, but has the advantage of being an easily computable fixed point equation in this case. 
+It also theoretically needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, but has the advantage of being an easily computable fixed point equation in this case. 
 In practice, the star-shape requirement can also be relaxed by smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
 
 % ok from here
