@@ -1,56 +1,77 @@
-% THIS SHOULD GIVE A COMPREHENSIBLE OVERVIEW OF POTENTIAL METHODS AND HOW TO CHOOSE THEM
 \begin{center}
-    \red{maybe change to first boundary smooth then BIE, if not smooth then at least piecewise continuous then SCE, else if not well-behaved IDK}
-\begin{tikzpicture}[node distance=1cm]
+    \begin{tikzpicture}[
+    node distance=1cm and 1cm,
+    %>=Stealth,
+    every node/.style={font=\sffamily, align=center},
+    process/.style={rectangle, draw=none, fill=none, text centered},
+    decision/.style={rectangle, draw=none, fill=none, text centered},
+    arrow/.style={->}
+]
 
-\node (BVP) {BVP};
+% --- Main Vertical Column (The Decision Spine) ---
+\node (bvp) [process] {BVP};
+\node (poly_dec) [decision, below=0.8cm of bvp] {$\Omega$ a polygon?};
+\node (bie_dec) [decision, below=0.8cm of poly_dec] {Reformulate as BIE?};
+\node (star_dec) [decision, below=0.8cm of bie_dec] {$\Omega$ star-shaped?};
+\node (theodorsen) [process, below=0.8cm of star_dec] {Theodorsen's Equation};
 
-\node (Q_poly) [below=of BVP] {$\Omega$ a polygon?};
+% --- Right Branch 1: Polygons ---
+\node (schwarz) [process, right=0.5cm of poly_dec] {Schwarz-Christoffel};
 
-\node (SCE) [right=of Q_poly] {Schwarz-Christoffel};
+% --- Right Branch 2: Other Method Families (Non-BIE) ---
+\node (other_fam) [process, right=1.5cm of bie_dec] {Other Method Families};
 
-\node (Q_BIE) [below=of Q_poly] {Reformulate as BIE?};
+% Leaves for Other Families
+% We stack these to keep the diagram tidy
+\node (zipper) [process, above right=0.2cm and 1.5cm of other_fam] {Zipper};
+\node (bergman) [process, right=1.8cm of other_fam] {Bergman Kernel};
+\node (alt_proj) [process, below right=0.2cm and 1.5cm of other_fam] {Alternating Projections};
+\node (conjugate) [process, below=0.3cm of alt_proj] {Conjugate Function};
+\node (prob) [process, below=0.3cm of conjugate] {Probabilistic Method};
 
-\node (Q_star) [below=of Q_BIE] {$\Omega$ star-shaped?};
 
-\node (theo) [below=of Q_star] {Theodorsen's Equation};
+% --- Right Branch 3: General BIE Methods ---
+\node (general_bie) [process, right=1.5cm of star_dec] {General BIE Methods};
 
-\node (BIE) [right=of Q_star] {General BIE Methods};
-\node (kerz) [below=of BIE] {Kerzman-Stein};
-\node (neu) [below left=of kerz, xshift=1cm] {Neumann Kernel};
-\node (symm) [below right=of BIE] {Symm's Equation*};
-\node (amano) [below=of symm] {Amano's Method};
+% Leaves for General BIE
+% Fanned out below
+\node (wegmann) [process, below=1.5cm of general_bie] {Wegmann's Method};
+\node (kerzman) [process, left=0.2cm of wegmann] {Kerzman-Stein};
+\node (neumann) [process, left=0.2cm of kerzman] {Neumann Kernel};
+\node (symm) [process, right=0.2cm of wegmann] {Symm's Equation*};
+\node (amano) [process, right=0.2cm of symm] {Amano's Method};
 
-\node (other) [right=of Q_BIE] {Other Method Families};
-\node (zip) [above right=of other] {Zipper};
-\node (berg) [right=of other] {Bergman Kernel};
-\node (AP) [below right=of other] {Alternating Projections};
 
-\draw [->] (BVP) -- (Q_poly);
+% --- Connections / Arrows ---
 
-\draw [->] (Q_poly) -- (SCE) 
-    node [midway, above] {Yes};
-\draw [->] (Q_poly) -- (Q_BIE) 
-    node [midway, left] {No};
+% Vertical Decisions
+\draw [arrow] (bvp) -- (poly_dec);
+\draw [arrow] (poly_dec) -- node[left, font=\scriptsize] {No} (bie_dec);
+\draw [arrow] (bie_dec) -- node[left, font=\scriptsize] {Yes} (star_dec);
+\draw [arrow] (star_dec) -- node[left, font=\scriptsize] {Yes} (theodorsen);
 
-\draw [->] (Q_BIE) -- (Q_star) 
-    node [midway, left] {Yes};
-\draw [->] (Q_star) -- (theo) 
-    node [midway, left] {Yes};
-\draw [->] (Q_star) -- (BIE) 
-    node [midway, above] {No};
+% Branch: Polygon -> Yes
+\draw [arrow] (poly_dec) -- node[above, font=\scriptsize] {Yes} (schwarz);
 
-\draw [->] (BIE) -- (kerz);
-\draw [->] (BIE) -- (neu);
-\draw [->] (BIE) -- (symm);
-\draw [->] (BIE) -- (amano);
+% Branch: BIE? -> No -> Other Families
+\draw [arrow] (bie_dec) -- node[above, font=\scriptsize] {No} (other_fam);
 
-\draw [->] (Q_BIE) -- (other) 
-    node [midway, above] {No};
+% Connecting Other Families to leaves
+\draw [arrow] (other_fam) -- (zipper.west);
+\draw [arrow] (other_fam) -- (bergman.west);
+\draw [arrow] (other_fam) -- (alt_proj.west);
+\draw [arrow] (other_fam) -- (conjugate.west);
+\draw [arrow] (other_fam) -- (prob.west);
 
-\draw [->] (other) -- (zip);
-\draw [->] (other) -- (berg);
-\draw [->] (other) -- (AP);
+% Branch: Star-shaped? -> No -> General BIE
+\draw [arrow] (star_dec) -- node[above, font=\scriptsize] {No} (general_bie);
+
+% Connecting General BIE to leaves
+\draw [arrow] (general_bie) -- (neumann.north);
+\draw [arrow] (general_bie) -- (kerzman.north);
+\draw [arrow] (general_bie) -- (wegmann.north);
+\draw [arrow] (general_bie) -- (symm.north);
+\draw [arrow] (general_bie) -- (amano.north);
 
 \end{tikzpicture}
 \end{center}

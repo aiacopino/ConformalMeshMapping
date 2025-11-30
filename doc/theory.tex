@@ -4,7 +4,6 @@
 Throughout this text, we identify $\R^2$ with the complex plane $\C$ and write $$\C\ni z=x+iy \text{ where } x,y\in\R.$$
 The task is to find an angle-preserving mapping $\psi$ from the unit disk $\disk$ to $\Omega$, given a simply connected bounded domain $\Omega\subset\C$ with boundary $\Gamma$ and $2\pi$-periodic parametrization 
 $$\eta: [0, 2\pi] \to \Gamma \quad \text{ with } \quad \eta \in C^0 ([0,2\pi])$$ by its fourier series representation. 
-\red{STIMMT DAS SO, DASS $\eta$ HIER AUCH NUR EINDIMENSIONAL IST (ANDERS ALS IM PROJEKTBESCHRIEB), WENN WIR $\C$ BENUTZEN STATT $\R^2$?}
 We are also given a curvilinear triangular mesh $\widehat{\mathcal{M}}$ on $\disk$ satisfying some regularity conditions (see chapter \ref{chap:Meshes}).
 
 \begin{definition}
@@ -176,8 +175,6 @@ When the region $\Omega$ is bounded by a closed Jordan curve $\Gamma$ the mappin
 for $t\in[0,2\pi)$. $S$ is called the \textbf{boundary correspondence function}. 
 By the Riemann mapping theorem, we need to fix at least three points for uniqueness of the conformal mapping $\psi$, which we achieve through the boundary correspondence equation \ref{eq:boundaryCorrespondence}.
 
-%\red{a rh problem arises when considering the change of the conformal mapping under changes to the boundary curve. weg388}
-
 From Definition \ref{def:ConformalMap} we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
 Denoting $z=x+iy$ and
 $$J:= \begin{pmatrix}
@@ -207,7 +204,7 @@ It can be described as finding $\psi$ analytic in $\disk$, continuous in $\overl
     \end{matrix}
 \end{equation}
 where $\psi$ is $2\pi$-periodic and Hölder continuous \cite[page 362]{Wegmann2005_num_methods_confmapping}.
-This problem has a unique real solution, which then yields a unique solution for $\psi$ up to an imaginary constant \red{stimmt dieser Teil so?}, which can be constructed using the conjugation operator 
+This problem has a unique real solution $u$, which then yields a unique solution for $\psi$ up to an additive imaginary constant (which we fix via our normalisation condition (\ref{eq:InitialConditionsOnPsi})), which can be constructed using the conjugation operator 
 \begin{equation}\label{eq:operatorK}
     K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)\cot(\frac{s-t}{2}) dt,
 \end{equation}
@@ -224,7 +221,7 @@ which is also known as Hilbert Transform (details on this in \cite{Castillo2025_
     If $\psi$ is smoother, e.g. $\psi \in C^{k-1}$, the error decreases to 
     $$\|K \psi - K_N \psi\|_{\infty} \in O(n^{-k}\log(n) \|\psi^{(k)}\|_{infty})$$ \cite[page 362]{Wegmann2005_num_methods_confmapping}. These considerations are of particular importance for all methods based on conjugation.
 \end{remark}
-\red{In principle, we have two options for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their kernels must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive. But since we are mainly interested in solving the mapping problem for a fixed boundary shape, we will focus on linear methods in this article.}
+In principle, there are two strategies for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their kernels must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive. But since we are mainly interested in solving the mapping problem for a fixed boundary shape, we will focus on linear methods in this article.
 
 \subsection{Boundary Conditions} 
 
@@ -261,18 +258,6 @@ The Neumann kernel is defined for $s \neq t$ as
 \end{equation}
 
 The integral in equation (\ref{eq:FredholmSecondKind}) can be interpreted as a Riemann or Riemann-Stieltjes integral, where the latter is more general and allows for evaluation of non-bounded integrands. This could be important if the boundary correspondence function $S$ as seen in (\ref{eq:boundaryCorrespondence}) is not continuously differentiable \cite[page 40]{Gaier1964}. These two interpretations lead to different methods of discretisation and different error estimates when solving the integral equation numerically.
-\subsubsection{Symm's equation}
-A potential theoretic formulation of the Dirichlet problem (\ref{eq:DirichletProblem}) leads to a Fredholm integral equation of the first kind called \textbf{Symm's equation}
-\begin{equation}\label{eq:Symm}
-    \int_{\Gamma} \log| z - \zeta| \mu(\zeta) d\zeta = -\log|z| \quad \text{ for } z\in\Omega, \zeta\in\Gamma
-\end{equation} which has a kernel with logarithmic singularity. In this context, the conformal mapping problem reduces to finding a suitable source density function $\mu(z)=g(z)+ih(z)$ on the boundary $\Gamma$ where $g$ and $h$ are conjugate and $g$ satisfies 
-\begin{equation}
-    \begin{matrix}
-        \nabla^2 g(z) = 0 & z\in \Omega \\
-        g(z) = -\frac{1}{2} \log|z\bar{z}| & z\in \Gamma.
-    \end{matrix}
-\end{equation}
-It is more easily solvable by numerical methods than the above Fredholm integral equation of the second kind, where the kernel might have singularities near the boundary \cite[chapter 9]{Kythe1998_symmsintegralequation}.
 
 \subsection{Discretisation} \label{chap:Meshes}
 In order to numerically solve boundary value problems the domain is usually discretised by creating a mesh $\M$ of $N$ nodes (points) and $M$ elements (cells) covering the domain $\Omega$. 
@@ -289,8 +274,7 @@ $$ \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty) .$$
 \red{to do. add a mesh quality analyser to the code}
 
 \subsection{Crowding}
-\cite{Banjai2008_SC_crowdingworkaround}
-Crowding is the phenomenon that occurs when a set of more or less equally distributed points on the domain are mapped to a much more dense set of points on the target region, thereby causing numerical issues due to the angles on the grid becoming very small. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. The following illustration shows the concentration of points near the equator of the ellipse when mapping equidistant points from the unit disk.
+Crowding is the phenomenon that occurs when a set of more or less equally distributed points on the domain are mapped to a much more dense set of points on the target region, thereby causing numerical issues due to the angles on the grid becoming very small \cite{Banjai2008_SC_crowdingworkaround}. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. The following illustration shows the concentration of points near the equator of the ellipse when mapping equidistant points from the unit disk.
 \input{crowding_v2.tex}
 
 Wegmann \cite{Wegmann2005_num_methods_confmapping} proved the following result.

@@ -1,0 +1,86 @@
+\begin{sidewaystable}[htbp]
+    \centering
+    \small
+    \caption{Comparison of Numerical Conformal Mapping Methods}
+    \label{tab:method_comparison}
+    \renewcommand{\arraystretch}{1.5} % Good vertical spacing
+    
+    % The sum of the hsize values below MUST equal 7 (the number of columns)
+    \begin{tabularx}{\textwidth}{@{} 
+        >{\hsize=0.7\hsize\raggedright\arraybackslash}X  % 1. Method (Narrow)
+        >{\hsize=0.7\hsize\raggedright\arraybackslash}X  % 2. Shape (Very Narrow)
+        >{\hsize=0.6\hsize\raggedright\arraybackslash}X  % 3. Runtime (Narrow)
+        >{\hsize=0.8\hsize\raggedright\arraybackslash}X  % 4. Input (Medium)
+        >{\hsize=0.9\hsize\raggedright\arraybackslash}X  % 5. Output (Wide)
+        >{\hsize=1.65\hsize\raggedright\arraybackslash}X % 6. Advantages (Very Wide)
+        >{\hsize=1.65\hsize\raggedright\arraybackslash}X % 7. Disadvantages (Very Wide)
+    @{}}
+        \toprule
+        \textbf{Method} & \textbf{$\Omega$ Shape} & \textbf{Runtime} & \textbf{Input} & \textbf{Output} & \textbf{Advantages} & \textbf{Disadvantages} \\
+        \midrule
+        
+        \textbf{Schwarz-Christoffel} & 
+        Polygon & 
+        $\bigO(N^3)$ (parameter problem) & 
+        Polygon vertices $z_k$ and angles $\theta_k$& 
+        Integral parameters: prevertices $v_k$, $C$ & 
+        Exact angle preservation at corner singularities; Handles unbounded \& periodic domains. & 
+        Restricted to polygons; Crowding (resolution loss); Slow \\
+        \addlinespace
+        
+        \textbf{Theodorsen} & 
+        Star-shaped & 
+        $\bigO(N \log N)$ & 
+        Radial function $\rho(\theta)$ & 
+        Boundary correspondence $\theta(\phi)$ & 
+        Fast fixed-point iteration; Efficient FFT implementation. & 
+        Restricted to star-shaped regions; Fails/Inaccurate for non-smooth boundaries or shapes far from $\disk$. \\
+        \addlinespace
+        
+        \textbf{Zipper (Geodesic)} & 
+        General Jordan incl. Fractals & 
+        Fast, Dep. only on $N$ but not on shape & 
+        Boundary points $\{z_i\}_{i\in[N]}$ & 
+        Composition of elementary maps & 
+        Robust (handles fractals); Finds inverse simultaneously. & 
+        Expensive derivative computation (chain rule); Only approximates $\Gamma$. \\
+        \addlinespace
+        
+        \textbf{Alternating Projections} & 
+        Smooth & 
+        $\bigO(N \log N)$ per iter.: FFT & 
+        Fourier Series of $\eta$ & 
+        Interpolating Polynomial & 
+        Robust and simple to implement; Efficient point evaluation. & 
+        Linear (slow) convergence for fine meshes; Low accuracy for reasonable grids. \\
+        \addlinespace
+        
+        \textbf{Wegmann's Method} & 
+        Smooth & 
+        $\bigO(N \log N)$ per iter.: FFT & 
+        $\eta$ and tangent angles & 
+        Analytic function (Trig. poly) & 
+        Quadratic (fast) convergence for fine meshes; High accuracy (FFT); Efficient point evaluation. & 
+        Requires good initial guess; Complex implementation. \\
+        \addlinespace
+        
+        \textbf{Amano's Method} & 
+        Analytic & 
+        $\bigO(N^3)$ & 
+        Collocation points $z_i$ & 
+        Lin. comb. of log potentials & 
+        Fast linear point/derivative evaluation; Exponential accuracy; Simple implementation. & 
+        Cannot use Fourier param. or mesh; Sensitive to charge point placement. \\
+        \addlinespace
+        
+        \textbf{Probabilistic Method} & 
+        General, incl. Rough/ Fractals & 
+        Polynomial & 
+        Oracle / Boundary (pixel list) & 
+        Random Walk approx. & 
+        Works on rough boundaries where deterministic methods fail. & 
+        Slow convergence; Inherent randomness; Difficult to guarantee accuracy. \\
+        
+        \bottomrule
+    \end{tabularx}
+\end{sidewaystable}

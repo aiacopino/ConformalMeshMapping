@@ -1,0 +1,64 @@
+\begin{tikzpicture}[scale=1.2, >=Stealth]
+
+  % --- Define Set P (Left, Blue) ---
+  % We use a smooth plot to create a generic convex shape
+  \draw[fill=blue!5, thick, draw=blue!40!black] 
+    plot [smooth cycle, tension=0.8] coordinates {(-1,0) (1,1) (.5,4) (-1.5, 3) (-2, 1)};
+  \node at (-0.5, 2) {\Large $P$};
+
+  % --- Define Set Q (Right, Red) ---
+  % Another generic convex shape
+  \draw[fill=red!5, thick, draw=red!40!black] 
+    plot [smooth cycle, tension=0.8] coordinates {(3,0.5) (5,1) (6.5,4) (3, 3.5) (2.5, 2)};
+  \node at (4.5, 2.5) {\Large $Q$};
+
+  % --- The Alternating Projections ---
+  
+  % 1. Start Point x_0 (Arbitrary point)
+  \coordinate (x0) at (5.5, 3.5);
+  \fill[black] (x0) circle (2pt) node[right] {$x_0$};
+
+  % 2. Project onto P (x_1)
+  % This point is visually chosen to look like an orthogonal projection from x0
+  \coordinate (x1) at (1, 3.1); 
+  \draw[->, dashed, thick] (x0) -- (x1);
+  \fill[black] (x1) circle (2pt) node[left] {$x_1 = \Pi_P(x_0)$};
+  % Draw small right angle marker to show orthogonality
+  %\draw[thin, gray] ($(x1)!0.2!(x0)$) -- ++(0.1,-0.2) -- ($(x1)+(0.1,-0.2)$);
+\draw[thin, gray] ($(x1)!2.mm!(x0)$) -- ($($(x1)!2.mm!(x0)$)!2.mm!-90:(x1)$) -- ($(x1)!2.mm!95:(x0)$);
+ 
+% 3. Project onto Q (x_2)
+  % Visual orthogonal projection from x1 to Q
+  \coordinate (x2) at (2.45, 2.8);
+  \draw[->, dashed, thick] (x1) -- (x2);
+  \fill[black] (x2) circle (2pt) node[right] {$x_2 = \Pi_Q(x_1)$};
+
+  % 4. Project back onto P (x_3)
+  \coordinate (x3) at (1.1, 2.5);
+  \draw[->, dashed, thick] (x2) -- (x3);
+  \fill[black] (x3) circle (2pt) node[left] {$x_3$};
+
+  % 5. Project back onto Q (x_4)
+  \coordinate (x4) at (2.52, 2.1);
+  \draw[->, dashed, thick] (x3) -- (x4);
+  \fill[black] (x4) circle (2pt) node[above right] {$x_4$};
+
+  % --- The Limit / Solution ---
+  % The sequence converges to the closest points between the sets
+  \coordinate (p_star) at (1.15, 1.9); % Approximate closest point on P
+  \coordinate (q_star) at (2.5, 1.9); % Approximate closest point on Q
+\draw[->, dashed, thick] (x4) -- (p_star);
+
+  % Draw dotted lines showing convergence
+  \draw[dotted] (x3) -- (p_star);
+  \draw[dotted] (x4) -- (q_star);
+
+  % Draw the final minimal distance connection
+  \draw[thick] (p_star) -- (q_star);
+  \fill[blue!80!black] (p_star) circle (2pt) node[left] {$x^*$};
+  \fill[red!80!black] (q_star) circle (2pt) node[right] {$y^*$};
+
+  % Label the minimal distance
+  \node[below, scale=0.8] at ($(p_star)!0.5!(q_star)$) {$\|x^*-y^*\|$};
+
+\end{tikzpicture}

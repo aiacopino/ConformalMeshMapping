@@ -10,8 +10,9 @@
 This chapter aims to give an overview and compare some existing methods in terms of input/output format, requirements on the boundary or shape of the regions, computational complexity, numerical stability and mesh quality preservation/ accuracy. The list is non-exhaustive but covers some of the most well-known and widely used methods.
 
 We start with an overview of the methods covered and how to choose between them depending on the application before explaining each of them in more detail.
-\input{flowchart.tex}
-\red{*(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)}
+%\input{flowchart.tex}
+\input{flowchart_v2.tex}
+%\red{*(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)}
 
 
 \subsection{Alternating Projections Method}\label{APMethod}
@@ -43,7 +44,6 @@ $$x_{n+1} := \begin{cases}
     \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
     \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
 \end{cases}$$ 
-\red{ADD IMAGE IF PATIENCE REMAINS}
 where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively (though there is also a more general algorithm by Braun, Pokutta and Weismantel \cite{Braun2023_AltProjections} in case no such projections exist).
 It can be shown that the sequence $(x_n)_n$ converges in the respectively used norm to a point tuple $(x*,y*)$ satisfying 
 $$
@@ -68,6 +68,8 @@ This exact idea is now applied to function spaces:
     \STATE $U_{k+1}(t) := U_k(t) - \text{Re}\frac{i (\text{Im}(a_1))e^{it}+\sum_{n=-\infty}^{0} a_n e^{int}}{\dot{\eta}(t+U_k(t))}$ \hfill [Calculate the new iterate]
     \end{algorithmic}
 \end{algorithm}
+
+\input{altproj.tex}
 
 \subsubsection{Alternating Projections with Overrelaxation (OAP)}
 The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[p. 298]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
@@ -94,7 +96,7 @@ Now pick prevertices $v_1, ..., v_N \in \del\mathbb{D}$ as well as two constants
 \end{equation}
 
 Note that $1-\frac{\zeta}{v_k} \in \{|z-1|<1 \}$ for $|v|<1$. Hence we can define a branch of logarithm with branch cut along the negative real axis and define $(1-\frac{\zeta}{v_k})^{-\theta_k} = exp(-\theta_k \log(1-\frac{\zeta}{v_k}))$, $\psi(v)$ defines an analytic function on $\disk$ which is continuous except at the vertices $v_k$.
-The formula is constructed such that the angles at the vertices correspong precisely to the exterior angles we need, hence the image of $\psi$ is a polygon with the correct angles. However, the lengths of the line segments need not be correct: This is where the choice of parameters $v_1, ..., v_N, z_c$ and $C$ comes in, and this is where the actual work in this method lies.
+The formula is constructed such that the angles at the vertices correspong precisely to the exterior angles we need, hence the image of $\psi$ is a polygon with the correct angles. However, the lengths of the line segments need not be correct: This is where the choice of parameters $v_1, ..., v_N, z_c$ and $C$ comes in, and this is where the computational challenge in this method lies.
 For the mapping to be unique, we can fix three of these parameters arbitrarily according to the Riemann mapping theorem. The remaining parameters are determined by solving the so-called \textbf{parameter problem}, which consists of a system of nonlinear equations obtained by enforcing the side lengths of the polygon to be correct.
 
 For fixing of the initial three parameters one has two options in principle:
@@ -172,6 +174,7 @@ Crowding is a problem because it yields exponential derivative of $\Phi$, but ca
 
 \subsection{Theodorsen's Method} \label{TheodorsenMethod}
 For $\Omega$ star-shaped with regard to the origin (wlog; otherwise we can precompose with a preliminary map), Theodorsen's method \cite[page 64]{Gaier1964} can be used to find the conformal mapping $\psi:\disk\to\Omega$ satisfying the initial conditions (\ref{eq:InitialConditionsOnPsi}).
+Since $\Omega$ is star-shaped, the boundary $\Gamma$ can be parametrized by the polar angle. Consequently, the boundary correspondence function $S(\varphi)$ defined in (\ref{eq:boundaryCorrespondence}) becomes the angular function $\theta(\varphi)$. 
 Theodorsen's integral equation is derived as follows:
 Note points on the unit circle are parametrised by $e^{i\varphi}$ while $\Gamma$ can be parametrised by $\rho(\theta)e^{i\theta}$ for $\varphi, \theta\in[0,2\pi]$ and $\rho(\theta)>0$ the radius function of $\Gamma$ (by star-shapedness of $\Omega$). Thus, the problem reduces to relating $\varphi$ and $\theta$ via a function $\theta(\phi)$.
 The trick is to introduce an auxiliary function involving a $\log$, which allows to separate the real and imaginary part of the problem: 
@@ -193,12 +196,12 @@ which can be rewritten into Theodorsen's integral equation
     \theta(\varphi) = \varphi + K \log(\rho(\theta(\varphi))).
 \end{equation}
 
-The discretization as in \cite{Gutknecht1983_theodorsen_equation_FFT} is done by naming $Y := \theta - \varphi$ the conjugate function of $X:= \log(\rho(\theta))$.
+The discretization as in \cite{Gutknecht1983_theodorsen_equation_FFT} is done by naming the difference between the boundary angle and the circle angle $Y := \theta - \varphi = \theta(\varphi) - \varphi$ the conjugate function of $X:= \log(\rho(\theta))= \log(|\eta(\varphi)|)$.
 Theodorsen's integral equation becomes the fixed point equation
 \begin{equation}\label{eq:TheodorsenDiscretized}
-    y=\psi(y):=K_{\Sigma} \log(\eta(s+y))
+    y=\psi(y):=K_{\Sigma} \log(|\eta(\varphi+y)|)
 \end{equation} 
-for $s:=(\frac{k\pi}{N})_{k\in[2N-1]}$ where $y$ approximates $Y(s)$ and $\eta$ is the boundary correspondence function (\ref{eq:boundaryCorrespondence}).
+where the equation is evaluated on a grid of $2N$ equidistant angles $\varphi_k = \frac{k\pi}{N}$ for $k=0, \dots, 2N-1$. Here, the vector $y$ approximates the values of the continuous function $Y(\varphi)$ at these grid points, such that $y_k \approx Y(\varphi_k)$.
 The product $y$ can be computed efficiently using FFT (see chapter \ref{operatorK_N}).
 \iffalse
 If the discretization is based on trigonometric interpolation, $K_{\Sigma}$ is called \textbf{Wittich's matrix} \cite{Gutknecht1983_theodorsen_equation_FFT}.
@@ -233,7 +236,7 @@ Alternatively, nonlinear Jacobi iteration with relaxation (JOR) can be used:
 \end{equation}
 \fi
 In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \cite{Gutknecht1983_theodorsen_equation_FFT}.
-It also theoretically needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, but has the advantage of being an easily computable fixed point equation in this case. 
+It also theoretically needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, since otherwise the radius function $\rho(\theta)$ becomes multivalued causing numerical failure, but has the advantage of being an easily computable fixed point equation if star-shaped. 
 In practice, the star-shape requirement can also be relaxed by smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
 
 % ok from here
@@ -292,7 +295,7 @@ We therefore exchange the map $f_a$ for a map $g_a: \mathbb{H}\setminus L \to \m
 \subsubsection{The Zipper Algorithm}
 The approximation of $\Gamma$ by circular arcs or straight line segments can be further improved by using circular arcs which meet $\Gamma$ tangentially at the points $z_i$. Each arc is determined by the points $z_i, z_{i+1}$ and $z_{i+2}$, hence we assume an even number of boundary points. 
 The first arc is replaced by $$\varphi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z_1-z_2)}}.$$ At each subsequent step that circular arc through $\zeta_k$ and $\zeta_{k+1}$ is mapped onto a straight line segment by a Möbius transform, and then the Slit Algorithm is applied to unzip that segment.
-\red{This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one.}
+This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one \cite[page 8]{marshall2006_convergencezipperalgorithmconformal}.
 
 
 \subsection{Wegmann's Method} \label{chap:WegmannMethod}
@@ -347,8 +350,20 @@ A potential theoretic formulation of the conformal mapping problem leads to a Fr
 Conceptually, a pair of conjugate harmonic functions are expressed by a complex logarithmic potential, and the mapping problems are reduced to singular Fredholm integral equations of the ﬁrst kind. Gaier \cite{Gaier1964} mathematically studied Symm’s integral equation and proved the existence and uniqueness of the solution. These methods need $\bigO(N^3)$ operations if the boundary is discretized at N points. Henrici showed that complexity of $\bigO(N^2\log N)$ can be achieved by using FFTs \cite{Henrici1986_vol3}.
 
 \begin{definition}
-    In two dimensions, the Laplace equation has a fundamental solution of the form $log(r)$ where $r=|z-\zeta_k|$ is the modulus of the vector from any point $z$ on the region to the boundary point $\zeta_k$, $k\in N$. This function $log(|z-\zeta_k|)$ is called the \textbf{logarithmic potential}. 
+    In two dimensions, the Laplace equation has a fundamental solution of the form $\log(r)$ where $r=|z-\zeta_k|$ is the modulus of the vector from any point $z$ on the region to the boundary point $\zeta_k$, $k\in N$. This function $\log(|z-\zeta_k|)$ is called the \textbf{logarithmic potential}. 
 \end{definition}
+A potential theoretic formulation of the Dirichlet problem (\ref{eq:DirichletProblem}) leads to a Fredholm integral equation of the first kind called \textbf{Symm's equation}
+\begin{equation}\label{eq:Symm}
+    \int_{\Gamma} \log| z - \zeta| \mu(\zeta) d\zeta = -\log|z| \quad \text{ for } z\in\Omega, \zeta\in\Gamma
+\end{equation} which has a kernel with logarithmic singularity. In this context, the conformal mapping problem reduces to finding a suitable source density function $\mu(z)=g(z)+ih(z)$ on the boundary $\Gamma$ where $g$ and $h$ are conjugate and $g$ satisfies 
+\begin{equation}
+    \begin{matrix}
+        \nabla^2 g(z) = 0 & z\in \Omega \\
+        g(z) = -\frac{1}{2} \log|z\bar{z}| & z\in \Gamma.
+    \end{matrix}
+\end{equation}
+It is more easily solvable by numerical methods than Fredholm integral equations of the second kind, where the kernel might have singularities near the boundary \cite[chapter 9]{Kythe1998_symmsintegralequation}.
+
 This is used in the so-called Charge Simulation Method which Amano's Method is based on.
 
 \subsubsection{Algorithm}
@@ -356,7 +371,7 @@ The charge simulation method approximates the solution of the Laplace equation b
 \begin{equation}\label{eq:AmanosApproximation}
     g(z) = \sum_{k=1}^{N} Q_k log(|z-\zeta_k|),
 \end{equation}
-where $\zeta_1, \ldots, \zeta_N \notin\overline\Omega$ are called \textbf{charge points} and placed outside the domain (\red{their placement is an art in and of itself}). The unknown constants $Q_1, \ldots, Q_N$ are called \textbf{charges} and determined to satisfy the boundary condition at the \textbf{collocation points} $z_1, \ldots, z_N$ (fixed check points on the boundary $\del\Omega$).
+where $\zeta_1, \ldots, \zeta_N \notin\overline\Omega$ are called \textbf{charge points} and placed outside the domain. The unknown constants $Q_1, \ldots, Q_N$ are called \textbf{charges} and determined to satisfy the boundary condition at the \textbf{collocation points} $z_1, \ldots, z_N$ (fixed check points on the boundary $\del\Omega$).
 Hence, $Q_k$ are found by plugging in the collocation points into the below \textbf{collocation condition} and solving the linear system:
 \begin{equation} \label{eq:collocationCondition}
     \eta(z_i) = \sum_{k=1}^{N} Q_k log(|z_i-\zeta_k|), \quad i=1,2,...,N.
@@ -370,8 +385,7 @@ If the boundary is analytic, this method can be shown to have exponential accura
 In 2007, Binder, Braverman ans Yampolsky proposed a method for finding a conformal map using a random walks solver to the general Dirichlet problem. They conjectured an upper bound of polynomial space and time for an algorithm with precision $\frac{1}{n}$ pixels (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function). \cite{binder2007_computationalcomplexityriemannmapping}
 
 
-\red{\input{workarounds.tex}}
-
+%\red{\input{workarounds.tex}}
 
 
 
@@ -379,11 +393,11 @@ In 2007, Binder, Braverman ans Yampolsky proposed a method for finding a conform
 We can directly rule out some of the options due to our project constraints: 
 First we note that Schwarz-Christoffel only works on polygons and Theodorsen's method is restricted to star-shaped regions. Since we want to be able to work with more general shapes of $\Omega$, we have to disregard these two methods.
 
-We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy.
-\red{Amano's Method of Fundamental Solutions seems good for fast point-evaluations of $\psi$ itself, but the derivative could be tricky due to $\psi$'s form.} Moreover, we cannot use our Fourier parametrization nor our mesh in this method, so it will probably not be the best choice for our specific problem. Note also that the accuracy and convergence of this method depend on the right choice of charge points, which poses another difficulty, especially given the generality of our target domain.
+We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy, but it is worthwile noting that this is a good choice in cases where the boundary is so rough/ irregular that deterministic methods fail.
+Amano's Method of Fundamental Solutions seems good for fast (linear time) point-evaluations of $\psi$ as well as its derivative as it is a sum of simple fractions and all the singularities (charge points) are placed strictly outside the region. However, we cannot directly use our Fourier parametrization nor our mesh in this method, so it will probably not be the best choice for our specific problem. Note also that the accuracy and convergence of this method depend on the right choice of charge points.
 The Conjugate Function Method is very beautiful mathematically, but it relies only on $hp$-FEM for which there already are powerful libraries, so there would not be much value in half-assing an FEM solver given the scope of this thesis. 
 
-On the one hand, the Zipper method seems very well implementable and robust, but there is a small caveat to be aware of for the efficient point evaluations. Since the Zipper method essentially constructs $\psi$ as a composition of many maps, the derivative is not straightforward to implement via a formula (chain rule). Also, trying a finite differences approach is slow and potentially numerically unstable, but there is hope in a technique called Forward Automatic Differentiation which is both exact and efficient \cite{wikipedia_autodiff}. 
+On the one hand, the Zipper method is very well implementable and robust (it can handle rough boundaries including fractals), but there is a small caveat to be aware of for the efficient point evaluations. Since the Zipper method essentially constructs $\psi$ as a composition of many maps, the derivative is numerically expensive to compute (chain rule). Also, trying a finite differences approach is slow and potentially numerically unstable, but there is hope in a technique called Forward Automatic Differentiation which is both exact and efficient \cite{wikipedia_autodiff}. 
 
 On the other hand, the Alternating Projections Method uses the boundary parametrization in its Fourier series form.
 The output of the discretized OAP is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$.
@@ -393,43 +407,12 @@ The Alternating Projections Method is one of the simplest and most robust method
 Lastly, Wegmann's Method (\ref{chap:WegmannMethod}) uses the boundary parametrization and its derivative in form of Fourier coefficients as well as the tangent angle as inputs. 
 The output of the algorithm is an analytic function constructed from trigonometric polynomials. This allows for efficient point evaluations of both $\psi$ and its derivative \cite{Wegmann1984_convergence_iterative_method}.
 Convergence is quadratic for analytic boundaries (as is known for Newton methods) and superlinear ($\in\bigO(N^{1+\mu})$) for $\eta\in C^{2+\mu}$ but depends on a "good enough" initial guess for the correspondence function \cite{Wegmann1984_convergence_iterative_method}.
-Discretizing the operator $K$ (\ref{operatorK_N}) using \red{Wittich's method} yields the operator $K_N$ which can be computed efficiently using FFT.
+Furthermore, discretizing the operator $K$ (\ref{operatorK_N}) using Wittich's method yields the operator $K_N$ which can be computed efficiently using FFT.
 
-Wegmann also compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite[p. 415]{Wegmann2005_num_methods_confmapping}.
+Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite[p. 415]{Wegmann2005_num_methods_confmapping}.
 Note the computational costs of these last two methods are mainly determined by the FFTs and this parameter is dependent on the number of grid points.
 
-Hence, Zipper, OAP and Wegmann's methods seem suitable for our problem, \red{but Wegmann's Method is more accurate with faster convergence while OAP is easier to implement. COMPARISON TABLE HERE}
+Hence, Zipper, OAP and Wegmann's methods seem suitable for our problem, but Wegmann's Method is more accurate with faster convergence while OAP is easier to implement.
 
 \bigskip
-
-
-\iffalse
-\begin{sidewaystable}[!p]
-\caption{Overview Table}
-\centering
-\small
-\resizebox{\textwidth}{!}{%
-    \begin{tabular}{|l|l|l|l|l|l|l|l|}
-    \hline
-    Algorithm & $\Omega$ shape & Runtime & Space & Input & Output & Advantages & Disadvantages \\
-    \hline
-    Alternating projections& shape & Runtime & Space & Input & Output & Advantages & Disadvantages\\
-    \hline
-    Zipper &shape & Runtime & Space & Input & Output & Advantages & Disadvantages \\
-    \hline
-    Theodorsen & star-shaped & Runtime & Space & Input & Output & Advantages & Disadvantages \\
-    \hline
-    Schwarz-Christoffel & polygon  & Runtime & Space & Input & Output & corner-handling & disadvantages\\
-    \hline
-    Niethammer &shape & Runtime & Space & linear system of equations & Output & Advantages & Disadvantages\\
-    \hline
-    Wegmann & shape & Runtime & Space & non-linear Theodorsen Equation & Output & Advantages & Disadvantages \\
-    \hline
-    Conjugate fct & shape & Runtime & Space & Input & Output & Advantages & Disadvantages \\
-    \hline
-    Spare row & shape & Runtime & Space & Input & Output & Advantages & Disadvantages\\
-    \hline
-    \end{tabular}%
-}
-\end{sidewaystable}
-\fi
+\input{comparisontable.tex}
