@@ -3,8 +3,8 @@
 %\usetikzlibrary{angles, quotes, calc, decorations.markings}
 
 %\begin{document}
-\bigskip
-
+\begin{center}
+    
 \begin{tikzpicture}
 
 \coordinate (O) at (0,0);
@@ -17,19 +17,19 @@
     postaction={decorate},
     decoration={
         markings,
-        mark=at position 0.25 with {
+        mark=at position 0.01 with {
             \coordinate (eta_s); 
             \coordinate (theta_s) at ($(eta_s) + (8mm,0)$);
             \draw[->] (0,0)--(8mm,0) node [above left] {};
             },
-        mark=at position 0.5 with {
+        mark=at position 0.25 with {
             \coordinate (eta_t);
             \coordinate (theta_t) at ($(eta_t) + (8mm,0)$); 
             \draw[->] (0,0)--(8mm,0) node [below right] {};
             }
     }
-] plot [smooth, tension=0.7] 
-    coordinates { (-1, 3) (5, 2) (3, -2) (-3, -1) } -- cycle;
+] plot [smooth cycle, tension=1.5] 
+    coordinates { (-1.5, 2) (5, 2) (3, -2) (-3, -1) } -- cycle;
 \node at (-3, -1) [below left] {$\Gamma$};
 
 % thetas
@@ -38,9 +38,9 @@
 \draw (eta_s)--(eta_s_x);
 \draw (eta_t)--(eta_t_x);
 
-\node [fill=black, circle, inner sep=1.5pt, label={[below left]$O$}] at (O) {};
+\node [fill=black, circle, inner sep=1.5pt, label={[below left]$0$}] at (O) {};
 \node [fill=black, circle, inner sep=1.5pt, label={[above]$ \eta(s)$}] at (eta_s) {};
-\node [fill=black, circle, inner sep=1.5pt, label={[above left]$ \eta(t)$}] at (eta_t) {};
+\node [fill=black, circle, inner sep=1.5pt, label={[above]$ \eta(t)$}] at (eta_t) {};
 
 % vectors from origin
 \draw[->] (O) -- (eta_s);
@@ -57,17 +57,16 @@
 \pic [draw, -, angle radius=1.2cm, "$\phi(s)$", angle eccentricity=1.4] 
     {angle = X_axis--O--eta_s};
 
-\pic [draw, -, angle radius = 0.7cm, "$\theta_s$", angle eccentricity=1.5] 
+\pic [draw, -, angle radius = 0.5cm, "$\theta(s)$", angle eccentricity=1.8] 
     {angle = theta_s--eta_s--eta_s_x};
 
-\pic [draw, -, angle radius = 0.5cm, "$\theta_t$", angle eccentricity=1.5] 
+\pic [draw, -, angle radius = 0.5cm, "$\theta(t)$", angle eccentricity=1.5] 
     {angle = theta_t--eta_t--eta_t_x};
 
 \pic [draw, -, angle radius = 0.7cm, angle eccentricity= 1.5]
     {angle = eta_t_x--eta_t--eta_s}
     node [shift={(1.2,.4)}] at (eta_t) {$\varphi_s(t)$};
 \end{tikzpicture}
-
-\bigskip
+\end{center}
 
 %\end{document}

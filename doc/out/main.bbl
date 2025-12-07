@@ -1,4 +1,4 @@
-\begin{thebibliography}{{Wik}25}
+\begin{thebibliography}{{Wik}25b}
 
 \bibitem[Ama98]{Amano1998_Amanosmethod}
 Kaname Amano.
@@ -102,10 +102,22 @@ Rudolf Wegmann.
 \newblock Chapter 9 - methods for numerical conformal mapping.
 \newblock In R.~Kühnau, editor, {\em Geometric Function Theory}, volume~2 of {\em Handbook of Complex Analysis}, pages 351--477. North-Holland, 2005.
 
-\bibitem[{Wik}25]{wikipedia_autodiff}
+\bibitem[{Wik}25a]{wikipedia_autodiff}
 {Wikipedia contributors}.
 \newblock Automatic differentiation --- {Wikipedia}{,} the free encyclopedia.
 \newblock \url{https://en.wikipedia.org/w/index.php?title=Automatic_differentiation&oldid=1320248234}, 2025.
 \newblock [Online; accessed 14-November-2025].
+
+\bibitem[{Wik}25b]{wiki:FredholmIntegralEquation}
+{Wikipedia contributors}.
+\newblock Fredholm integral equation --- {Wikipedia}{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/w/index.php?title=Fredholm_integral_equation&oldid=1314003753}, 2025.
+\newblock [Online; accessed 7-December-2025].
+
+\bibitem[{Wik}25c]{wiki:HurwitzTheorem}
+{Wikipedia contributors}.
+\newblock Hurwitz's theorem (complex analysis) --- {Wikipedia}{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/w/index.php?title=Hurwitz%27s_theorem_(complex_analysis)&oldid=1321322619}, 2025.
+\newblock [Online; accessed 7-December-2025].
 
 \end{thebibliography}
