@@ -1,4 +1,4 @@
-\begin{thebibliography}{{Wik}25b}
+\begin{thebibliography}{{Wik}25d}
 
 \bibitem[Ama98]{Amano1998_Amanosmethod}
 Kaname Amano.
@@ -6,17 +6,13 @@ Kaname Amano.
 \newblock {\em SIAM Journal on Scientific Computing}, 19(4):1169--1187, 1998.
 
 \bibitem[Ban08]{Banjai2008_SC_crowdingworkaround}
-L.~Banjai.
+Lehel Banjai.
 \newblock Revisiting the crowding phenomenon in schwarz–christoffel mapping.
 \newblock {\em SIAM Journal on Scientific Computing}, 30(2):618--636, 2008.
 
 \bibitem[BBY07]{binder2007_computationalcomplexityriemannmapping}
 Ilia Binder, Mark Braverman, and Michael Yampolsky.
 \newblock On computational complexity of riemann mapping, 2007.
-
-\bibitem[BPW23]{Braun2023_AltProjections}
-Gábor Braun, Sebastian Pokutta, and Robert Weismantel.
-\newblock Alternating linear minimization: Revisiting von neumann's alternating projections, 2023.
 
 \bibitem[Bro90]{Brown1990_SC_meshgen}
 Philip~Raymond Brown.
@@ -27,6 +23,11 @@ Philip~Raymond Brown.
 Ren{\'e}~E. Castillo and Edixon~M. Rojas.
 \newblock Revisiting the hilbert transform of periodic functions.
 \newblock {\em Mathematische Semesterberichte}, 72:29--49, 2025.
+
+\bibitem[DeL94]{DeLillo1994_crowding_accuracy}
+Thomas~K. DeLillo.
+\newblock The accuracy of numerical conformal mapping methods: A survey of examples and results.
+\newblock {\em SIAM Journal on Numerical Analysis}, 31(3):788--812, 1994.
 
 \bibitem[EW22]{EinsiedlerWieser2022AnalysisSkript}
 Manfred Einsiedler and Andreas Wieser.
@@ -47,6 +48,11 @@ Martin~H. Gutknecht.
 Peter Henrici, editor.
 \newblock {\em Applied and computational complex analysis. Vol. 3: discrete Fourier analysis—Cauchy integrals—construction of conformal maps---univalent functions}.
 \newblock John Wiley \& Sons, Inc., USA, 1986.
+
+\bibitem[Hip23]{Hiptmair2023_NUMPDE}
+Ralf Hiptmair.
+\newblock Numerical methods for partial differential equations.
+\newblock Lecture Notes, Seminar for Applied Mathematics, ETH Zurich, 2023.
 
 \bibitem[HQR13]{Hakula_2013_conjugatefunctionmethod}
 Harri Hakula, Tri Quach, and Antti Rasila.
@@ -119,5 +125,23 @@ Rudolf Wegmann.
 \newblock Hurwitz's theorem (complex analysis) --- {Wikipedia}{,} the free encyclopedia.
 \newblock \url{https://en.wikipedia.org/w/index.php?title=Hurwitz%27s_theorem_(complex_analysis)&oldid=1321322619}, 2025.
 \newblock [Online; accessed 7-December-2025].
+
+\bibitem[{Wik}25d]{wiki:MoebiusTransform}
+{Wikipedia contributors}.
+\newblock Möbius transformation --- {Wikipedia}{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/w/index.php?title=M%C3%B6bius_transformation&oldid=1323948782}, 2025.
+\newblock [Online; accessed 8-December-2025].
+
+\bibitem[{Wik}25e]{wiki:Polygon}
+{Wikipedia contributors}.
+\newblock Polygon --- {Wikipedia}{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/w/index.php?title=Polygon&oldid=1320067726}, 2025.
+\newblock [Online; accessed 8-December-2025].
+
+\bibitem[{Wik}25f]{wiki:SobolevSpace}
+{Wikipedia contributors}.
+\newblock Sobolev space --- {Wikipedia}{,} the free encyclopedia.
+\newblock \url{https://en.wikipedia.org/w/index.php?title=Sobolev_space&oldid=1324240611}, 2025.
+\newblock [Online; accessed 8-December-2025].
 
 \end{thebibliography}

@@ -17,14 +17,13 @@
 
 % --- Star-Shaped Branches (Bottom of Spine) ---
 % Left Branch: Theodorsen
-\node (theodorsen) [process, left=1cm of dec_star] {Theodorsen's\\Method};
+\node (theodorsen) [process, left=1cm of dec_star] {Theodorsen's\\Method (\ref{chap:TheodorsenMethod})};
 
 % Down Branch: General Smooth Methods
 \node (general_bie_label) [process, below=1cm of dec_star] {General Smooth Methods:};
     % List
-    \node (wegmann) [process, below=0.1cm of general_bie_label] {Wegmann's Method};
-    \node (neumann) [process, below=0.1cm of wegmann] {Neumann Kernel};
-    \node (amano) [process, below=0.1cm of neumann] {Symm's Eq. (Amano)};
+    \node (amano) [process, below=0.1cm of general_bie_label] {Amano's Method (\ref{chap:AmanosMethod})};
+    \node (wegmann) [process, below=0.1cm of amano] {Wegmann's Method (\ref{chap:WegmannMethod})};
 
 
 % --- Polygon Branch (To the Right) ---
@@ -32,16 +31,15 @@
 \node (dec_poly) [decision, right=1.5cm of dec_smooth] {$\Omega$ a Polygon?};
 
     % Right Branch: Schwarz-Christoffel
-    \node (schwarz) [process, right=1cm of dec_poly] {Schwarz-\\Christoffel};
+    \node (schwarz) [process, right=1cm of dec_poly] {Schwarz-\\Christoffel\\(\ref{chap:SchwarzChristoffelMethod})};
 
     % Down Branch: General Jordan Curves
     \node (general_group) [process, below=1cm of dec_poly] {General Jordan\\Curves:};
     
     % List (Aligned with General Jordan Label)
-    \node (zipper) [process, below=0.1cm of general_group] {Zipper Algorithm};
-    \node (ap) [process, below=0.1cm of zipper] {Alternating\\Projections};
-    \node (conjugate) [process, below=0.1cm of ap] {Conjugate Function};
-    \node (prob) [process, below=0.1cm of conjugate] {Probabilistic\\Method};
+    \node (zipper) [process, below=0.1cm of general_group] {Zipper Method (\ref{chap:ZipperMethod})};
+    \node (conjugate) [process, below=0.1cm of zipper] {Conjugate Function \\Method (\ref{chap:ConjugateFunctionMethod})};
+    \node (prob) [process, below=0.1cm of conjugate] {Probabilistic\\Method (\ref{chap:ProbabilisticMethod})};
 
 
 % --- Arrows ---
@@ -63,13 +61,11 @@
 \draw [arrow] (dec_poly) -- node[right, font=\scriptsize] {No} (general_group);
 
 % List Connectors (Optional thin lines for visual grouping)
-\draw [thin, gray] (general_bie_label) -- (wegmann);
-\draw [thin, gray] (wegmann) -- (neumann);
-\draw [thin, gray] (neumann) -- (amano);
+\draw [thin, gray] (general_bie_label) -- (amano);
+\draw [thin, gray] (amano) -- (wegmann);
 
 \draw [thin, gray] (general_group) -- (zipper);
-\draw [thin, gray] (zipper) -- (ap);
-\draw [thin, gray] (ap) -- (conjugate);
+\draw [thin, gray] (zipper) -- (conjugate);
 \draw [thin, gray] (conjugate) -- (prob);
 
 \end{tikzpicture}

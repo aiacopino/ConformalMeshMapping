@@ -15,7 +15,8 @@
 \begin{abstract}
     Given a 2D triangular mesh $\widehat{\mathcal{M}}$ of the unit disk $\mathbb{D}$, whose triangles are all nicely shape-regular (in the sense that the ratio of their diameter to the radius of the largest inscribed circle is uniformly bounded for all triangles), we are guaranteed the existence of a conformal mapping $\psi$ from $\mathbb{D}$ to any simply connected bounded domain $\Omega$ by the Riemann mapping theorem. This allows for a sufficiently "nice" mesh $\mathcal{M}$ on $\Omega$ to be obtained as the image of $\widehat{\mathcal{M}}$ under $\psi$, i.e. $\mathcal{M}=\psi(\widehat{\mathcal{M}})$. 
     The challenge lies in the numerical construction/ approximation of this conformal mapping $\psi$.
-    This text is intended to give a general overview of currently known numerical conformal mapping algorithms, and to provide a comparison in terms of accuracy, runtime, and the representation format of the resulting map, particularly emphasizing the efficiency of point evaluations for both the mapping $\psi$ itself and its derivative (Jacobian) $D\psi$. Finally, we implement \red{Algorithm Name} in Python.
+    This text is intended to give a general overview of currently known numerical conformal mapping algorithms, and to provide a comparison in terms of accuracy, runtime, and the representation format of the resulting map, particularly emphasizing the efficiency of point evaluations for both the mapping $\psi$ itself and its derivative (Jacobian) $D\psi$. 
+    Finally, we implement Wegmann's Method in Python.
 
     % If the region S is a convex polygon, the extremal problem can be treated numerically by linear programming methods (Opfer [202]).
 \iffalse

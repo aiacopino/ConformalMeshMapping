@@ -46,25 +46,23 @@
         Expensive derivative computation (chain rule); Only approximates $\Gamma$. \\
         \addlinespace
         
-        \textbf{Alternating Projections} & 
-        Smooth & 
-        $\bigO(N \log N)$ per iter.: FFT & 
-        Fourier Series of $\eta$ & 
-        Interpolating Polynomial & 
-        Robust and simple to implement; Efficient point evaluation. & 
-        Linear (slow) convergence for fine meshes; Low accuracy for reasonable grids. \\
-        \addlinespace
-        
-        \textbf{Wegmann's Method} & 
-        Smooth & 
-        $\bigO(N \log N)$ per iter.: FFT & 
-        $\eta$ and tangent angles & 
-        Analytic function (Trig. poly) & 
-        Quadratic (fast) convergence for fine meshes; High accuracy (FFT); Efficient point evaluation. & 
-        Requires good initial guess; Complex implementation. \\
-        \addlinespace
-        
-        \textbf{Amano's Method} & 
+        \textbf{Conjugate Function} & 
+        General, incl. sharp corners/ cusps & 
+        Dep. on mesh, slower than SC on polygons & 
+        Boundary \& 4 marked vertices & 
+        Conformal modulus $h$ \& $u,v$ potentials s.t. $\psi(z)=u(z)+ih(z)$ & 
+        Exponential convergence using $hp$-FEM; Works on rough boundaries; Numerical stability thanks to dual BVP & 
+        Point evaluation expensive (searching mesh) \\
+
+        \textbf{Probabilistic} & 
+        General, incl. Rough/ Fractals & 
+        Polynomial & 
+        Oracle / Boundary (pixel list) & 
+        Random Walk approx. & 
+        Works on rough boundaries where deterministic methods fail. & 
+        Slow convergence; Inherent randomness; Difficult to guarantee accuracy. \\
+
+        \textbf{Amano} & 
         Analytic & 
         $\bigO(N^3)$ & 
         Collocation points $z_i$ & 
@@ -73,13 +71,14 @@
         Cannot use Fourier param. or mesh; Sensitive to charge point placement. \\
         \addlinespace
         
-        \textbf{Probabilistic Method} & 
-        General, incl. Rough/ Fractals & 
-        Polynomial & 
-        Oracle / Boundary (pixel list) & 
-        Random Walk approx. & 
-        Works on rough boundaries where deterministic methods fail. & 
-        Slow convergence; Inherent randomness; Difficult to guarantee accuracy. \\
+        \textbf{Wegmann (OAP)} & 
+        Smooth & 
+        $\bigO(N \log N)$ per iter.: FFT & 
+        Fourier Series of $\eta$ & 
+        Analytic Interpolating Polynomial & 
+        Quadratic (fast) convergence for fine meshes; High accuracy (FFT); Efficient point evaluation. & 
+        Requires good initial guess (local convergence); Requires smooth boundary. \\
+        \addlinespace
         
         \bottomrule
     \end{tabularx}

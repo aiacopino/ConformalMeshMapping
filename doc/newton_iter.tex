@@ -1,0 +1,62 @@
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=2, >=Latex]
+
+    % 1. DRAW THE CURVE (Gamma)
+    % Hardcoded smooth curve
+    \draw[thick, blue!70!black] 
+        (0,0) .. controls (2, 2) and (5, 1) .. (6, 0.5) 
+        node[right] {\large $\Gamma$ (Boundary)};
+
+    % 2. DEFINE COORDINATES
+    % Current point
+    \coordinate (Pk) at (1.3, 1.25); 
+    
+    % Target point on Tangent (Red Dot)
+    \coordinate (Phi) at (4.0, 2.18); 
+
+    % Tangent line end (just for drawing the dashed line past Phi)
+    \coordinate (TangentEnd) at ($(Pk)!1.4!(Phi)$);
+
+    % Point on Curve below Phi (Blue Dot)
+    \coordinate (Pk_next) at (4.0, 1.35); 
+
+    % 3. DRAW TANGENT LINE
+    \draw[dashed, gray, thick] (Pk) -- (TangentEnd) 
+        node[right, black] {Tangent Space $T_k$};
+
+    % 4. DRAW NEWTON SHIFT VECTOR (Red Arrow)
+    \draw[->, red, very thick] (Pk) -- (Phi) 
+        node[midway, above, sloped, yshift=2pt, font=\small] 
+        {Newton Step: $U_k \cdot \dot{\eta}(S_k)$};
+
+    % 5. DRAW ERROR GAP (Manual Dimension Line)
+    % The vertical dotted line
+    \draw[dotted, black, thick] (Phi) -- (Pk_next);
+    
+    % The horizontal marker lines (ticks)
+    \draw[thin, gray] ($(Phi)+(-0.05,0)$) -- ($(Phi)+(0.15,0)$);
+    \draw[thin, gray] ($(Pk_next)+(-0.05,0)$) -- ($(Pk_next)+(0.15,0)$);
+    
+    % The vertical connector line
+    \draw[thin, gray] ($(Phi)+(0.1,0)$) -- ($(Pk_next)+(0.1,0)$)
+        node[midway, right, align=left, font=\footnotesize, black] 
+        {Linearization\\Error $\mathcal{O}(U_k^2)$};
+
+    % 6. DRAW DOTS AND LABELS
+    
+    % P_k
+    \filldraw[black] (Pk) circle (1.5pt) 
+        node[below=5pt] {$P_k = \eta(S_k)$};
+
+    % Phi_{k+1}
+    \filldraw[red!80!black] (Phi) circle (1.5pt) 
+        node[above left=-2pt] {$\Phi_{k+1}$};
+
+    % eta(S_{k+1})
+    \filldraw[blue!80!black] (Pk_next) circle (1.5pt) 
+        node[below right=-2pt] {$\eta(S_{k+1})$};
+
+\end{tikzpicture}
+\label{fig:wegmann_newton}
+\end{figure}

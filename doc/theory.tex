@@ -269,11 +269,25 @@ The Neumann kernel is defined for $s \neq t$ as
 In order to numerically solve boundary value problems the domain is usually discretised by creating a mesh $\M$ of $N$ nodes (points) and $M$ elements (cells) covering the domain $\Omega$. 
 There are many methods to create such meshes, but for the scope of this article we will assume to be given a mesh on the domain and only briefly discuss some important properties of meshes and mesh generation methods. We highly recommend referring to \cite{Brown1990_SC_meshgen} for a more in-depth treatment of mesh generation techniques.
 
-\begin{definition}
-\red{XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx}
+\begin{definition}[{\cite[Definition 2.5.1.1]{Hiptmair2023_NUMPDE}}]
+    A \textbf{mesh} on $\Omega\in\C$ is a finite collection $\mathcal{M}:= \{K_i\}_{i\in [M]}, M\in\N$ of open non-degenerate (curvilinear) polygons called \textbf{cells} such that
+    \begin{enumerate}
+        \item $\overline{\Omega} = \displaystyle\bigcup_{i\in [M]} \overline{K_i}$,
+        \item $K_i \cap K_j = \emptyset \iff i\neq j$,
+        \item $\forall i\neq j\in[M]:
+        \overline{K_i} \cap \overline{K_j}\in
+        \begin{cases}
+        \emptyset,\\
+        \text{a common vertex of both cells or } \\
+        \text{a common edge of both cells}
+        \end{cases}$
+    \end{enumerate}
 \end{definition}
 
 In two dimensions, the most common choice for mesh elements are triangles or quadrilaterals. Triangular meshes are more flexible in adapting to complex geometries, while quadrilateral meshes can provide better accuracy for certain types of problems. Hybrid meshes combining both types are also used in practice to combine advantages.
+
+We will be given a triangular mesh in the form of a list of nodes and a list of cells by two vectors:
+A $N\times2$ matrix of points (complex coordinates of $N$ nodes) and a $M\times 3$ matrix of integers (containing the indices of nodes constituing each of the $M$ triangles).
 
 \subsubsection{Mesh Structure}
 To ensure bijectivity and conformality of the mapping $\psi$ acting on the discretised domain, the discretisation must be done intelligently, i.e. the mesh must satisfy certain regularity criteria. Ill-chosen meshes could lead to overlaps of the target mesh nodes, failing bijectivity, or even non-conformality of $\psi$ due to the failure to satisfy the discrete geometric constraints which are required for angle preservation.
@@ -306,7 +320,7 @@ Wegmann proved the following result.
     $$
 \end{theorem}
 This means that crowding increases exponentially with the aspect ratio of the target region.
-\red{CHECK CORRECTNESS OF THIS STATEMENT}
 \input{elongated_v2.tex}
 
 \red{DeLillo has shown how crowding affects the accuracy of numerical computations.}
+\cite{DeLillo1994_crowding_accuracy}
