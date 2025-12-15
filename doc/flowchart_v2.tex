@@ -23,7 +23,8 @@
 \node (general_bie_label) [process, below=1cm of dec_star] {General Smooth Methods:};
     % List
     \node (amano) [process, below=0.1cm of general_bie_label] {Amano's Method (\ref{chap:AmanosMethod})};
-    \node (wegmann) [process, below=0.1cm of amano] {Wegmann's Method (\ref{chap:WegmannMethod})};
+    \node (AP) [process, below=0.1cm of amano] {Alternating Projections (\ref{chap:APMethod})};
+    \node (wegmann) [process, below=0.1cm of AP] {Wegmann's Method (\ref{chap:WegmannMethod})};
 
 
 % --- Polygon Branch (To the Right) ---
@@ -62,7 +63,8 @@
 
 % List Connectors (Optional thin lines for visual grouping)
 \draw [thin, gray] (general_bie_label) -- (amano);
-\draw [thin, gray] (amano) -- (wegmann);
+\draw [thin, gray] (amano) -- (AP);
+\draw [thin, gray] (AP) -- (wegmann);
 
 \draw [thin, gray] (general_group) -- (zipper);
 \draw [thin, gray] (zipper) -- (conjugate);

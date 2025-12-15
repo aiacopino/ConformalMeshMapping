@@ -1,0 +1,424 @@
+\documentclass{article}
+\input{preamble}
+\begin{document}
+
+\iffalse METRICS
+- Numerical stability of different conformal mapping methods
+- Boundary discretization requirements (how smooth does $\gamma$ need to be?)
+- Mesh quality preservation - how does the mapping affect triangle quality?
+- Computational complexity
+- Input and output formats
+- https://www.desmos.com/calculator/g9asjc6xph
+\fi
+\section{Existing Methods}
+This chapter aims to give an overview and compare some existing methods in terms of input/output format, requirements on the boundary or shape of the regions, computational complexity, numerical stability and mesh quality preservation/ accuracy. The list is non-exhaustive but covers some of the most well-known and widely used methods.
+
+We start with an overview of the methods covered and how to choose between them depending on the application before explaining each of them in more detail.
+%\input{flowchart.tex}
+\input{flowchart_v2.tex}
+%\red{*(Linear Fredholm $1^{st}$ kind, generally ill-posed -> not preferred)}
+\red{EHAT IS THE DIFF BETW ALT PROJ AND CONJ FUNC}
+\red{ALSO NEUMANN KERNEL AND CONJ FUNC ARE NOT IN COMPTABLE}
+
+\subsection{Alternating Projections Method}\label{APMethod}
+Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator $K$ \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
+The method of alternating projections uses both these sequences and alternates between them to find $\psi$ \cite{Wegmann1989_alternating_projections}.
+We first introduce the necessary function spaces.
+\red{what di helly}
+\subsubsection{Sobolev Spaces}
+Let $L^2$ be the space of all $2\pi$-periodic complex functions $f$ which are square integrable over $[0, 2\pi]$ equipped with the inner product 
+$$(f,g)_2= \frac{1}{2\pi}Re \int_{0}^{2\pi} f(f) \overline{g(t)} dt.$$
+\begin{definition}
+    The \textbf{Sobolev space $W$ }is defined as the space of all absolutely continuous functions $f\in L^2$ such that the derivative $f'$ exists and is also in $L^2$. The inner product on $W$ is defined as
+    $$(f,g)_W = (f,g)_2 + (f',g')_2.$$
+\end{definition}
+This is a Hilbert space over $\R$. The subspaces of real functions are denoted $L_{\R}^2$ and $W_{\R}$ respectively. Note that we can decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ where $f \in L^2$ is decomposed as follows into its Fourier series:
+$$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} = 
+    \underbrace{\sum_{-\infty}^{0} a_n e^{int} +i(\text{Im}(a_1))e^{int}}_{=:f^{-}\in W^{-}} + 
+    \underbrace{(\text{Re}(a_1))e^{int} + \sum_{n=2}^{\infty} a_n e^{int}}_{=:f^{+}\in W^{+}}.
+$$
+In this framework, the conformal mapping $\psi$ we are looking for can be expressed as follows:
+%Recall the definition of $\Phi$ as the mapping from the boundary of the disk \red{VIA ETA} and subject to \ref{eq:InitialConditionsOnPsi}. This can now be expressed as $\Phi \in W^{+}$\red{HUH}.
+$$\psi(t)=\eta(t+\hat{u}(t))\in W^{+}  \quad \forall t.$$
+By (\ref{eq:boundaryCorrespondence}) $\hat{u}$ exists and by the implicit function theorem \ref{thm:ImplicitMappingTheorem} $\hat{u}$ is continuously differentiable, hence $\hat{u} \in W_{\R}$.
+Thus, $\psi$ lies in the intersection of a certain manifold $M:= \{u \in W_{\R}: \eta(t+u(t))\}$ with our space $W^{+}$.
+
+\subsubsection{Alternating Projections à la von Neumann} \label{chap:AlternatingProjections}
+For two closed convex sets $P,Q$ in a Hilbert space $H$, the method of alternating projections constructs a sequence $(x_n)_n$ as follows: Starting from an arbitrary point $x_0 \in H$, we define 
+$$x_{n+1} := \begin{cases}
+    \Pi_P (x_n) & n \equiv 0 (\text{mod } 2) \\
+    \Pi_Q (x_n) & n \equiv 1 (\text{mod } 2)
+\end{cases}$$ 
+where $\Pi_P(z)=\min_{x\in P} \| x-z \|^2$ and $\Pi_Q(z)=\min_{x\in Q} \| x-z \|^2$ denote the orthogonal projections onto the sets $P$ and $Q$ respectively (though there is also a more general algorithm by Braun, Pokutta and Weismantel \cite{Braun2023_AltProjections} in case no such projections exist).
+It can be shown that the sequence $(x_n)_n$ converges in the respectively used norm to a point tuple $(x*,y*)$ satisfying 
+$$
+\begin{cases}
+    x*=\Pi_P(y*), \\
+    y*=\Pi_Q(x*), \\
+    d_H(x*,y*)= min_{(x,y)\in P\times Q} \| x-y \|^2
+\end{cases}
+$$
+
+In particular, $x*=y*$ if $P\cap Q \neq \emptyset$. 
+This exact idea is now applied to function spaces:
+
+\begin{algorithm}
+    \caption{AP-Method}
+    \begin{algorithmic}
+    \STATE Start with a function $U_0\in W_{\R}$.
+    \STATE Given $U_k$ for $k\geq 0$,
+        \FOR {$n = 1,0,-1,-2,...$}
+            \STATE $a_n = \frac{1}{2\pi}\int_{0}^{2\pi} \eta(t+U_k(t))e^{-int} dt$ \hfill [Calculate Fourier coefficients]
+        \ENDFOR
+    \STATE $U_{k+1}(t) := U_k(t) - \text{Re}\frac{i (\text{Im}(a_1))e^{it}+\sum_{n=-\infty}^{0} a_n e^{int}}{\dot{\eta}(t+U_k(t))}$ \hfill [Calculate the new iterate]
+    \end{algorithmic}
+\end{algorithm}
+
+\input{altproj.tex}
+
+\subsubsection{Alternating Projections with Overrelaxation (OAP)}
+The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[p. 298]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
+This factor decreases the number of outer iterations, which in our case are the iterations indexed by $k$, performed until convergence. The complexity of each individual iteration remains of order $\bigO(N \log N)$ due to the FFT computation of the Fourier coefficients.
+
+
+\subsection{Schwarz-Christoffel Method}
+One class of methods for finding the conformal mapping $\psi$ is given by the Schwarz-Christoffel equation, which relates the derivative of $\psi$ to an integral over the boundary of the target domain $\Omega$ when $\Omega$ is a polygon.
+\subsubsection{Preliminaries and Notation}
+\begin{definition}
+    A \textbf{Polygon} is a piecewise linear Jordan curve with finitely many line segments connecting corner points $z_1, ..., z_N$.
+\end{definition} 
+
+For each $z_i\in\Gamma$, denote the exterior angle by $\measuredangle z_i=\theta_i\pi$. Then for any polygon we have $$\sum_{i=1}^{k} \theta_i = 2$$ and we set $\theta_i\in[-1,1]\forall i$. 
+Note also that $P$ need not be bounded, since we can add vertices at complex infinity with exterior angles ranging from $[1,3]$. These angles are defined to be $2\pi$ minus the external angle formed in the plane by the two lines meeting at infinity \cite{Trefethen1980_SCnumericalcomputation}. 
+\input{exteriorangle.tex}
+
+\label{infinity}
+In the above example $Q$ we have the two lines joining at $z_3$ again joining at infinity ($z_2$), where their outer angle is $\theta_2=2 - \theta_3 = \frac{5}{3}$, and thus the angles are 
+$$\theta_1=\frac{1}{2}, \theta_2=\frac{5}{3}, \theta_3=\frac{1}{3}, \theta_4=\frac{1}{2}, \theta_5=-1 \implies \sum_{i=1}^{5} \theta_i = 2.$$
+Now pick prevertices $v_1, ..., v_N \in \del\mathbb{D}$ as well as two constants $z_c,C\in\C$ (these choices will be explained later) and consider the Schwarz-Christoffel formula:
+\begin{equation} % TREFETHEN W = MY Z, TREFETHEN Z = MY V
+    z=\psi(v)= z_c + C\int_{0}^{v} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta
+\end{equation}
+
+Note that $1-\frac{\zeta}{v_k} \in \{|z-1|<1 \}$ for $|v|<1$. Hence we can define a branch of logarithm with branch cut along the negative real axis and define $(1-\frac{\zeta}{v_k})^{-\theta_k} = exp(-\theta_k \log(1-\frac{\zeta}{v_k}))$, $\psi(v)$ defines an analytic function on $\disk$ which is continuous except at the vertices $v_k$.
+The formula is constructed such that the angles at the vertices correspong precisely to the exterior angles we need, hence the image of $\psi$ is a polygon with the correct angles. However, the lengths of the line segments need not be correct: This is where the choice of parameters $v_1, ..., v_N, z_c$ and $C$ comes in, and this is where the computational challenge in this method lies.
+For the mapping to be unique, we can fix three of these parameters arbitrarily according to the Riemann mapping theorem. The remaining parameters are determined by solving the so-called \textbf{parameter problem}, which consists of a system of nonlinear equations obtained by enforcing the side lengths of the polygon to be correct.
+
+For fixing of the initial three parameters one has two options in principle:
+\begin{enumerate}
+    \item Fix three of the prevertices $v_k$ on the unit circle.
+    \item Fix only one prevertex and the point $z_c=\psi(0)\in P$. 
+\end{enumerate}
+The first option results in a remaining system of size $(N-3)\times(N-3)$ which is computationally more attractive, but may be too restrictive when scaling to polygons with many more vertices, as it can lead to very uneven distribution of the prevertices on the unit circle. Hence why the second option is often preferred, even though it means solving a $(N-1)\times(N-1)$ system \cite[page 84]{Trefethen1980_SCnumericalcomputation}.
+Note that the Schwarz-Christoffel formula guarantees correctness of the angles and the prevertices are on the unit circle, hence defined by their angle; thus, it remains to tune lengths only, and our system of equations is actually real! 
+
+Thus, the first step is to fix $v_N=1\in\disk$ (1 real degree of freedom) and $z_c\in P$ (two real degrees of freedom) the image of the origin under $\psi$. This yields uniqueness of the mapping.
+
+Next, the scaling factor $C$ is defined by the formula 
+\begin{equation} \label{eq:fix_v_N}
+    \psi(v_N) - \psi(0) = z_N - z_C = C \int_{0}^{v_N=1} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta
+\end{equation}
+i.e. it is chosen such that the image of the segment from $v_N$ to the origin is correctly scaled to match the segment from $z_N$ to $z_c$.
+Then a first vertex is pinned down to fix the "orientation" of the polygon (rotation anchoring):
+\begin{equation} \label{eq:fix_v_1}
+        z_1 - z_C = C \int_{0}^{v_1} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta
+\end{equation}
+This defines two real constraints, hence it remains to formulate $N-3$ equations for our $(N-1)\times (N-1)$ system.
+
+\input{schwarzchristoffel.tex}
+
+These are found by enforcing the side lengths of the polygon to be correct between the remaining vertices.
+\begin{equation} \label{eq:N-3sidelengths}
+        |z_{i+1} - z_i| = |C \int_{v_i}^{v_{i+1}} \prod_{k=1}^{N} (1-\frac{\zeta}{v_k})^{-\theta_k} d\zeta| \quad  \forall i\in 2, ..., N-2
+\end{equation}
+Note that unboundedness of the polygon is not a problem, since it can be modeled by one vertex as described earlier (\ref{infinity}), which can be chosen to be $z_N$ without loss of generality; this way, it will be taken care of by the first equation (\ref{eq:fix_v_N}) and will not pose a problem when comparing lengths in (\ref{eq:N-3sidelengths}).
+
+\iffalse
+The system of equations then consists of the 2N conditions
+\begin{equation}
+    z_{k}-z_c = C\int_{0}^{v_{k}} \prod_{i=1}^{N} (1-\frac{\zeta}{v_i})^{-\theta_i} d\zeta \quad \text{ for } k=1,...,N.
+\end{equation}
+Note this system is highly overdetermined, so the tricky problem to solve is to delete $2N+1$ of those conditions without leaving any degrees of freedom in the final system. 
+\fi
+
+\iffalse
+These arcs being smooth yields tangents with well-defined derivatives at every point of the boundary curves except for (a finite number of) corners, and we denote the angles of these tangents with $\theta_{\mathbb{D}}(s_{\mathbb{D}})$ and $\theta_{\Omega}(s_{\Omega})$ respectively. If $z_0$ is a corner it will have a turning angle of 
+$$\measuredangle\theta_{\mathbb{D}}(z_0)=\theta_{\mathbb{D}}(z_0+\eps)-\theta_{\mathbb{D}}(z_0-\eps),$$ 
+where $\eps\to0$ \red{is this eps in 0,2pi or is it on the boundary, and if theta(s) for s in 0,2pi and z0 on boundary how can the above equation be well-def even}. The same applies to corners of $\Omega$. Then,
+$\frac{\del\theta_{\mathbb{D}}}{\del s_{\mathbb{D}}} = \measuredangle\theta_{\mathbb{D}}(z_0)\delta(s_{\mathbb{D}}-z_0)$ for $\delta$ the Dirac function, and similarly for $\theta_{\Omega}$ and thus $\theta_{\mathbb{D}}$ and $\theta_{\Omega}$ are piecewise continuously differentiable functions with jump discontinuities at the corner points.
+
+%\red{\subsubsection{the log derivative of Phi}}
+
+\subsubsection{Green's Functions}
+A Green's function is a general concept for solving differential equations containing a linear operator.
+\begin{definition} 
+    A \textbf{Green's function} or \textbf{Green function $G(x,s)$} is any solution to $$LG(x,s)=\delta(x-s)$$ where $L=L(x)$ is a linear operator acting on distributions over $\R^{n}$ and $\delta$ is the Dirac delta function.
+\end{definition}
+This definition can be exploited to solve inhomogeneous differential equations of the form $Lu=f(x)$.
+In the case of the SCE the Green's function are defined as $G(z,z'):\mathbb{D}\to\mathbb{R}$ satisfying $$\nabla^2 G(z,z') = 2\pi \delta(u-u')\delta(v-v') $$ inside the disk and $$\frac{\del G(z_B, z')}{\del n} = \beta_i$$ where $n$ is the outward normal vector at the boundary point $z_B \in \del\mathbb{D}$ and $\beta_i$ is a real constant associated with the $i$'th arc's length $l_i$ such that $\sum l_i\beta_i = 2\pi$. It can be shown according to Floryan and Zemach that this defines a unique Green's function up to an additive constant \cite{FLORYAN1987_SC_general}.
+The SCE can be written explicitly whenever the Green's function is \red{obtainable in closed analytic form, i.e. expressable via a finite number of elementary operations (is that what is meant on p348? i looked up wikipedia for closed analytic form)}.
+
+\subsubsection{Schwarz-Christoffel Equation Variants}
+Let $\mathcal{G}(z, z_B')$ be a complex extension of the above defined $G(z,z_B')$, i.e. $\mathcal{G}(z, z_B')$ is analytic with real part $G(z,z_B')$.
+A Schwarz-Christoffel equation for a conformal mapping $\Phi(z):\mathbb{D}\to\Omega$ has the form $$ log \frac{d\Phi}{dz}= C+\displaystyle\sum_i Q_i,$$ where $C\in\mathbb{C}$ is a constant and the $Q_i$ are the Green's function integrals over the boundary arcs of $\mathbb{D}$.
+Some parameters and constants have to be determined in order to get a unique $\Phi$ for a particular given $\Omega$. The Riemann mapping theorem allows \red{HOW?} for the first three real parameters to be preassigned, for example to three boundary points in the case of simply connected bounded $\Omega$. The remaining degrees of freedom must be solved for using properties of the arcs $s_{\Omega}(s_z)$ and $s_{\mathbb{D}}(s_z)$. 
+
+The most general form is called Schwarz-Christoffel equation with subtraction \cite{FLORYAN1987_SC_general}:
+$$log(\frac{d\Phi}{dz}) = C_0 - \frac{1}{2\pi}\displaystyle\int_{\del\mathbb {D}} [\mathcal{G}(z, z_B')-\mathcal{G}(z_0, z_B')] \times [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
+where $C_0\in\mathbb{C}$ is a constant, $z_0$ is a fixed point in $\mathbb{D}$\red{or del?}, $\mathcal{G}(z,z_B')$ is the fundamental solution of the Laplace equation in $\del\mathbb{D}$ with singularity at $z_B' \in \del\mathbb{D}$\red{not at the boundary of omega?}. However, we can use an unsubtracted form of this equation since the integrals converge separately and we know our $\Omega$ is bounded (hence we need not care about behaviours at infinity), yielding the simpler form
+$$log(\frac{d\Phi}{dz}) = C - \frac{1}{2\pi}\int_{\del\mathbb{D}} \mathcal{G}(z, z_B') [d\theta_{\Omega}(s_z')-d\theta_{\del\mathbb{D}}(s_z')]$$
+
+
+\subsubsection{Implementation}
+\cite{Brown1990_SC_meshgen}
+\cite{Trefethen1980_SCnumericalcomputation}
+\cite{banjaitrefethen2006_SCmultipolemethod}
+\cite{Bezrodnykh2022_lauricella}
+Crowding is a problem because it yields exponential derivative of $\Phi$, but can be fixed. \cite{Banjai2008_SC_crowdingworkaround}
+\fi
+
+\subsection{Theodorsen's Method} \label{TheodorsenMethod}
+For $\Omega$ star-shaped with regard to the origin (wlog; otherwise we can precompose with a preliminary map), Theodorsen's method \cite[page 64]{Gaier1964} can be used to find the conformal mapping $\psi:\disk\to\Omega$ satisfying the initial conditions (\ref{eq:InitialConditionsOnPsi}).
+Since $\Omega$ is star-shaped, the boundary $\Gamma$ can be parametrized by the polar angle. Consequently, the boundary correspondence function $S(\varphi)$ defined in (\ref{eq:boundaryCorrespondence}) becomes the angular function $\theta(\varphi)$. 
+Theodorsen's integral equation is derived as follows:
+Note points on the unit circle are parametrised by $e^{i\varphi}$ while $\Gamma$ can be parametrised by $\rho(\theta)e^{i\theta}$ for $\varphi, \theta\in[0,2\pi]$ and $\rho(\theta)>0$ the radius function of $\Gamma$ (by star-shapedness of $\Omega$). Thus, the problem reduces to relating $\varphi$ and $\theta$ via a function $\theta(\phi)$.
+The trick is to introduce an auxiliary function involving a $\log$, which allows to separate the real and imaginary part of the problem: 
+\begin{equation}
+    Re^{i\alpha} = \log(R) + i\alpha
+\end{equation} 
+However, $\log$ has a singularity at $0$ which impedes direct application of the $\log$ as it contradicts with our normalization criterion on $\psi$ (\ref{eq:InitialConditionsOnPsi}).
+Thus the singularity is removed by dividing out $z$. This gives us the helper function 
+\begin{equation}\label{eq:helperfunctiontheodorsen}
+    F(z) := \log(\frac{\psi(z)}{z}) = \\ 
+    \log(\frac{\rho(\theta)e^{i\theta}}{e^{i\varphi}}) = \log(\rho(\theta)e^{i(\theta-\varphi)}) = \log(\rho(\theta))+i(\theta - \varphi).
+\end{equation}
+By the section on conjugate functions \ref{eq:operatorK} the real and imaginary parts of this helper function are conjugate. Thus, we can relate them by
+\begin{equation}
+    \theta - \varphi = K \log(\rho(\theta))
+\end{equation}
+which can be rewritten into Theodorsen's integral equation
+\begin{equation}
+    \theta(\varphi) = \varphi + K \log(\rho(\theta(\varphi))).
+\end{equation}
+
+The discretization as in \cite{Gutknecht1983_theodorsen_equation_FFT} is done by naming the difference between the boundary angle and the circle angle $Y := \theta - \varphi = \theta(\varphi) - \varphi$ the conjugate function of $X:= \log(\rho(\theta))= \log(|\eta(\varphi)|)$.
+Theodorsen's integral equation becomes the fixed point equation
+\begin{equation}\label{eq:TheodorsenDiscretized}
+    y=\psi(y):=K_{\Sigma} \log(|\eta(\varphi+y)|)
+\end{equation} 
+where the equation is evaluated on a grid of $2N$ equidistant angles $\varphi_k = \frac{k\pi}{N}$ for $k=0, \dots, 2N-1$. Here, the vector $y$ approximates the values of the continuous function $Y(\varphi)$ at these grid points, such that $y_k \approx Y(\varphi_k)$.
+The product $y$ can be computed efficiently using FFT (see chapter \ref{operatorK_N}).
+\iffalse
+If the discretization is based on trigonometric interpolation, $K_{\Sigma}$ is called \textbf{Wittich's matrix} \cite{Gutknecht1983_theodorsen_equation_FFT}.
+By a permutation $P$ the above components can be brought to the form
+\begin{equation}
+    PK_{\Sigma}P =
+    \begin{pmatrix}
+        0 & -L^T \\
+        L & 0
+    \end{pmatrix}, \quad
+    Py = \begin{pmatrix}
+        y^{"} \\
+        y^{' }
+    \end{pmatrix}, \quad
+    Ps = \begin{pmatrix}
+        s^{"} \\
+        s^{'}
+    \end{pmatrix}.
+\end{equation}
+By Niethammer, (\ref{eq:TheodorsenDiscretized}) can be solved using nonlinear successive over-relaxation (SOR) for given $y_0^{"}, y_0^{'}$ and $\omega$ (relaxation factor) and $m\geq 0$:
+\begin{equation}\label{eq:SOR}
+    \begin{matrix}
+        y_{m+1}^{"} &:= &(1-\omega)&y_m^{"} &- &\omega L^T \log(\eta(s^{'} + y_m^{'})) \\
+        y_{m+1}^{'} &:= &(1-\omega)&y_m^{'} &+ &\omega L \log(\eta(s^{"} + y_m^{"}))        
+    \end{matrix}
+\end{equation}
+Alternatively, nonlinear Jacobi iteration with relaxation (JOR) can be used:
+\begin{equation}\label{eq:JOR}
+    \begin{matrix}
+        y_{m+1} &:= &(1-\omega)&y_m + &\omega \psi(y_m).
+    \end{matrix}
+\end{equation}
+\fi
+In case of $\Gamma$ not being smooth, Theodorsen's method becomes inaccurate \cite{Gutknecht1983_theodorsen_equation_FFT}.
+It also theoretically needs $\Omega$ to be star-shaped in order to converge \cite{Wegmann1978_newtonverfahren}, since otherwise the radius function $\rho(\theta)$ becomes multivalued causing numerical failure, but has the advantage of being an easily computable fixed point equation if star-shaped. 
+In practice, the star-shape requirement can also be relaxed by smoothing the boundary curve first using preliminary maps \cite{Gutknecht1983_theodorsen_equation_FFT}.
+
+% ok from here
+
+\subsection{Zipper Method}\label{chap:ZipperMethod}
+This algorithm was found independently by Kühnau and Marshall in the 1980's and has the advantage of finding $\psi$ and its inverse at the same time. 
+The computed map is only approximately conformal, and is obtained as a composition of conformal maps onto slit halfplanes. Depending on the shape of the slits, the Zipper algorithm looks a bit different. 
+In this section we will focus on the easiest version called the "geodesic algorithm" \cite{marshall2006_convergencezipperalgorithmconformal}.
+First, let us introduce the following definition:
+
+\subsubsection{Möbius Transforms}
+\begin{definition}
+    A \textbf{Möbius transform} is a function on the extended complex plane $\hat\C:=\C\cup\{\infty\}$ which is uniquely determined by where it sends three points. It has the form
+    $$ f(z) = \frac{az + b}{cz + d} $$
+    with complex numbers $a,b,c,d$ such that $ad - bc \neq 0$.
+\end{definition}
+More explicitly, given three distinct points $z_1,z_2,z_3 \in \C$ and three distinct points $w_1,w_2,w_3 \in \C$ there exists a unique Möbius transform $f$ such that $f(z_i) = w_i$ for $i=1,2,3$:
+$$ f(z)=\frac{(z-z_1)(z_2-z_3)}{(z-z_3)(z_2-z_1)}$$
+In particular, Möbius transforms are conformal and more general than affine maps, since they can e.g. map $\infty$ to $0$ and vice versa.
+
+\subsubsection{The Geodesic Algorithm}
+The most elementary version of this algorithm is based on a function 
+$$f_a: \mathbb{H}\setminus \gamma \to \mathbb{H}$$
+where $\mathbb{H}$ is the upper half plane and $\gamma$ is a circular arc from $0$ to $a\in\mathbb{H}$ which is orthogonal to the real axis. The orthogonal circle also meets the real axis again at $b=|a^2|\text{Im}(a)$. Then the map can be expressed in closed form as 
+$$f_a(z) = \sqrt{g_a \circ h_a (z)}$$ where $g_a(z) = z^2 + c^2$, $c=\frac{|a^2|}{\text{Im}(a)}$ is called the \textbf{conformal capacity} of $\gamma$ and $h_a(z) = \frac{z}{1-z/b}$.
+
+\input{zipper_fa.tex}
+
+Now suppose $z_0, z_1, ..., z_n$ are points arranged counterclockwise on a Jordan curve $\Gamma$ in the upper half plane. The geodesic algorithm basically iterates over the arcs from $z_i$ to $z_{i+1}$ and "unzips" them one by one using the map $f_{a_i}$ where $a_i$ is the image of $z_{i+1}$ under the composition of all previous maps.
+The original geodesic algorithm proposed by Marshall and Rohde constructs a conformal map from the upper half plane to the region bounded by $\Gamma$, but it can be adapted to map from the unit disk as well via a Möbius transformation mapping the half plane to the unit disk and back first.
+
+\begin{algorithm}
+    \caption{Geodesic Zipper Algorithm}
+    \begin{algorithmic}
+    \STATE \textbf{Input:} Points $z_0, z_1, ..., z_n$ on a Jordan curve $\Gamma$ in the upper half plane.
+    \STATE \textbf{Output:} $\psi$: conformal map from $\mathbb{H}$ to the region bounded by $\Gamma$ and its inverse $\psi^{-1}$.
+    \STATE $\varphi_1(z) := i\sqrt{(z-z_1)/(z-z_0)}$
+    \STATE $\zeta_2:= \varphi_1(z_2)$
+    \STATE $\varphi_2(z) := f_{\zeta_2}(z)$
+    \FOR{k in n}
+        \STATE $\zeta_k := \varphi_{k-1} \circ \ldots \circ \varphi_1 (z_k)$
+        \STATE $\varphi_k(z) := f_{\zeta_k}(z)$
+    \ENDFOR
+    \STATE Finally, $\zeta_{n+1} := \varphi_n \circ \ldots \circ \varphi_1 (z_{0})\in\R$ and $\varphi_{n+1}(z) := -(\frac{z}{1 - z/\zeta_{n+1}})^2$
+    \STATE Then $\psi(z) := \varphi_1^{-1} \circ \varphi_2^{-1} \circ \ldots \circ \varphi_{n+1}^{-1}(z)$ and $\psi^{-1}(z) := \varphi_{n+1} \circ \ldots \circ \varphi_2 \circ \varphi_1 (z)$
+    \end{algorithmic}
+\end{algorithm}
+\begin{flushleft}
+\includegraphics[width=\textwidth]{zipper_geodesic.png}
+\end{flushleft}
+
+\subsubsection{The Slit Algorithm}
+The above geodesic algorithm is only as accurate as the approximation of the boundary curve $\Gamma$ by circular arcs between the points $z_i$. A more accurate version is given by the slit algorithm, which uses straight line segments instead of circular arcs.
+We therefore exchange the map $f_a$ for a map $g_a: \mathbb{H}\setminus L \to \mathbb{H}$ where $L$ is the line segment from $0$ to $a\in\mathbb{H}$. This map does not have a closed form expression, but can be computed numerically using Newton's method.
+
+\subsubsection{The Zipper Algorithm}
+The approximation of $\Gamma$ by circular arcs or straight line segments can be further improved by using circular arcs which meet $\Gamma$ tangentially at the points $z_i$. Each arc is determined by the points $z_i, z_{i+1}$ and $z_{i+2}$, hence we assume an even number of boundary points. 
+The first arc is replaced by $$\varphi_1(z)=\sqrt{\frac{(z-z_2)(z_1-z_2)}{(z-z_0)(z_1-z_2)}}.$$ At each subsequent step that circular arc through $\zeta_k$ and $\zeta_{k+1}$ is mapped onto a straight line segment by a Möbius transform, and then the Slit Algorithm is applied to unzip that segment.
+This yields a sort of "quadratic approximation" of $\del\Omega$ instead of a linear one \cite[page 8]{marshall2006_convergencezipperalgorithmconformal}.
+
+
+\subsection{Wegmann's Method} \label{chap:WegmannMethod}
+For smooth $\del\Omega$, Integral equations of the second kind can also be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
+Given $\eta$ the differentiable parametrization of $\Gamma$ with $\dot\eta(s)\neq 0 \text{ } \forall s$, we construct the conformal mapping by iterated correction of an initial guess $S$ as follows: 
+$$
+\begin{tikzpicture}[node distance=2cm, auto]
+\node (A) {$\del\disk$};
+\node(B) [right of=A] {$[0,2\pi]$};
+\node (C) [right of=B] {$\Gamma$};
+\draw[->](A) to node {$S$}(B);
+\draw[->](B) to node {$\eta$}(C);
+\draw[->, out = -40, in = -140, looseness = 0.5] (A) to node [below]{$\psi$}(C); % this should be a circular arrow under the diagram
+\end{tikzpicture}
+$$
+%Assume a starting configuration of points $z_1, z_2, ..., z_N$ in $\disk$ and their images $\zeta_1, \zeta_2, ..., \zeta_N$ on $\Gamma$ such that $\psi(z_k)=\zeta_k$. 
+Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. We improve the approximation by moving the points along their tangents towards the boundary curve, i.e. by finding a correction function $U_k:\del\disk\to[0,2\pi]$ such that
+\begin{equation}\label{eq:h_k+1}
+    \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = h_{k+1}(\zeta)
+\end{equation}
+where $h$ is analytic on $\overline\Omega$.
+To uniquely solve for $U_k$ numerically, we fix a boundary point $z_0 \in\del\disk$ and its corresponding target parameter $s_0\in[0,2\pi]$ which defines the target point $\eta(s_0)=c_0\in\Gamma$. 
+Note that since $h_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ we cannot have $h_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$. Therefore we set
+\begin{equation}
+    U_k(z_0)=s_0-S_k(z_0).
+\end{equation}
+Note also that $h_{k+1}$ is an approximation of $\psi$ but it does not generally take values on $\Gamma$. We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta)$$ which can be understood as "new guess equals last guess plus some correction".
+
+\subsubsection{Implementation}
+Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation:
+Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
+$$\theta_k = \theta_0 + \frac{\pi k}{N}, \quad k\in[N-1]$$
+and write the integrals in terms of their Fourier transform
+\begin{equation}
+    F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
+\end{equation}
+where $\sigma_n(\zeta_k)=\sum_{i=-n}^{n} c_k \zeta_k^i$. This can be computed fast ($\in\bigO(N\log N)$) via FFT.
+% Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
+
+
+% \subsection{Shirokova's Method}
+% \cite{Shirokova2014}
+
+\subsection{Conjugate Function Method}
+Hakula, Quach and Rasila \cite{Hakula_2013_conjugatefunctionmethod} presented a new method in 2010 which is based on numerical solution of the Laplace equation subject to Dirichlet-Neumann mexed-type boundary conditions by using $hp$-FEM.  
+In their paper they construct the mapping starting from a quadrilateral, but it can be tweaked to map from the unit disk as well. 
+"It is well known that one can express the modulus of a quadrilateral Q in terms of the solution of the Dirichlet-Neumann mixed boundary value problem \cite[p.431]{Henrici1986_vol3}."
+
+
+\subsection{Amano's Method of Fundamental Solutions}
+A potential theoretic formulation of the conformal mapping problem leads to a Fredholm integral equation of the first kind, known as Symm's integral equation, which has a kernel with logarithmic singularity. Unlike Fredholm integral equations of the second kind like Theodorsen's equation, where the singularity of the kernel creates numerical instabilities, Symm's equation is easily solvable by numerical methods \cite[p. 237]{Kythe1998_symmsintegralequation}. One of these is Amano's method.
+Conceptually, a pair of conjugate harmonic functions are expressed by a complex logarithmic potential, and the mapping problems are reduced to singular Fredholm integral equations of the ﬁrst kind. Gaier \cite{Gaier1964} mathematically studied Symm’s integral equation and proved the existence and uniqueness of the solution. These methods need $\bigO(N^3)$ operations if the boundary is discretized at N points. Henrici showed that complexity of $\bigO(N^2\log N)$ can be achieved by using FFTs \cite{Henrici1986_vol3}.
+
+\begin{definition}
+    In two dimensions, the Laplace equation has a fundamental solution of the form $\log(r)$ where $r=|z-\zeta_k|$ is the modulus of the vector from any point $z$ on the region to the boundary point $\zeta_k$, $k\in N$. This function $\log(|z-\zeta_k|)$ is called the \textbf{logarithmic potential}. 
+\end{definition}
+A potential theoretic formulation of the Dirichlet problem (\ref{eq:DirichletProblem}) leads to a Fredholm integral equation of the first kind called \textbf{Symm's equation}
+\begin{equation}\label{eq:Symm}
+    \int_{\Gamma} \log| z - \zeta| \mu(\zeta) d\zeta = -\log|z| \quad \text{ for } z\in\Omega, \zeta\in\Gamma
+\end{equation} which has a kernel with logarithmic singularity. In this context, the conformal mapping problem reduces to finding a suitable source density function $\mu(z)=g(z)+ih(z)$ on the boundary $\Gamma$ where $g$ and $h$ are conjugate and $g$ satisfies 
+\begin{equation}
+    \begin{matrix}
+        \nabla^2 g(z) = 0 & z\in \Omega \\
+        g(z) = -\frac{1}{2} \log|z\bar{z}| & z\in \Gamma.
+    \end{matrix}
+\end{equation}
+It is more easily solvable by numerical methods than Fredholm integral equations of the second kind, where the kernel might have singularities near the boundary \cite[chapter 9]{Kythe1998_symmsintegralequation}.
+
+This is used in the so-called Charge Simulation Method which Amano's Method is based on.
+
+\subsubsection{Algorithm}
+The charge simulation method approximates the solution of the Laplace equation by a linear combination of fundamental solutions placed at so-called charge points outside the domain \cite{Amano1998_Amanosmethod} by 
+\begin{equation}\label{eq:AmanosApproximation}
+    g(z) = \sum_{k=1}^{N} Q_k log(|z-\zeta_k|),
+\end{equation}
+where $\zeta_1, \ldots, \zeta_N \notin\overline\Omega$ are called \textbf{charge points} and placed outside the domain. The unknown constants $Q_1, \ldots, Q_N$ are called \textbf{charges} and determined to satisfy the boundary condition at the \textbf{collocation points} $z_1, \ldots, z_N$ (fixed check points on the boundary $\del\Omega$).
+Hence, $Q_k$ are found by plugging in the collocation points into the below \textbf{collocation condition} and solving the linear system:
+\begin{equation} \label{eq:collocationCondition}
+    \eta(z_i) = \sum_{k=1}^{N} Q_k log(|z_i-\zeta_k|), \quad i=1,2,...,N.
+\end{equation}
+Then the conformal map $\psi(z)=g(z)+ih(z)$ is constructed, where $h(z)$ is the harmonic conjugate of $g(z)$.
+If the boundary is analytic, this method can be shown to have exponential accuracy i.e. exponentially small error in the number of collocation points \cite{Amano1998_Amanosmethod}.
+
+%\cite{Sakakibara2019_AmanosMethod}
+
+\subsection{Probabilistic Uniformization Method}
+In 2007, Binder, Braverman ans Yampolsky proposed a method for finding a conformal map using a random walks solver to the general Dirichlet problem. They conjectured an upper bound of polynomial space and time for an algorithm with precision $\frac{1}{n}$ pixels (for explicitly given $\del\Omega$; quadratic if $\del\Omega$ is given only approximately, via a so-called \textit{oracle}, sort of a Dirac delta function). \cite{binder2007_computationalcomplexityriemannmapping}
+
+
+%\red{\input{workarounds.tex}}
+
+
+
+\subsection{Comparison}
+We can directly rule out some of the options due to our project constraints: 
+First we note that Schwarz-Christoffel only works on polygons and Theodorsen's method is restricted to star-shaped regions. Since we want to be able to work with more general shapes of $\Omega$, we have to disregard these two methods.
+
+We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy, but it is worthwile noting that this is a good choice in cases where the boundary is so rough/ irregular that deterministic methods fail.
+Amano's Method of Fundamental Solutions seems good for fast (linear time) point-evaluations of $\psi$ as well as its derivative as it is a sum of simple fractions and all the singularities (charge points) are placed strictly outside the region. However, we cannot directly use our Fourier parametrization nor our mesh in this method, so it will probably not be the best choice for our specific problem. Note also that the accuracy and convergence of this method depend on the right choice of charge points.
+The Conjugate Function Method is very beautiful mathematically, but it relies only on $hp$-FEM for which there already are powerful libraries, so there would not be much value in half-assing an FEM solver given the scope of this thesis. 
+
+On the one hand, the Zipper method is very well implementable and robust (it can handle rough boundaries including fractals), but there is a small caveat to be aware of for the efficient point evaluations. Since the Zipper method essentially constructs $\psi$ as a composition of many maps, the derivative is numerically expensive to compute (chain rule). Also, trying a finite differences approach is slow and potentially numerically unstable, but there is hope in a technique called Forward Automatic Differentiation which is both exact and efficient \cite{wikipedia_autodiff}. 
+
+On the other hand, the Alternating Projections Method uses the boundary parametrization in its Fourier series form.
+The output of the discretized OAP is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$.
+The AP Method converges linearly if the boundary parametrization is 3-Hölder and the initial approximation $U_0$ is sufficiently close to the actual boundary correspondence function (\ref{eq:boundaryCorrespondence}) \cite[p. 292]{Wegmann1989_alternating_projections}.
+The Alternating Projections Method is one of the simplest and most robust methods for conformal mapping. However, it is not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite[p. 389]{Wegmann2005_num_methods_confmapping}.
+
+Lastly, Wegmann's Method (\ref{chap:WegmannMethod}) uses the boundary parametrization and its derivative in form of Fourier coefficients as well as the tangent angle as inputs. 
+The output of the algorithm is an analytic function constructed from trigonometric polynomials. This allows for efficient point evaluations of both $\psi$ and its derivative \cite{Wegmann1984_convergence_iterative_method}.
+Convergence is quadratic for analytic boundaries (as is known for Newton methods) and superlinear ($\in\bigO(N^{1+\mu})$) for $\eta\in C^{2+\mu}$ but depends on a "good enough" initial guess for the correspondence function \cite{Wegmann1984_convergence_iterative_method}.
+Furthermore, discretizing the operator $K$ (\ref{operatorK_N}) using Wittich's method yields the operator $K_N$ which can be computed efficiently using FFT.
+
+Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite[p. 415]{Wegmann2005_num_methods_confmapping}.
+Note the computational costs of these last two methods are mainly determined by the FFTs and this parameter is dependent on the number of grid points.
+
+Hence, Zipper, OAP and Wegmann's methods seem suitable for our problem, but Wegmann's Method is more accurate with faster convergence while OAP is easier to implement.
+
+\bigskip
+%\input{comparisontable.tex}
+\end{document}

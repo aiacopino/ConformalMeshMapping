@@ -294,11 +294,10 @@ If the boundary is analytic, this method can be shown to have exponential accura
 
 %\cite{Sakakibara2019_AmanosMethod}
 
-\subsection{Wegmann's Method (Alternating Projections)}\label{chap:WegmannMethod}
-Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk (using the operator $K$ \ref{operatorK_N}) and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
+\subsection{Method of Alternating Projections}\label{chap:APMethod}
+Various methods for numerical construction of $\psi$ essentially construct two sequences of functions, one of normalized analytic functions on the disk and one mapping the boundary of $\disk$ to the boundary $\Gamma$.
 The method of alternating projections uses both these sequences and alternates between them to find $\psi$ \cite{Wegmann1989_alternating_projections}.
-It was originally derived as a Newton method for a nonlinear integral equation \cite{Wegmann1978_newtonverfahren} but later re-interpreted geometrically as Alternating Projections onto tangent spaces \cite{Wegmann1989_alternating_projections}.
-We first give the geometrical intuition and start by introducing the necessary function spaces.
+Before giving the geometrical intuition we start by introducing the necessary function spaces.
 
 \subsubsection{Sobolev Spaces}
 Let $L^2([0,2\pi])$ be the space of all $2\pi$-periodic complex functions $f$ which are square integrable over $[0, 2\pi]$ equipped with the inner product 
@@ -357,7 +356,25 @@ In particular, $x*=y*$ if $P\cap Q \neq \emptyset$.
 
 This exact idea is applied to function spaces using $x_0=U_0 \in M, P=W^+$ and $Q =T_k$ the tangent space approximating $M$ at the current iteration.
 
-\subsubsection{Analytic Realisation (Newton's Method)}
+\begin{algorithm}
+    \caption{AP-Method}
+    \begin{algorithmic}
+    \STATE Start with a function $U_0\in W_{\R}$.
+    \STATE Given $U_k$ for $k\geq 0$,
+        \FOR {$n = 1,0,-1, ...$}
+            \STATE $a_n = \frac{1}{2\pi}\int_{0}^{2\pi} \eta(t+U_k(t))e^{-int} dt$ \hfill [Calculate Fourier coefficients]
+        \ENDFOR
+    \STATE $U_{k+1}(t) := U_k(t) - \text{Re}\frac{i (\text{Im}(a_1))e^{it}+\sum_{n=-\infty}^{0} a_n e^{int}}{\dot{\eta}(t+U_k(t))}$ \hfill [Calculate the new iterate]
+    \end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Alternating Projections with Overrelaxation (OAP)}
+The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[§ 4]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
+This factor decreases the number of outer iterations, which in our case are the iterations indexed by $k$, performed until convergence. The complexity of each individual iteration remains of order $\bigO(N \log N)$ due to the FFT computation of the Fourier coefficients.
+
+
+\subsection{Wegmann's Method} \label{chap:WegmannMethod}
 The projection onto the tangent space described above is analytically equivalent to a linearization of the boundary value problem. Wegmann \cite{Wegmann1978_newtonverfahren} showed that the update shift $U_k(t)$ is the solution to the linearized equation below.
 %For smooth $\del\Omega$, Integral equations of the second kind can be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
 Given $\eta$ the differentiable parametrization of $\Gamma$ with $\dot\eta(s)\neq 0 \text{ } \forall s$, we construct the conformal mapping by iterated correction of an initial guess $S$ as follows.
@@ -378,48 +395,76 @@ We improve the approximation by moving the points along their tangents towards t
     \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = \psi_{k+1}(\zeta)
 \end{equation}
 where $\psi_{k+1}$ is an analytic approximation for $\psi$ on $\overline\Omega$. Note that $\psi_{k+1}$ does not generally take values on $\Gamma$. 
-To uniquely solve for $U_k$ numerically, we fix a boundary point $z_0 \in\del\disk$ and its corresponding target parameter $s_0\in[0,2\pi]$ which defines the target point $\eta(s_0)=c_0\in\Gamma$. 
-Note that since $\psi_{k+1}(z_0)$ lies on the tangent through $\eta(S_k(z_0))$ we cannot have $\psi_{k+1}(z_0)=c_0$ unless $\eta(S_k(z_0))=c_0$. Therefore we set
+The above equation (\ref{eq:h_k+1}) has two unknowns, $U_k$ and $\psi_{k+1}$, which makes it a \red{Riemann-Hilbert Problem}.
+By the Riemann Mapping Theorem, it admits a unique solution only if we fix the mapping normalization. We therefore require that a specific boundary point $z_0$ corresponds to the target parameter $s_0$ (where $\eta(s_0) = c_0$). A direct coordinate constraint $\psi_{k+1}(z_0) = c_0$ is geometrically impossible because $\psi_{k+1}(z_0)$ is constrained to the tangent vector, while $c_0$ lies on the curve $\Gamma$. Therefore, the normalization condition is transferred to the parameter space. We force the updated parameter function to satisfy $S_{k+1}(z_0) = s_0$, which directly yields the necessary boundary condition for $U_k$ \cite[Equation 2.4a]{Wegmann1978_newtonverfahren}:
 \begin{equation}
     U_k(z_0)=s_0-S_k(z_0).
 \end{equation}
-We get an approximation for the parametrization $S$ by $$S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta)$$ which can be understood as "new guess equals last guess plus some correction".
 
-%\input{newton_iter.tex}
+To find $U_k$, equation (\ref{eq:h_k+1}) is rewritten into \cite[Equation 3.4]{Wegmann1978_newtonverfahren}:
+\begin{equation}
+    \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
+\end{equation}
+This eliminates $U_k$ (since it is real-valued) and yields a boundary value problem for $\psi_{k+1}$ which can be solved using the operator $K$ defined in \ref{operatorK_N}. 
+This is done via FFT (see \ref{chap:WegmannImplementation}). Subsequently, $U_k$ is recovered by rearranging equation (\ref{eq:h_k+1}).
 
-\subsubsection{Implementation}
-Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation:
+Finally, we get an approximation for the parametrization $S$ by 
+\begin{equation}
+    S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta)
+\end{equation}
+which can be understood as "new guess equals last guess plus some correction".
+
+
+
+
+
+
+\begin{algorithm}
+    \caption{Wegmann's Method}
+    \begin{algorithmic}[1]
+        \STATE \textbf{Input:} Target boundary $\eta: [0, 2\pi] \to \mathbb{C}$, anchor points $z_0 \in \partial\mathbb{D}, s_0 \in [0, 2\pi]$.
+        \STATE \textbf{Initialize:} $S_0(\zeta) = \arg(\zeta)$ (Identity) or guess satisfying $S_0(z_0)=s_0$.
+        \WHILE {not converged}
+            \STATE \textit{// 1. Evaluate current boundary geometry}
+            \STATE $f_k(\zeta) := \eta(S_k(\zeta))$
+            \STATE $g_k(\zeta) := \dot\eta(S_k(\zeta))$
+            
+            \STATE \textit{// 2. Solve Riemann-Hilbert Problem with anchoring}
+            \STATE Find analytic function $\psi_{k+1}$ on $\mathbb{D}$ satisfying:
+            \begin{equation*}
+                \text{Re}\left(\frac{\psi_{k+1}(\zeta)}{i g_k(\zeta)}\right) = \text{Im}\left(\frac{f_k(\zeta)}{g_k(\zeta)}\right) \quad \forall \zeta \in \partial\mathbb{D}
+            \end{equation*}
+            \STATE subject to the constraint:
+            \begin{equation*}
+                 \text{Re}\left(\frac{\psi_{k+1}(z_0) - f_k(z_0)}{g_k(z_0)}\right) = s_0 - S_k(z_0)
+            \end{equation*}
+
+            \STATE \textit{// 3. Compute correction and update}
+            \STATE $U_k(\zeta) := \text{Re}\left( \frac{\psi_{k+1}(\zeta) - f_k(\zeta)}{g_k(\zeta)} \right)$
+            \STATE $S_{k+1}(\zeta) := S_k(\zeta) + U_k(\zeta)$
+        \ENDWHILE
+    \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Implementation} \label{chap:WegmannImplementation}
+Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation \cite[§5]{Wegmann1978_newtonverfahren}:
 Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
 $$\theta_k = \theta_0 + \frac{\pi k}{N}, \quad k\in[N-1]$$
 and write the integrals in terms of their Fourier transform
 \begin{equation}
     F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
 \end{equation}
-where $\sigma_n(\zeta_k)=\sum_{i=-n}^{n} c_k \zeta_k^i$. This can be computed fast ($\in\bigO(N\log N)$) via FFT.
+where
+$$\sigma_n(\zeta_k)=\displaystyle\sum_{i=-n}^{n} c_i \zeta_k^i.$$ 
+This $\sigma_n \mapsto F$ can be computed fast ($\in\bigO(N\log N)$) via FFT.
 % Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
 
 
-\begin{algorithm}
-    \caption{AP-Method}
-    \begin{algorithmic}
-    \STATE Start with a function $U_0\in W_{\R}$.
-    \STATE Given $U_k$ for $k\geq 0$,
-        \FOR {$n = 1,0,-1, ...$}
-            \STATE $a_n = \frac{1}{2\pi}\int_{0}^{2\pi} \eta(t+U_k(t))e^{-int} dt$ \hfill [Calculate Fourier coefficients]
-        \ENDFOR
-    \STATE $U_{k+1}(t) := U_k(t) - \text{Re}\frac{i (\text{Im}(a_1))e^{it}+\sum_{n=-\infty}^{0} a_n e^{int}}{\dot{\eta}(t+U_k(t))}$ \hfill [Calculate the new iterate]
-    \end{algorithmic}
-\end{algorithm}
+Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of the boundary. Hence why a "good" (close enough) initial guess is vital for numerical stability. In practice, for $\Omega$ far from circular, a homotopy method could probably be adopted, where each solution for a slightly deformed circle is used as initial guess for the next deformation until the target region is reached.
+Unlike the AP Method, which uses a fixed projection to find the next iterate, Wegmann's Method leverages the exact geometry of the boundary curve via $\theta$, which yields quadratic convergence since the error decreases much faster \cite[Theorem 4]{Wegmann1978_newtonverfahren}.
+%However, given a suitable initial guess, the method achieves a quadratic local convergence rate for smooth boundaries, or superlinear for sufficiently smooth boundaries \cite{Wegmann1989_alternating_projections}, unlike just linear convergence achieved by standard fixed-set alternating projection methods.
 
-Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of $M$. Hence why a "good" (close enough) initial guess is vital for numerical stability.
-However, given a suitable initial guess, the method achieves a quadratic local convergence rate for smooth boundaries, or superlinear for sufficiently smooth boundaries \cite{Wegmann1989_alternating_projections}, unlike just linear convergence achieved by standard fixed-set alternating projection methods.
-
-
-\subsubsection{Alternating Projections with Overrelaxation (OAP)}
-The OAP method is a variant of the AP method which introduces an overrelaxation parameter to speed up convergence \cite[§ 4]{Wegmann1989_alternating_projections}. The algorithm is the same except for a constant factor in the definition of $U_{k+1}$.
-This factor decreases the number of outer iterations, which in our case are the iterations indexed by $k$, performed until convergence. The complexity of each individual iteration remains of order $\bigO(N \log N)$ due to the FFT computation of the Fourier coefficients.
-
-
+\newpage
 \subsection{Comparison}
 We can directly rule out some of the options due to our project constraints: 
 First we note that Schwarz-Christoffel only works on polygons and Theodorsen's method is restricted to star-shaped regions. Since we want to be able to work with more general shapes of $\Omega$, we disregard these two methods.
@@ -433,16 +478,17 @@ The Conjugate Function Method contains a very astute idea mathematically, but it
 
 Amano's Method of Fundamental Solutions seems good for fast (linear time) point-evaluations of $\psi$ as well as its derivative as it is a sum of simple fractions and all the singularities (charge points) are placed strictly outside the region. However, we cannot directly use our Fourier parametrization nor our mesh in this method, so it will probably not be the best choice for our specific problem. Note also that the accuracy and convergence of this method depend on the right choice of charge points.
 
-Lastly, Wegmann's Method of Alternating Projections uses the boundary parametrization in its Fourier series form.
-The output of the discretized OAP is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$ \cite{Wegmann1984_convergence_iterative_method}.
-Convergence is quadratic for analytic boundaries (as is known for Newton methods) and superlinear ($\in\bigO(N^{1+\mu})$) for $\eta\in C^{2+\mu}$ but depends on a "good enough" initial guess for the boundary correspondence function (\ref{eq:boundaryCorrespondence}) \cite[page 292]{Wegmann1989_alternating_projections}, \cite{Wegmann1984_convergence_iterative_method}.
-It is one of the simplest and most robust methods for conformal mapping. However, it is not very accurate for reasonably sized grids, and converges very slowly for finer meshes \cite[page 389]{Wegmann2005_num_methods_confmapping}.
+Lastly, Wegmann's Method and the Method of Alternating Projections both use the boundary parametrization in its Fourier series form.
+In both cases, the output is an interpolating polynomial, allowing for efficient point evaluations of $\psi$ and $D\psi$ \cite{Wegmann1984_convergence_iterative_method}.
+The AP Method is one of the simplest and most robust methods for conformal mapping. However, it is not very accurate for reasonably sized grids, and converges only linearly \cite[Chapter 4.2]{Wegmann2005_num_methods_confmapping}.
+In contrast, Newton's Method converges quadratically for analytic boundaries (as is known for Newton methods) and superlinear ($\in\bigO(N^{1+\mu})$) for $\eta\in C^{2+\mu}$ but depends on a "good enough" initial guess for the boundary correspondence function (\ref{eq:boundaryCorrespondence}) \cite[§ 4]{Wegmann1978_newtonverfahren}, \cite[page 292]{Wegmann1989_alternating_projections}, \cite{Wegmann1984_convergence_iterative_method}.
 
 
 %Wegmann compared the accuracies of the AP, OAP, Theodorsen and Wegmann methods for the mapping from the disk to an inverted ellipse and found that OAP is most efficient for low accuracy and Newton methods are best for slower high accuracy calculations \cite[p. 415]{Wegmann2005_num_methods_confmapping}.
 %Note the computational costs of these last two methods are mainly determined by the FFTs and this parameter is dependent on the number of grid points.
 
-Hence, both Zipper and Wegmann's methods seem suitable for our problem, but Wegmann's Method is more accurate with faster convergence while Zipper seems easier to implement.
+Hence, both Zipper, AP and Wegmann's methods seem suitable for our problem, but Wegmann's Method is most accurate with fastest convergence while seemingly the most interesting to implement.
+The Zipper method is also very appealing due to its robustness, but since we are given a smooth boundary and want high accuracy, we can afford to use a method that is less robust but more accurate.
 We will therefore opt for implementing Wegmann's Method.
 \bigskip
 

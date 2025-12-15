@@ -7,8 +7,8 @@
     
     % The sum of the hsize values below MUST equal 7 (the number of columns)
     \begin{tabularx}{\textwidth}{@{} 
-        >{\hsize=0.7\hsize\raggedright\arraybackslash}X  % 1. Method (Narrow)
-        >{\hsize=0.7\hsize\raggedright\arraybackslash}X  % 2. Shape (Very Narrow)
+        >{\hsize=0.8\hsize\raggedright\arraybackslash}X  % 1. Method (Narrow)
+        >{\hsize=0.5\hsize\raggedright\arraybackslash}X  % 2. Shape (Very Narrow)
         >{\hsize=0.6\hsize\raggedright\arraybackslash}X  % 3. Runtime (Narrow)
         >{\hsize=0.8\hsize\raggedright\arraybackslash}X  % 4. Input (Medium)
         >{\hsize=0.9\hsize\raggedright\arraybackslash}X  % 5. Output (Wide)
@@ -71,15 +71,25 @@
         Cannot use Fourier param. or mesh; Sensitive to charge point placement. \\
         \addlinespace
         
-        \textbf{Wegmann (OAP)} & 
+        \textbf{Alternating Projections} & 
         Smooth & 
         $\bigO(N \log N)$ per iter.: FFT & 
         Fourier Series of $\eta$ & 
-        Analytic Interpolating Polynomial & 
-        Quadratic (fast) convergence for fine meshes; High accuracy (FFT); Efficient point evaluation. & 
+        Analytic Interpolating Polynomial for Boundary Corresp. Fct& 
+        Efficient point evaluation; Robust (less dependent than Wegmann's on initial guess). & 
+        Linear (slow) convergence; Requires smooth boundary; Approximative Solution (inaccurate). \\
+        \addlinespace
+
+        \textbf{Wegmann} & 
+        Smooth & 
+        $\bigO(N \log N)$ per iter.: FFT & 
+        Fourier Series of $\eta$ & 
+        Analytic Interpolating Polynomial for Boundary Corresp. Fct & 
+        Quadratic (fast) convergence; High accuracy (FFT); Efficient point evaluation. & 
         Requires good initial guess (local convergence); Requires smooth boundary. \\
         \addlinespace
-        
+
         \bottomrule
     \end{tabularx}
+
 \end{sidewaystable}
