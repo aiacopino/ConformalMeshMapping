@@ -1,3 +1,7 @@
+import numpy as np
+from numpy.fft import fft, ifft
+from src.targetregion import BoundaryCurve
+
 '''
 PARAMETERS
 boundary matrix 2xN containing fourier coefficients of the boundary function of the target region Omega
@@ -8,16 +12,5 @@ matrix 2xN containing coordinates of the vertices of the mesh on the target regi
 
 ''' 
 
-# check validity of input
-
-## initial guess for boundary correspondence function S
-
-## iterated correction
-
-## calculate fourier coefficients
-
-## new iterate
-
-## make entire mesh from boundary
-
-## count iterations/ convergence rate
+eta_mat = np.load('data/boundary.npy')
+eta = BoundaryCurve(eta_mat)

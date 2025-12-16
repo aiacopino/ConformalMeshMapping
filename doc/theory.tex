@@ -204,7 +204,7 @@ It can be described as finding $\psi$ analytic in $\disk$, continuous in $\overl
         \Delta u = 0 &\text{ in } \disk^{\circ},
     \end{matrix}
 \end{equation}
-where $\psi$ is $2\pi$-periodic and Hölder continuous \cite[page 362]{Wegmann2005_num_methods_confmapping}.
+where $\psi$ is $2\pi$-periodic and Hölder continuous \cite[Chapter 12.3]{Wegmann2005_num_methods_confmapping}.
 This problem has a unique real solution $u$, which then yields a unique solution for $\psi$ up to an additive imaginary constant \cite[Corollary 15.1b]{Henrici1986_vol3}(which we fix via our normalisation condition (\ref{eq:InitialConditionsOnPsi})), which can be constructed using the conjugation operator 
 \begin{equation}\label{eq:operatorK}
     K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)\cot(\frac{s-t}{2}) dt,
@@ -212,7 +212,7 @@ This problem has a unique real solution $u$, which then yields a unique solution
 
 which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}).
 
-\begin{remark}[{\cite[page 362]{Wegmann2005_num_methods_confmapping}}]
+\begin{remark}[{\cite[Chapter 12.3]{Wegmann2005_num_methods_confmapping}}]
     In order to implement numerical methods efficiently via the Fast Fourier Transform later, we will use the functions' Fourier series representations. Hence e.g. on a grid of $N = 2n$ equidistant points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as 
     $$\psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ 
     and the conjugation operator can be approximated by the operator $K_N$ defined as 
