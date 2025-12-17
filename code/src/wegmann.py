@@ -1,9 +1,9 @@
-## wegmann's method algorithm for conformal mapping
 '''
+from targetregion import BoundaryCurve
+## wegmann's method algorithm for conformal mapping
 input: boundary parametrisation eta of target region, anchoring points z_0 on unit disk, s_0 in [0,2pi]
 output: conformal map psi from unit disk to target region
 
-'''
 
 class WegmannSolver:
         #perform one newton iter
@@ -32,3 +32,4 @@ class WegmannSolver:
 ## make entire mesh from boundary
 
 ## count iterations/ convergence rate
+'''

@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 from numpy.fft import fft, ifft
 from src.targetregion import BoundaryCurve
 
@@ -11,6 +12,8 @@ RETURNS
 matrix 2xN containing coordinates of the vertices of the mesh on the target region Omega
 
 ''' 
+# file not found error handling
+main_dir = Path(__file__).parent
 
-eta_mat = np.load('data/boundary.npy')
+eta_mat = np.load(main_dir/'data/boundary.npy')
 eta = BoundaryCurve(eta_mat)
