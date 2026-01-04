@@ -1,35 +1,42 @@
 import numpy as np
+#from scipy.fft import fft, ifft
 ## math helpers
 
-## hilbert transform
 ## https://www.youtube.com/watch?v=dy4OeAYqSqM
-def hilbert_transform(matrix):
+## hilbert tranform
+# input: spatial domain values
+# output: spatial domain values
+def hilbert_transform(self, vals):
     '''
-    param: matrix 2xN of fourier coefficients
-    returns: matrix 2xN of fourier coefficients of hilbert transform
+    n = len(vals)
+    assert n % 2 == 0, "N must be even for clean FFT behavior"
+    v_hat = np.fft.fft(vals)
 
-    in time domain:
-    # set all negative frequency coefficients to zero
-    # double the real coefficients
-    # IFFT
-    # imaginary part is the hilbert transform 
-    in frequency domain:
-    # swap real & imaginary coefficients
-    # multiply imaginary coefficients by -1
-    # set k=o frquency coefficient = 0
+    h_hat = np.zeros(n, dtype=complex)
+    half = n // 2
+    h_hat[1:half]   = -1j * v_hat[1:half]     # positive frequencies
+    h_hat[half+1:]  =  1j * v_hat[half+1:]    # negative frequencies
+    # h_hat[0] = h_hat[half] = 0  (already zero)
+
+    return np.fft.ifft(h_hat).real
     '''
-    real_part = matrix[0,:]
-    imag_part = matrix[1,:]
+        v_hat = np.fft.fft(v_val)
+        h_hat = np.zeros_like(v_hat)
+        
+        # H[u] multiplier is -i * sgn(k)
+        # Frequencies: 0, 1..N/2-1, N/2, -N/2+1..-1
+        #k=0 zeroed out since HT of const is 0
+        half = self.N // 2
+        h_hat[1:half] = -1j * v_hat[1:half]       # + freq
+        h_hat[half+1:] = 1j * v_hat[half+1:]      # - freq
+        
+        return np.fft.ifft(h_hat).real
 
-    matrix_hilbert = np.zeros_like(matrix)
-    matrix_hilbert[0,:] = imag_part
-    matrix_hilbert[1,:] = -real_part
-    matrix_hilbert[:,0] = 0 # zero frequency component
 
-    return matrix_hilbert
-
-## derivative
-def fourier_derivative():
-    return None
+## derivative of a fourier coeff array
+def fourier_derivative(self, coeffs_hat):
+    #N = len(coeffs_hat)  #alternatively use this and leave self out in args
+    k = np.fft.fftfreq(self.N) * self.N
+    return 1j * k * coeffs_hat
 
 ## cauchy integral formula to compute the region's interior mesh from the boundary once mapped

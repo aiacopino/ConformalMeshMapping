@@ -17,3 +17,5 @@ main_dir = Path(__file__).parent
 
 eta_mat = np.load(main_dir/'data/boundary.npy')
 eta = BoundaryCurve(eta_mat)
+
+

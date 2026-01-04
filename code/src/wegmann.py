@@ -1,73 +1,160 @@
 import numpy as np
+from scipy.fft import fft, ifft
 import src.operators as ops
 from targetregion import BoundaryCurve
-import functools
-
+import functools #maybe delete later
 
 class WegmannSolver:
     '''
     wegmann's method algorithm for conformal mapping
     input: boundary parametrisation eta of target region, anchoring points z_0 on unit disk, s_0 in [0,2pi]
     output: conformal map psi from unit disk to target region
+    all fourier coeffs are in 2xN matrices with row 0 = real part, row 1 = imaginary part
     '''
     def __init__(self, eta, N):
         self.eta = eta
         self.N = N
 
-        # fix normalization psi(0) = eta(s_0) for uniqueness
-        ################### check this ######################
-        self.z_0 = eta.evaluate(0)
-        self.s_0 = 0
+        self.theta = np.linspace(0, 2*np.pi, num=N, endpoint=False) # array of equally spaced args (angles)
+        self.zeta = np.exp(1j*self.theta) # array of equally spaced grid pts on unit circle [0, 2pi)
 
+        # fix normalization psi(0) = 0, psi'(0) > 0 for uniqueness (anchoring)
+        # what if normalization point is somewhere else: make adjustable to user input
+        # self.z_0 = 0 # eta.evaluate(0) ################### check this ######################
+        # self.s_0 = 0
+        
         #state variables
-        self.current_approximation_coeffs = None
-        self.current_derivative_coeffs = None
+        self.sigma_hat = None # fourier coeffs of boundary correspondenec fct, equation 33 in thesis (fourier coeffs of sigma)
         self.error_history = [] # convergence tracking
 
+    
     def init_initial_guess(self):
-        pass
+        '''
+        initial guess for boundary correspondence function S mapping angle theta (in [0, 2pi]) of unit disk to boundary parameter s of target region (eta(S))        
+        '''
+        # initial guess is identity map S(theta) = theta
+        # S(theta) = theta + sigma(theta) where sigma is 2pi-periodic smooth (equation 33 in thesis)
+        # hence sigma = 0 is initial guess
+        self.sigma_hat = np.zeros(self.N, dtype=complex128) 
+
+    def evaluate_boundary_geometry(self):
+        '''
+        evaluate boundary geometry from current state (sigma_hat)
+        returns f_k (positions on boundary) and g_k (tangent vectors on boundary)
+        '''
+        # recover geometry from state
+        # S_k(θ) = θ + σ(θ) 
+        sigma_val = np.fft.ifft(self.sigma_hat).real # spatial domain
+        S_k = self.theta + sigma_val # array of stretched parameters (one for each theta_i for i in [N])
+
+        #derivative of S_k : S_k = theta + sigma(theta) => S_k'(θ) = 1 + σ'(θ)
+        sigma_dot_hat = ops.fourier_derivative(self.sigma_hat)
+        sigma_dot_val = np.fft.ifft(sigma_dot_hat).real
+        S_dot_k = 1 + sigma_dot_val
+
+        f_k = self.eta.evaluate(S_k) #position on boundary f_k = η(S_k(θ)), geometric candidate but not analytic -> not extendable into interior of disk (analytic candidate is psi_k+1 on the tangent)
+        g_k = ops.fourier_derivative(f_k) * S_dot_k #tangent on buondary g_k = η'(S_k(θ)) * S_k'(θ)
+
+        return f_k, g_k
+
+    def correction_and_update(self):
 
 
     def step(self):
-        #perform one newton iteration
+        '''
+        perform one newton iteration
+        stuff within the while loop (lines 4-12) of algorithm 3 in thesis
+        '''
+        # DO I HAVE TO CALL INITIAL GUESS HERE??
+        
+        
+        # STEP 1
         # eval boundary geometry
-        f = self.eta
-        g = ops.fourier_derivative(f)
-        # RH problem
-        RHS = (f/g).imag
-        LHS = None
-        pass
+        f_k, g_k = self.evaluate_boundary_geometry()
+
+        # STEP 2
+        # solve RH problem
+        # RHS = Im (f(zeta)/tangent_vec(zeta))
+        RHS = (f_k/g_k).imag #tangent vec has winding number 1, need winding number 0 for std RH solver
+        # g_k is tangent vector -> 1j*g_k is normal vector
+        A = 1j*g_k / self.zeta #new coefficient with winding nr 0
+        #Rh solves Re(psi_bar/A) = RHS
+        psi_bar = self.RH_problem(A, RHS)
+        psi = psi_bar * self.zeta #recover psi from psi_bar #WHY
+
+        # STEP 3
+        #correction and update
+        U_k_correction = ((psi-f_k)/g_k).real
+        U_k_correction_hat = np.fft.fft(U_k_correction) 
+
+        # if U_k is very small, we are done (remaining correction is very small, algorithm "settled" -> converged)
+        # should this be checked here or in solve() function??
+        # update sigma
+        new_sigma_hat = self.sigma_hat + U_k_correction_hat # sigma_new = sigma_old + U_k (by equation 33)
+        new_sigma_hat[0] = 0 #enforce mean to keep S as a diffeo of the circle #MAYBE MAKE THIS ADAPTABLE/ USER INPUT DEPENDENT
+        
+        return new_sigma_hat
+    
+    def RH_problem(self, A, RHS):
+        # step 2 of algorithm 3 in thesis
+        # https://arxiv.org/abs/1210.2199
+        '''
+        Solves Re( psi / A ) = RHS where Index(A) = 0: psi = M * (Re(W) + i*H[Re(W)])
+        M = multiplier (homogeneous solution) => M solves Re(psi/A)=0
+        usually integrating factor of RH problem is multiplied to achieve a winding number of 0 (=> \R)
+        W := psi/M is defined in order to reduce to Dirichlet problem: since M/A real (because pahse(M)=phase(A) => imaginary part divides out),
+        Re(M*W/A)=RHS <=> M/A* Re(W) = RHS <=> Re(W) = RHS * A/M
+        then the imaginary part of W is recovered via hilbert transform
+        finally psi = M*W
+        -
+        -
+        '''
+        # unwrap arg
+        angle_A = np.angle(A)
+        angle_A = np.unwrap(angle_A) # smoothing discontinuities coming from modulo 2pi
+        
+        # M = exp( H[angle] - i*angle )
+        h_angle = ops.hilbert_transform(angle_A)
+        M = np.exp(h_angle + 1j * angle_A) # WHY IS IT PLUS HERE??
+        
+        # Check ratio (M/A should be real) WHAT IF IT ISNT? CHECK THIS DIFFERENTLY
+        ratio = (M / A).real 
+        print(f"FLAG: RH problem check, max imag part of M/A: {np.max(np.abs((M/A).imag))}") # should be close to 0
+
+        # Solve for W = phi/M
+        Re_W = RHS / ratio
+        Im_W = ops.hilbert_transform(Re_W)
+        
+        W = Re_W + 1j * Im_W
+        
+        return M * W
+
 
     def solve(self, max_iter = 100, epsilon = 1e-6):
         #iterate until convergence
         self.init_initial_guess()
         for i in range(max_iter):
-            err = self.step()
+            old_sigma = self.sigma_hat.copy()
+            self.sigma_hat = self.step()
+                    # if U_k is very small, we are done (remaining correction is very small, algorithm "settled" -> converged)
+
+            err = np.linalg.norm(self.sigma_hat - old_sigma) # norm of the corection vector
             self.error_history.append(err)
+            print(f"iter {i}, error: {err}")
+
+            #check if converged yet
             if err < epsilon:
                 print(f"Converged in {i} iterations. \n Error history: {self.error_history}")
-                return self.current_approximation_coeffs
+                return self.sigma_hat
+        #if not converged after max_iter
         print(f"Max iterations reached. \n Error history: {self.error_history}")
-        return self.current_approximation_coeffs
+        return self.sigma_hat
+    
 
-    def count_iterations():
-        pass
-
+'''
     @functools.cached_property
     def current_tangent_angle(self):
         # calc current tangent angle from current derivative coeffs
         # cached property so only calculated once per iteration
-
         pass
-
-## initial guess for boundary correspondence function S
-
-## iterated correction
-
-## calculate fourier coefficients
-
-## new iterate
-
-## make entire mesh from boundary
-
-## count iterations/ convergence rate
+'''
