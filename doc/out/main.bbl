@@ -1,8 +1,15 @@
 \begin{thebibliography}{{Wik}25d}
 
+\bibitem[AB94]{AnosovBolibruch1994_riemannhilbertproblems}
+Dmitrij~Vladimirovič Anosov and Andreĭ~Andreevič Bolibruch.
+\newblock {\em The Riemann-Hilbert Problem}, volume~22 of {\em Aspects of
+  Mathematics}.
+\newblock Vieweg+Teubner Verlag, Wiesbaden, 1994.
+
 \bibitem[Ama98]{Amano1998_Amanosmethod}
 Kaname Amano.
-\newblock A charge simulation method for numerical conformal mapping onto circular and radial slit domains.
+\newblock A charge simulation method for numerical conformal mapping onto
+  circular and radial slit domains.
 \newblock {\em SIAM Journal on Scientific Computing}, 19(4):1169--1187, 1998.
 
 \bibitem[Ban08]{Banjai2008_SC_crowdingworkaround}
@@ -16,7 +23,8 @@ Ilia Binder, Mark Braverman, and Michael Yampolsky.
 
 \bibitem[Bro90]{Brown1990_SC_meshgen}
 Philip~Raymond Brown.
-\newblock {\em The use of the Schwarz-Christoffel transformation in finite element mesh generation}.
+\newblock {\em The use of the Schwarz-Christoffel transformation in finite
+  element mesh generation}.
 \newblock Phd, University of Leicester, 1990.
 
 \bibitem[CR25]{Castillo2025_hilberttransform}
@@ -26,7 +34,8 @@ Ren{\'e}~E. Castillo and Edixon~M. Rojas.
 
 \bibitem[DeL94]{DeLillo1994_crowding_accuracy}
 Thomas~K. DeLillo.
-\newblock The accuracy of numerical conformal mapping methods: A survey of examples and results.
+\newblock The accuracy of numerical conformal mapping methods: A survey of
+  examples and results.
 \newblock {\em SIAM Journal on Numerical Analysis}, 31(3):788--812, 1994.
 
 \bibitem[EW22]{EinsiedlerWieser2022AnalysisSkript}
@@ -36,17 +45,24 @@ Manfred Einsiedler and Andreas Wieser.
 
 \bibitem[Gai64]{Gaier1964}
 Dieter Gaier.
-\newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em Springer Tracts in Natural Philosophy / Ergebnisse der angewandten Mathematik}.
+\newblock {\em Konstruktive Methoden der konformen Abbildung}, volume~3 of {\em
+  Springer Tracts in Natural Philosophy / Ergebnisse der angewandten
+  Mathematik}.
 \newblock Springer-Verlag, Berlin, G{\"o}ttingen, Heidelberg, 1964.
 
 \bibitem[Gut83]{Gutknecht1983_theodorsen_equation_FFT}
 Martin~H. Gutknecht.
-\newblock Numerical experiments on solving theodorsen's integral equation for conformal maps with the fast fourier transform and various nonlinear iterative methods.
-\newblock {\em SIAM Journal on Scientific and Statistical Computing}, 4(1):1--30, 1983.
+\newblock Numerical experiments on solving theodorsen's integral equation for
+  conformal maps with the fast fourier transform and various nonlinear
+  iterative methods.
+\newblock {\em SIAM Journal on Scientific and Statistical Computing},
+  4(1):1--30, 1983.
 
 \bibitem[Hen86]{Henrici1986_vol3}
 Peter Henrici, editor.
-\newblock {\em Applied and computational complex analysis. Vol. 3: discrete Fourier analysis—Cauchy integrals—construction of conformal maps---univalent functions}.
+\newblock {\em Applied and computational complex analysis. Vol. 3: discrete
+  Fourier analysis—Cauchy integrals—construction of conformal
+  maps---univalent functions}.
 \newblock John Wiley \& Sons, Inc., USA, 1986.
 
 \bibitem[Hip23]{Hiptmair2023_NUMPDE}
@@ -57,7 +73,8 @@ Ralf Hiptmair.
 \bibitem[HQR13]{Hakula_2013_conjugatefunctionmethod}
 Harri Hakula, Tri Quach, and Antti Rasila.
 \newblock Conjugate function method for numerical conformal mappings.
-\newblock {\em Journal of Computational and Applied Mathematics}, 237(1):340–353, January 2013.
+\newblock {\em Journal of Computational and Applied Mathematics},
+  237(1):340–353, January 2013.
 
 \bibitem[Kyt98]{Kythe1998_symmsintegralequation}
 Prem~K. Kythe.
@@ -68,20 +85,29 @@ Prem~K. Kythe.
 Donald~E. Marshall and Steffen Rohde.
 \newblock Convergence of the zipper algorithm for conformal mapping, 2006.
 
+\bibitem[Mus77]{Muskhelishvili1977}
+N.~I. Muskhelishvili.
+\newblock {\em Singular Integral Equations: Boundary Problems of Function
+  Theory and their Application to Mathematical Physics}.
+\newblock Springer Netherlands, Dordrecht, 1977.
+
 \bibitem[Pom92]{Pommerenke1992_bdarybehaviour_confmaps}
 Christian Pommerenke.
-\newblock {\em Boundary Behaviour of Conformal Maps}, volume 299 of {\em Grundlehren der mathematischen Wissenschaften}.
+\newblock {\em Boundary Behaviour of Conformal Maps}, volume 299 of {\em
+  Grundlehren der mathematischen Wissenschaften}.
 \newblock Springer-Verlag, Berlin, 1992.
 
 \bibitem[SS03]{SteinShakarchi2003_complexanalysis}
 Elias~M. Stein and Rami. Shakarchi.
 \newblock {\em Complex analysis}.
-\newblock Princeton lectures in analysis ; 2. Princeton University Press, Princeton, N.J, 2003.
+\newblock Princeton lectures in analysis ; 2. Princeton University Press,
+  Princeton, N.J, 2003.
 
 \bibitem[Tre80]{Trefethen1980_SCnumericalcomputation}
 Lloyd~N. Trefethen.
 \newblock Numerical computation of the schwarz–christoffel transformation.
-\newblock {\em SIAM Journal on Scientific and Statistical Computing}, 1(1):82--102, 1980.
+\newblock {\em SIAM Journal on Scientific and Statistical Computing},
+  1(1):82--102, 1980.
 
 \bibitem[Wec19]{Wechsung2019_shapeopt_robustsolvers_incompressible}
 F~Wechsung.
@@ -95,7 +121,8 @@ Rudolf Wegmann.
 
 \bibitem[Weg84]{Wegmann1984_convergence_iterative_method}
 Rudolf Wegmann.
-\newblock Convergence proofs and error estimates for an iterative method for conformal mapping.
+\newblock Convergence proofs and error estimates for an iterative method for
+  conformal mapping.
 \newblock {\em Numerische Mathematik}, 44:435--461, 1984.
 
 \bibitem[Weg89]{Wegmann1989_alternating_projections}
@@ -106,42 +133,56 @@ Rudolf Wegmann.
 \bibitem[Weg05]{Wegmann2005_num_methods_confmapping}
 Rudolf Wegmann.
 \newblock Chapter 9 - methods for numerical conformal mapping.
-\newblock In R.~Kühnau, editor, {\em Geometric Function Theory}, volume~2 of {\em Handbook of Complex Analysis}, pages 351--477. North-Holland, 2005.
+\newblock In R.~Kühnau, editor, {\em Geometric Function Theory}, volume~2 of
+  {\em Handbook of Complex Analysis}, pages 351--477. North-Holland, 2005.
 
 \bibitem[{Wik}25a]{wikipedia_autodiff}
 {Wikipedia contributors}.
 \newblock Automatic differentiation --- {Wikipedia}{,} the free encyclopedia.
-\newblock \url{https://en.wikipedia.org/w/index.php?title=Automatic_differentiation&oldid=1320248234}, 2025.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=Automatic_differentiation&oldid=1320248234},
+  2025.
 \newblock [Online; accessed 14-November-2025].
 
 \bibitem[{Wik}25b]{wiki:FredholmIntegralEquation}
 {Wikipedia contributors}.
 \newblock Fredholm integral equation --- {Wikipedia}{,} the free encyclopedia.
-\newblock \url{https://en.wikipedia.org/w/index.php?title=Fredholm_integral_equation&oldid=1314003753}, 2025.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=Fredholm_integral_equation&oldid=1314003753},
+  2025.
 \newblock [Online; accessed 7-December-2025].
 
 \bibitem[{Wik}25c]{wiki:HurwitzTheorem}
 {Wikipedia contributors}.
-\newblock Hurwitz's theorem (complex analysis) --- {Wikipedia}{,} the free encyclopedia.
-\newblock \url{https://en.wikipedia.org/w/index.php?title=Hurwitz%27s_theorem_(complex_analysis)&oldid=1321322619}, 2025.
+\newblock Hurwitz's theorem (complex analysis) --- {Wikipedia}{,} the free
+  encyclopedia.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=Hurwitz%27s_theorem_(complex_analysis)&oldid=1321322619},
+  2025.
 \newblock [Online; accessed 7-December-2025].
 
 \bibitem[{Wik}25d]{wiki:MoebiusTransform}
 {Wikipedia contributors}.
 \newblock Möbius transformation --- {Wikipedia}{,} the free encyclopedia.
-\newblock \url{https://en.wikipedia.org/w/index.php?title=M%C3%B6bius_transformation&oldid=1323948782}, 2025.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=M%C3%B6bius_transformation&oldid=1323948782},
+  2025.
 \newblock [Online; accessed 8-December-2025].
 
 \bibitem[{Wik}25e]{wiki:Polygon}
 {Wikipedia contributors}.
 \newblock Polygon --- {Wikipedia}{,} the free encyclopedia.
-\newblock \url{https://en.wikipedia.org/w/index.php?title=Polygon&oldid=1320067726}, 2025.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=Polygon&oldid=1320067726},
+  2025.
 \newblock [Online; accessed 8-December-2025].
 
 \bibitem[{Wik}25f]{wiki:SobolevSpace}
 {Wikipedia contributors}.
 \newblock Sobolev space --- {Wikipedia}{,} the free encyclopedia.
-\newblock \url{https://en.wikipedia.org/w/index.php?title=Sobolev_space&oldid=1324240611}, 2025.
+\newblock
+  \url{https://en.wikipedia.org/w/index.php?title=Sobolev_space&oldid=1324240611},
+  2025.
 \newblock [Online; accessed 8-December-2025].
 
 \end{thebibliography}

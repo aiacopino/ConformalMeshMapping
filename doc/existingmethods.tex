@@ -395,7 +395,7 @@ We improve the approximation by moving the points along their tangents towards t
     \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = \psi_{k+1}(\zeta)
 \end{equation}
 where $\psi_{k+1}$ is an analytic approximation for $\psi$ on $\overline\Omega$. Note that $\psi_{k+1}$ does not generally take values on $\Gamma$. 
-The above equation (\ref{eq:h_k+1}) has two unknowns, $U_k$ and $\psi_{k+1}$, which makes it a \red{Riemann-Hilbert Problem}.
+The above equation (\ref{eq:h_k+1}) is a Riemann-Hilbert Problem \cite{AnosovBolibruch1994_riemannhilbertproblems} of two unknowns, $U_k$ and $\psi_{k+1}$.
 By the Riemann Mapping Theorem, it admits a unique solution only if we fix the mapping normalization. We therefore require that a specific boundary point $z_0$ corresponds to the target parameter $s_0$ (where $\eta(s_0) = c_0$). A direct coordinate constraint $\psi_{k+1}(z_0) = c_0$ is geometrically impossible because $\psi_{k+1}(z_0)$ is constrained to the tangent vector, while $c_0$ lies on the curve $\Gamma$. Therefore, the normalization condition is transferred to the parameter space. We force the updated parameter function to satisfy $S_{k+1}(z_0) = s_0$, which directly yields the necessary boundary condition for $U_k$ \cite[Equation 2.4a]{Wegmann1978_newtonverfahren}:
 \begin{equation}
     U_k(z_0)=s_0-S_k(z_0).
@@ -415,10 +415,6 @@ Finally, we get an approximation for the parametrization $S$ by
 which can be understood as "new guess equals last guess plus some correction".
 
 
-
-
-
-
 \begin{algorithm}
     \caption{Wegmann's Method}
     \begin{algorithmic}[1]
@@ -426,8 +422,8 @@ which can be understood as "new guess equals last guess plus some correction".
         \STATE \textbf{Initialize:} $S_0(\zeta) = \arg(\zeta)$ (Identity) or guess satisfying $S_0(z_0)=s_0$.
         \WHILE {not converged}
             \STATE \textit{// 1. Evaluate current boundary geometry}
-            \STATE $f_k(\zeta) := \eta(S_k(\zeta))$
-            \STATE $g_k(\zeta) := \dot\eta(S_k(\zeta))$
+            \STATE $f_k(\zeta) := \eta(S_k(\zeta))$ \hfill // Position on boundary
+            \STATE $g_k(\zeta) := \dot\eta(S_k(\zeta))$ \hfill // Tangent vector on boundary
             
             \STATE \textit{// 2. Solve Riemann-Hilbert Problem with anchoring}
             \STATE Find analytic function $\psi_{k+1}$ on $\mathbb{D}$ satisfying:
@@ -459,10 +455,21 @@ $$\sigma_n(\zeta_k)=\displaystyle\sum_{i=-n}^{n} c_i \zeta_k^i.$$
 This $\sigma_n \mapsto F$ can be computed fast ($\in\bigO(N\log N)$) via FFT.
 % Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
 
+Note that the boundary correspodence function $S_k$ maps the angle $\theta\in[0,2\pi]$ to the paramter $s\in[0,2\pi]\subset\R$. Since $S_k$ winds around the unit circle once, it must satisfy $S_k(2\pi)= S_k(0)+2\pi$ and is not periodic since the codomain is an interval. We resolve this by decomposing the map into the identity term plus a $2\pi$-periodic displacement function:
+\begin{equation}
+    S_k(\theta) = \theta + \sigma_k(\theta).
+\end{equation}
 
 Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of the boundary. Hence why a "good" (close enough) initial guess is vital for numerical stability. In practice, for $\Omega$ far from circular, a homotopy method could probably be adopted, where each solution for a slightly deformed circle is used as initial guess for the next deformation until the target region is reached.
 Unlike the AP Method, which uses a fixed projection to find the next iterate, Wegmann's Method leverages the exact geometry of the boundary curve via $\theta$, which yields quadratic convergence since the error decreases much faster \cite[Theorem 4]{Wegmann1978_newtonverfahren}.
 %However, given a suitable initial guess, the method achieves a quadratic local convergence rate for smooth boundaries, or superlinear for sufficiently smooth boundaries \cite{Wegmann1989_alternating_projections}, unlike just linear convergence achieved by standard fixed-set alternating projection methods.
+
+\subsubsection{Python}
+\cite{Wegmann2005_num_methods_confmapping} integral equations, newton update steps
+\cite{Henrici1986_vol3} Hilbert BVP, construction of conformal maps
+\cite{Muskhelishvili1977} plemelj formulas (definition of M)
+
+
 
 \newpage
 \subsection{Comparison}

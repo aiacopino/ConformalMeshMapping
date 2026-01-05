@@ -6,7 +6,7 @@ import numpy as np
 ## hilbert tranform
 # input: spatial domain values
 # output: spatial domain values
-def hilbert_transform(self, vals):
+def hilbert_transform(self, v_val):
     '''
     n = len(vals)
     assert n % 2 == 0, "N must be even for clean FFT behavior"
@@ -20,17 +20,17 @@ def hilbert_transform(self, vals):
 
     return np.fft.ifft(h_hat).real
     '''
-        v_hat = np.fft.fft(v_val)
-        h_hat = np.zeros_like(v_hat)
-        
-        # H[u] multiplier is -i * sgn(k)
-        # Frequencies: 0, 1..N/2-1, N/2, -N/2+1..-1
-        #k=0 zeroed out since HT of const is 0
-        half = self.N // 2
-        h_hat[1:half] = -1j * v_hat[1:half]       # + freq
-        h_hat[half+1:] = 1j * v_hat[half+1:]      # - freq
-        
-        return np.fft.ifft(h_hat).real
+    v_hat = np.fft.fft(v_val)
+    h_hat = np.zeros_like(v_hat)
+    
+    # H[u] multiplier is -i * sgn(k)
+    # Frequencies: 0, 1..N/2-1, N/2, -N/2+1..-1
+    #k=0 zeroed out since HT of const is 0
+    half = self.N // 2
+    h_hat[1:half] = -1j * v_hat[1:half]       # + freq
+    h_hat[half+1:] = 1j * v_hat[half+1:]      # - freq
+    
+    return np.fft.ifft(h_hat).real
 
 
 ## derivative of a fourier coeff array
