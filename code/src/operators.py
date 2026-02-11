@@ -6,7 +6,7 @@ import numpy as np
 ## hilbert tranform
 # input: spatial domain values
 # output: spatial domain values
-def hilbert_transform(self, v_val):
+def hilbert_transform(v_val):
     '''
     n = len(vals)
     assert n % 2 == 0, "N must be even for clean FFT behavior"
@@ -20,13 +20,14 @@ def hilbert_transform(self, v_val):
 
     return np.fft.ifft(h_hat).real
     '''
+    N = len(v_val)
     v_hat = np.fft.fft(v_val)
-    h_hat = np.zeros_like(v_hat)
+    h_hat = np.zeros(N, dtype=complex)
     
     # H[u] multiplier is -i * sgn(k)
     # Frequencies: 0, 1..N/2-1, N/2, -N/2+1..-1
     #k=0 zeroed out since HT of const is 0
-    half = self.N // 2
+    half = N // 2
     h_hat[1:half] = -1j * v_hat[1:half]       # + freq
     h_hat[half+1:] = 1j * v_hat[half+1:]      # - freq
     
@@ -34,9 +35,9 @@ def hilbert_transform(self, v_val):
 
 
 ## derivative of a fourier coeff array
-def fourier_derivative(self, coeffs_hat):
-    #N = len(coeffs_hat)  #alternatively use this and leave self out in args
-    k = np.fft.fftfreq(self.N) * self.N
+def fourier_derivative(coeffs_hat):
+    N = len(coeffs_hat)
+    k = np.fft.fftfreq(N) * N
     return 1j * k * coeffs_hat
 
 ## cauchy integral formula to compute the region's interior mesh from the boundary once mapped

@@ -1,0 +1,1 @@
+# plot progression of f_k points on boundary
