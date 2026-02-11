@@ -38,12 +38,55 @@ def test_initial_guess():
     S_k = solver.theta + sigma_val
     print(f"S_k min value: {np.min(S_k)} (expected 0), max value: {np.max(S_k)} (expected close to 2pi (endpt=False in linspace))")
 
-def test_boundary_geometry_evaluation():
+def test_boundary_geometry_evaluation_easy():
     '''
-    test if the boundary geomtry evaluation is actually on the boundary (f_k is on the boundary but not yet at the correct place)
+    test if the boundary geomtry evaluation is actually on the boundary (f_k(S_k) is on the boundary but not yet at the correct place)
     '''
     print("testing boundary geometry evaluation ...")
+    N = 128
+    eta_dummy = np.zeros(N, dtype=complex)
+    eta_dummy[1] = 1.0 # unit circle
+    solver = WegmannSolver(eta_dummy, N)
     # check if S_k = theta + sigma_k where sigma_k is 2pi-periodic (check if sigma_k(0)=sigma_k(2pi))
+    sigma_spatial = np.full(N, 0.1)
+    solver.sigma_hat = np.fft.fft(sigma_spatial)
+
+    S_expected = solver.theta + sigma_spatial
+    f_expected = np.exp(1j * S_expected)
+    g_expected = 1j * np.exp(1j * S_expected)
+
+    f_k, g_k = solver.evaluate_boundary_geometry()
+
+    assert np.allclose(f_k, f_expected, atol=1e-10), "Error: Evaluated boundary points f_k do not match expected values."
+    assert np.allclose(g_k, g_expected, atol=1e-10), "Error: Evaluated boundary tangents g_k do not match expected values."
+    print("Boundary geometry evaluation tests passed.")
+
+def test_boundary_geometry_evaluation_ellipse_vary():
+    '''
+    test on an ellipse wit semi axes 2 and 1
+    reparametrisation sigma = 0.2sin(theta) lets see what happens
+    '''
+    print("testing boundary geometry evaluation on ellipse with varying reparametrisation ...")
+    N = 32
+    a = 2.0
+    b = 1.0
+    theta = np.linspace(0, 2*np.pi, num=N, endpoint=False)
+    # eta(t) = 1.5 e^{it} + 0.5 e^{-it}
+    eta_vals = a * np.cos(theta) + 1j * b * np.sin(theta)
+    eta_coeffs = np.fft.fft(eta_vals)/N 
+    print(f"FLAG: Fourier coefficients of ellipse boundary: {eta_coeffs}")
+    # isclose rather than == because of float eval FFT inexactness
+    assert (np.isclose(eta_coeffs [1], 1.5, atol=1e-10) and np.isclose(eta_coeffs[N-1], 0.5, atol=1e-10)), "Error: Fourier coefficients of ellipse boundary do not match expected values."
+    solver = WegmannSolver(eta_coeffs, N)
+    sigma_spatial = 0.2 * np.sin(solver.theta)
+    solver.sigma_hat = np.fft.fft(sigma_spatial)
+    S_k = solver.theta + sigma_spatial
+    f_expected = a * np.cos(S_k) + 1j * b * np.sin(S_k)
+    g_expected = -a * np.sin(S_k) + 1j * b * np.cos(S_k)
+    f_k, g_k = solver.evaluate_boundary_geometry()
+    assert np.allclose(f_k, f_expected, atol=1e-10), "Error: Evaluated boundary points f_k do not match expected values."
+    assert np.allclose(g_k, g_expected, atol=1e-10), "Error: Evaluated boundary tangents g_k do not match expected values."
+    print("Boundary geometry evaluation on ellipse with varying reparametrisation tests passed.")
 
 def test_RH_solver():
     '''
@@ -131,10 +174,10 @@ def test_RH_solver_meromorphic():
     error = np.max(np.abs(psi_computed - psi_true))
     print(f"meromorphic error, N={N}: {error}")
     # assert np.allclose(psi_true, psi_computed, atol=1e-5) # not working
-    print(f"Riemann-Hilbert solver meromorphic test passed.")
+    # print(f"Riemann-Hilbert solver meromorphic test passed.")
 
 if __name__ == "__main__":
-    test_initial_guess()
+    #test_initial_guess()
     #test_omega_unit_circle()
     #test_omega_ellipse()
     #test_hilbert_transform()
@@ -142,3 +185,4 @@ if __name__ == "__main__":
     #test_RH_solver_exponential_magnitude()
     #test_RH_solver_oscillatory_phase()
     #test_RH_solver_meromorphic()
+    test_boundary_geometry_evaluation_ellipse_vary()

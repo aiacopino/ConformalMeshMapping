@@ -2,6 +2,11 @@ import numpy as np
 #from scipy.fft import fft, ifft
 ## math helpers
 
+'''
+NOTE FOURIER ARRAY HAS COEFFS ORDERED LIKE c0, c1, c2, c3, ..., c_n, c_{-n}, c_{-n+1}, ..., c_{-1}
+SO THE NEGATIVE FREQS ARE IN THE SECOND HALF OF THE ARRAY
+'''
+
 ## https://www.youtube.com/watch?v=dy4OeAYqSqM
 ## hilbert tranform
 # input: spatial domain values
