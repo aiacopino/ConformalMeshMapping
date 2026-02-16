@@ -13,9 +13,11 @@ class BoundaryCurve:
         return self.N
     
     def evaluate(self, t):
-        #evaluate boundary curve at parameter t (array of values in [0, 2pi])
-        #using fourier series
-        #N = self.N
+        '''
+        evaluate boundary curve at parameter t (outputs array of complex points on the boundary)
+        
+        :param t: array of parameter values in [0, 2pi]
+        '''
         #result = np.zeros_like(t, dtype=complex)
         t = np.asarray(t)
         k = np.fft.fftfreq(self.N) * self.N

@@ -8,103 +8,161 @@ in this file we test the algorithm as a whole
 to ensure convergence for the most common target region shapes
 '''
 
-class UnitCircle:
-    def eval(self,t):
-        return np.exp(1j*t)
-    
-def test_omega_unit_circle():
+def get_inverted_ellipse_coefficients(N,p):
     '''
-    expected immediate convergence for unit circle as target region
+    helper function to get fourier coefficients of inverted ellipse boundary parametrisation
+    benchmark example from wegmann's paper
+    parameter p in (0,1): closer to 1 equals ellipse, closer to 0 is more non-convex with sharper cusp at x=0, y=+-1
     '''
-    print("testing wegmann solver for unit circle target region ...")
-    N=128
-    eta_circle = UnitCircle()
-    eta_coeffs = np.fft.fft(eta_circle.eval(np.linspace(0, 2*np.pi, N, endpoint=False)))/N #discretisation
-    circle_bdary_obj = BoundaryCurve(eta_coeffs) #make bdarycurve object from unit circle
-    solver = WegmannSolver(circle_bdary_obj, N)
-    print("Running wegmann solver for unit circle target region ...")
-    res_sigma = solver.find_conformal_map(max_iter=10, epsilon=1e-10)
-    
-    max_sigma = np.max(np.abs(res_sigma))
-    print(f"Max perturbation (sigma) magnitude: {max_sigma}")
-    
-    if max_sigma < 1e-10:
-        print("SUCCESS: Sigma is effectively zero (Identity Map preserved).")
-    else:
-        print("FAILURE: Sigma should be zero for identity map.")
-
-    # 2. Check the Error History
-    # The first error calculation might be non-zero depending on implementation details,
-    # but it should drop to machine precision immediately.
-    print("Error History:", solver.error_history)
-    
-    # 3. Geometric Check
-    # Let's see if the final points f_k actually lie on the circle
-    # We manually reconstruct the boundary points
-    sigma_val = np.fft.ifft(solver.sigma_hat).real
-    S_final = solver.theta + sigma_val
-    final_points = eta_circle.eval(S_final)
-    
-    # Calculate distance from origin (should be 1.0 everywhere)
-    radii = np.abs(final_points)
-    radius_error = np.max(np.abs(radii - 1.0))
-    print(f"Max deviation from unit radius: {radius_error}")
-    
-    assert radius_error < 1e-14, "Final points are not on the unit circle!"
-
-
-def test_omega_ellipse():
-    '''
-    test wegmann solver for ellipse target region
-    '''
-    print("testing wegmann solver for ellipse target region ...")
-    N=128
-    a = 2.0 # semi-major axis
-    b = 1.0 # semi-minor axis
-    theta = np.linspace(0,2*np.pi, num=N, endpoint=False)
-    eta_vals = a * np.cos(theta) + 1j * b * np.sin(theta)
+    #N = 128
+    #p = 0.4 # p in (0,1)
+    s = np.linspace(0, 2*np.pi, N, endpoint=False)
+    r = np.sqrt(1 - (1 - p**2) * np.cos(s)**2)
+    #cartesian frmo aobve angle s and radius r
+    x = r * np.cos(s)
+    y = r * np.sin(s)
+    eta_vals = x + 1j*y
     eta_coeffs = np.fft.fft(eta_vals)/N
-    ellipse_bdary_obj = BoundaryCurve(eta_coeffs)
-    solver = WegmannSolver(ellipse_bdary_obj, N)
-    print("Running wegmann solver for ellipse target region ...")
-    solver.find_conformal_map(max_iter=100, epsilon=1e-10)
-    final_pts= solver.get_final_boundary_points() #get final coordinates on boundary after convergence
-    # check if pts are on ellipse
-    x = final_pts.real
-    y = final_pts.imag
-    metric = (x/a)**2 + (y/b)**2
-    deviation = np.max(np.abs(metric - 1.0))
-    print(f"Max deviation from ellipse boundary: {deviation}")
-    assert deviation < 1e-5, "FAILURE: Final points are not on the ellipse boundary"
-    print("SUCCESS: final points lie on the ellipse boundary")
 
-def test_low_resolution_mesh():
-    '''
-    check if discretization is coarse, derivatives still make sense or too big errors
-    especialy check hilbert transform validity
-    '''
-    N=8
+    #plotting for fun
+    plt.figure(figsize = (7,7))
+    plt.plot(x,y,label=f'Inverted Ellipse with p={p}')
+    plt.axis('equal') #distortion prevention
+    plt.legend()
+    plt.title("Wegmann's Inverted Ellipse Example (1978)")
+    plt.show()
+    return eta_coeffs
 
-def test_non_convex_target_region():
+def check_analyticity(solver, tol):
     '''
-    test if wegmann solver converges for non-convex target region and if not, make it raise an error instead of just crashing
-    '''
+    check the computed psi is actually analytic
+    cauchy-riemann equations: u_x = v_y and u_y = -v_x where psi = u + iv
+    equivalent to checking f taylor series expansion is well-def, i.e. all negative foourier coeffs are zero
 
-def test_zero_derivative_boundary():
+    :param tol: computational error tolerance
     '''
-    test if wegmann solver handles case where boundary derivative is zero at some point (cusp) (should raise zerodivisionerror)
-    '''
-#delete this
-def construct_conformal_map(self):
-    '''
-    construct conformal map psi from unit disk to target region from final state (sigma_hat)
-    returns fourier coeffs of psi
-    '''
-    sigma_hat = self.find_conformal_map(max_iter=100, epsilon=1e-6)
-    sigma_val = np.fft.ifft(sigma_hat).real
-    #shift back the conformal mapping to the actual centroid
-    self.sigma_hat[0] += self.shift
-    S_final = self.theta + sigma_val
-    psi = self.eta.evaluate(S_final)
+    print("checking analyticity of computed conformal map ...")
+    bdary_pts = solver.get_final_boundary_points()
+    coeffs = np.fft.fft(bdary_pts)/solver.N
+    negative_coeffs = coeffs[solver.N//2+1:]
+    ncoeffs_magnitude = np.linalg.norm(negative_coeffs)
+    print(f"Norm of negative Fourier coefficients (should be close to 0 for analyticity): {ncoeffs_magnitude}")
+    if ncoeffs_magnitude > tol:
+        print(f"Error: Negative Fourier coefficients have norm {ncoeffs_magnitude} > {tol}. computed map not analytic")
+    else:
+        print("Analyticity check passed: negative Fourier coefficients negligeable.")
 
-    return psi
+def plot_conformal_grid(solver, num_circles = 10, num_lines = 40):
+    '''
+    mesh on unit disk
+    maybe make the mesh gen a method inside operators or so idk
+    
+    :param solver: Description
+    :param num_circles: number of radial lines (concentric circles in unit disk)
+    :param num_lines: number of angular lines (rays from origin in unit disk)must be even ? 
+    '''
+    print("plotting conformal grid ...")
+    r = np.linspace(0, 1, num_circles) # radial points
+    theta = np.linspace(0, 2*np.pi, num_lines, endpoint=True) # angular points
+    
+    '''
+    R, Theta = np.meshgrid(r, theta) 
+
+    # cartesian for passing to calculate_interior_mesh method
+    disk_mesh = R * np.exp(1j * Theta) # 2D array of complex numbers, points of mesh in unit disk
+    target_region_mesh = solver.calculate_interior_mesh(disk_mesh)
+
+    #plotting
+    plt.figure(figsize=(8,8))
+    plt.axis('equal')
+    plt.plot([target_region_mesh[i,:].real for i in range(num_lines)], [target_region_mesh[i, :].imag for i in range(num_lines)], 'k-', alpha =0.3) # plot angular lines
+    plt.plot([target_region_mesh[:,j].real for j in range(num_circles)], [target_region_mesh[:, j].imag for j in range(num_circles)], 'k-', alpha =0.5) # plot radial lines
+    plt.title(f"Conformal Grid in Target Region, N={solver.N}")
+    plt.show()
+    '''
+    # Plot Circles
+    plt.figure(figsize=(8, 8))
+    for radius in r:
+        z_circle = radius * np.exp(1j * theta)
+        w_circle = solver.calculate_interior_mesh(z_circle)
+        plt.plot(w_circle.real, w_circle.imag, 'b-', alpha=0.5, linewidth=0.8)
+        
+    # Plot Rays
+    theta_rays = np.linspace(0, 2*np.pi, num_lines, endpoint=False)
+    r_ray = np.linspace(0, 1.0, 100)
+    for angle in theta_rays:
+        z_ray = r_ray * np.exp(1j * angle)
+        w_ray = solver.calculate_interior_mesh(z_ray)
+        plt.plot(w_ray.real, w_ray.imag, 'k-', alpha=0.4, linewidth=0.8)
+
+    # Plot Boundary
+    bdary = solver.get_final_boundary_points()
+    plt.plot(bdary.real, bdary.imag, 'r--', linewidth=2, label='Boundary')
+    
+    plt.axis('equal')
+    plt.title(f"Conformal Map (N={solver.N})")
+    plt.legend()
+    plt.show()
+
+
+def test_inverted_ellipse_convergence(N,p):
+    '''
+    test wegmann solver convergence for inverted ellipse target region
+    '''
+    print("START testing wegmann solver convergence for inverted ellipse target region ...")
+    eta_coeffs = get_inverted_ellipse_coefficients(N, p)
+    inverted_ellipse_bdary_obj = BoundaryCurve(eta_coeffs)
+    solver = WegmannSolver(inverted_ellipse_bdary_obj, N)
+
+    print("Running wegmann solver for inverted ellipse target region ...")
+    solver.find_conformal_map(max_iter=100, epsilon=1e-5)
+
+    if solver.error_history:
+        print(f"last 10 error entries after convergence: {solver.error_history[-10:]}")
+    else:
+        print("Error history is empty, something went wrong with convergence tracking.")
+    
+    check_analyticity(solver, tol = 1e-5)
+    plot_conformal_grid(solver)
+
+def test_unit_disk_convergence(N):
+    '''
+    test convergence for unit disk target region, should be the identity map
+    '''
+    print("START testing wegmann solver convergence for unit disk target region ...")
+    eta_coeffs = np.zeros(N, dtype=complex)
+    eta_coeffs[1] = 1.0 # unit circle
+    unit_disk_bdary_obj = BoundaryCurve(eta_coeffs)
+    solver = WegmannSolver(unit_disk_bdary_obj, N)
+
+    solver.init_initial_guess()
+    check_analyticity(solver, tol = 1e-10)
+    plot_conformal_grid(solver)
+
+def test_kite_convergence(N):
+    '''
+    test convergence for kite domain target region
+    k(s) = (cos(s) + 0.65* cos(2s) - 0.65, 1.5 * sin(s)) for s in [0,2*pi]
+
+    '''
+    print("START testing wegmann solver convergence for kite domain target region ...")
+    s = np.linspace(0, 2*np.pi, N, endpoint=False)
+    x = np.cos(s) + 0.65 * np.cos(2*s) - 0.65
+    y = 1.5 * np.sin(s)
+    eta_vals = x + 1j*y
+    eta_coeffs = np.fft.fft(eta_vals)/N
+    print(f"FLAG: Fourier coefficients of kite boundary: {eta_coeffs}")
+    kite_bdary_obj = BoundaryCurve(eta_coeffs)
+    solver = WegmannSolver(kite_bdary_obj, N)
+
+    check_analyticity(solver, tol = 1e-5)
+    plot_conformal_grid(solver)
+
+if __name__ == "__main__":
+    # adapt params here for different target regions and convergence tests
+    N = 256
+    p = 0.9
+
+    test_inverted_ellipse_convergence(N, p)
+    #test_kite_convergence(N)
+    #test_unit_disk_convergence(N)

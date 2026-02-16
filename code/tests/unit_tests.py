@@ -26,7 +26,7 @@ def test_initial_guess():
     check if boundary corerspondence function (including initial guess) maps from unit circle to [0,2pi]
     '''
     print("testing initial guess for boundary correspondence function ...")
-    N=128
+    N=2048
     dummy_eta = np.zeros(N, dtype=complex)
     solver = WegmannSolver(dummy_eta, N)
     solver.init_initial_guess()
@@ -177,7 +177,7 @@ def test_RH_solver_meromorphic():
     # print(f"Riemann-Hilbert solver meromorphic test passed.")
 
 if __name__ == "__main__":
-    #test_initial_guess()
+    test_initial_guess()
     #test_omega_unit_circle()
     #test_omega_ellipse()
     #test_hilbert_transform()
@@ -185,4 +185,4 @@ if __name__ == "__main__":
     #test_RH_solver_exponential_magnitude()
     #test_RH_solver_oscillatory_phase()
     #test_RH_solver_meromorphic()
-    test_boundary_geometry_evaluation_ellipse_vary()
+    #test_boundary_geometry_evaluation_ellipse_vary()
