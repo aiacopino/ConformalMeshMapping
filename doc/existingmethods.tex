@@ -395,18 +395,32 @@ We improve the approximation by moving the points along their tangents towards t
     \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = \psi_{k+1}(\zeta)
 \end{equation}
 where $\psi_{k+1}$ is an analytic approximation for $\psi$ on $\overline\Omega$. Note that $\psi_{k+1}$ does not generally take values on $\Gamma$. 
-The above equation (\ref{eq:h_k+1}) is a Riemann-Hilbert Problem \cite{AnosovBolibruch1994_riemannhilbertproblems} of two unknowns, $U_k$ and $\psi_{k+1}$.
+The above equation (\ref{eq:h_k+1}) is a non-homogeneous Riemann-Hilbert Problem \cite{AnosovBolibruch1994_riemannhilbertproblems} of two unknowns, $U_k$ and $\psi_{k+1}$, which is solved using a method described in \cite[§ 87]{Muskhelishvili1977} and \cite{Wegmann1978_newtonverfahren}.
 By the Riemann Mapping Theorem, it admits a unique solution only if we fix the mapping normalization. We therefore require that a specific boundary point $z_0$ corresponds to the target parameter $s_0$ (where $\eta(s_0) = c_0$). A direct coordinate constraint $\psi_{k+1}(z_0) = c_0$ is geometrically impossible because $\psi_{k+1}(z_0)$ is constrained to the tangent vector, while $c_0$ lies on the curve $\Gamma$. Therefore, the normalization condition is transferred to the parameter space. We force the updated parameter function to satisfy $S_{k+1}(z_0) = s_0$, which directly yields the necessary boundary condition for $U_k$ \cite[Equation 2.4a]{Wegmann1978_newtonverfahren}:
 \begin{equation}
     U_k(z_0)=s_0-S_k(z_0).
 \end{equation}
 
 To find $U_k$, equation (\ref{eq:h_k+1}) is rewritten into \cite[Equation 3.4]{Wegmann1978_newtonverfahren}:
-\begin{equation}
+\begin{equation}\label{eq:RHproblem}
     \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
 \end{equation}
-This eliminates $U_k$ (since it is real-valued) and yields a boundary value problem for $\psi_{k+1}$ which can be solved using the operator $K$ defined in \ref{operatorK_N}. 
-This is done via FFT (see \ref{chap:WegmannImplementation}). Subsequently, $U_k$ is recovered by rearranging equation (\ref{eq:h_k+1}).
+
+This corresponds to the geometric observation that we are essentially moving the current analytic approximation $\psi_{k+1}$ towards the boundary along the tangent, i.e.
+\begin{equation}
+    \psi_{k+1}-\eta((S_k(\zeta))) = c \cdot \dot\eta(S_k(\zeta))
+\end{equation}
+where $c\in\R$. Hence, 
+\begin{equation} \label{eq:imaginaryParts}
+    \text{Im}(\frac{\psi_{k+1}-\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))})=0 \iff
+    \text{Im}(\frac{\psi_{k+1}}{\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).        
+\end{equation}
+Note that since for a complex number Im$(a+ib) = b = -i\text{Re}(a+ib)$, we have
+\begin{equation}
+    \text{Im}(\frac{\psi_{k+1}}{\dot\eta(S_k(\zeta))}) = -i\text{Re}(\frac{\psi_{k+1}}{\dot\eta(S_k(\zeta))}) = \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))}),
+\end{equation}
+which can be plugged into equation (\ref{eq:imaginaryParts}) to yield exactly equation (\ref{eq:RHproblem}).
+This eliminates $U_k$ from the equation and yields a Dirichlet problem for $\psi_{k+1}$. The analytic $\psi_{k+1}$ can then be reconstructed by adding the imaginary part \cite[Lemma 14.2]{Henrici1986_vol3}using the operator $K$ defined in chapter \ref{operatorK_N}. 
 
 Finally, we get an approximation for the parametrization $S$ by 
 \begin{equation}
@@ -464,11 +478,51 @@ Note that this is a Newton method and thus only guaranteed to converge locally d
 Unlike the AP Method, which uses a fixed projection to find the next iterate, Wegmann's Method leverages the exact geometry of the boundary curve via $\theta$, which yields quadratic convergence since the error decreases much faster \cite[Theorem 4]{Wegmann1978_newtonverfahren}.
 %However, given a suitable initial guess, the method achieves a quadratic local convergence rate for smooth boundaries, or superlinear for sufficiently smooth boundaries \cite{Wegmann1989_alternating_projections}, unlike just linear convergence achieved by standard fixed-set alternating projection methods.
 
-\subsubsection{Python}
+\subsubsection{Numerical Solution to the Riemann-Hilbert Problem}
 \cite{Wegmann2005_num_methods_confmapping} integral equations, newton update steps
 \cite{Henrici1986_vol3} Hilbert BVP, construction of conformal maps
-\cite{Muskhelishvili1977} plemelj formulas (definition of M)
+\cite[§ 17]{Muskhelishvili1977} plemelj formulas (definition of M)
 
+The Riemann-Hilbert problem solves this equation for $\psi_{k+1}$. Since $\psi_{k+1}$ is the analytic approximation, we canreduce this problem of finding $\psi_{k+1}$ to that of finding Re$(\psi_{k+1})$ since the imaignary part of an analytic function is just its harmonic conjugate, which can numerically be computed efficiently using the operator $K$ defined in \ref{operatorK_N} (AKA Hilbert Transform).  
+Thus, the equation (\ref{eq:RHproblem}) 
+\begin{equation}
+    \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
+\end{equation}
+is rewritten as 
+\begin{equation}
+    Re(\psi_{k+1}) = \text{RHS} \frac{A}{M}
+\end{equation}
+where 
+
+
+
+Note that the condition (\ref{eq:InitialConditionsOnPsi}) could cause the algorithm to break or diverge if the target region does not contain the origin. 
+This can be resolved by first translating the region such that the condition $\psi(0)=0$ is satisfied, and then adding the shift back after computation of the conformal map. 
+
+
+\begin{figure}
+    \centering
+    \caption{A good initial guess is vital, as the algorithm is only guaranteed to converge locally quadratically for a close enough initial guess. The result of trying to find the map onto a kite by choosing the unit disk as initial guess is shown here.}
+    \includegraphics[width=\textwidth]{kite_initial_guess_circle.jpeg}
+\end{figure}
+
+TODO
+GIBBS PHENOMENON
+
+ausprobieren mit quadrat (truncate infinite fourier series)
+
+
+add images of mesh map to documentation!!!
+
+WRITE ABOUT RELAXATION FACTOR
+
+Note that Wegmann initial guess for inverted ellipse is always identity
+
+WEgmann describes two methods for solving the Riemann-Hilbert problem. He writes (\cite[§6]{Wegmann1978_newtonverfahren}) that the first method converges locally quadratically as long as the approximation error exceeds the discretisation error and only linearly from that point on, while the second method converges locally quadratically until machine precision is reached. However, the approxmation is significanly more exact in the first method, results which we have been able to reproduce. \red{ADD TABLES}
+
+$Y(z)$ is defined as a Cauchy integral of $\Theta$.By the Plemelj-Sokhotski formulas, the boundary values of a Cauchy integral satisfy:$$Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta)$$(The jump across the boundary is exactly the density function).Now look at Equation 3.6 for $\kappa=1$:Inside ($|z|<1$): $X(z) = \exp(Y(z) - C)$.So, $X^+ = \exp(Y^+ - C)$.Outside ($|z|>1$): $X(z) = z^{-2} \exp(Y(z) - C)$.So, $X^- = z^{-2} \exp(Y^- - C)$.If we take the ratio $X^+ / X^-$:$$\frac{X^+}{X^-} = \frac{\exp(Y^+ - C)}{z^{-2} \exp(Y^- - C)} = z^2 \exp(Y^+ - Y^-)$$Substituting the jump condition $Y^+ - Y^- = \Theta$:$$\frac{X^+}{X^-} = z^2 \exp(\Theta)$$Solving for $X^-$:$$X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}$$
+
+\subsection{Implementation}
 
 
 \newpage
