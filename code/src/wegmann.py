@@ -44,6 +44,8 @@ class WegmannSolver:
         # tool for error estimation in the correction step
         #self.domain_diameter =  2 * np.max(np.abs(self.eta.evaluate(self.theta)))
 
+        self.h_k = None # placeholder for h_k+1 to be used in newton step, defined here for scope reasons
+
     
     def init_initial_guess_identity(self):
         '''
@@ -91,11 +93,23 @@ class WegmannSolver:
         g_k = self.eta.evaluate_derivative(S_k) # as in the paper, no chain rule
         return f_k, g_k
 
-    def newton_step(self):
+    def newton_step(self, verfahren):
         '''
         perform one newton iteration
         stuff within the while loop (lines 4-11) of algorithm 3 in thesis
-        METHOD 1 in §5 of wegmann's 1978 paper
+        verfahren 1 in §5 of wegmann's 1978 paper
+        '''
+        '''
+        one newton iteration using second verfahren in §5 of wegmann's 1978 paper
+        *** used for all iterations after the very first one (according to wegmann p 464 bottom paragraph) ***
+
+        but since we need some inputs from verfahren 1 we have a few options
+        1. we can save all the fcts from verfahren 1 in self to refer to them also here
+        2. we can pass all the needed fcts as args to verfahren 2 but this is ugly
+        3. we can run verfahren 1 for the first iterations to not have to check if i == 0 in each iteration (how important is this?)
+        we would still have two functions 
+        3. we can write only one fct with code for both verfahrens, then pass verfahren as arg, then exec code depending on the verfahren but 
+        this is a lot of comparisons (expensive?) but probably most readable option
         '''
         # STEP 1
         # eval boundary geometry
@@ -108,12 +122,12 @@ class WegmannSolver:
         # arg(zeta^-2*fraction)=arg(zeta^-2)+arg(fraction) by complex number arithmetic
         # => result = -2 theta +2 arg(g_k)
         # see also formula in section 5 of the paper (p464)
-        Theta = np.unwrap(np.arctan2(g_k.imag, g_k.real)) * 2 - 2* self.theta
+        Theta = np.unwrap(np.arctan2(g_k.imag, g_k.real)) * 2 - 2* self.theta #this is for verfahren 2, see p 464
         H_Theta = ops.hilbert_transform(Theta)
         #print(f"FLAG: Theta = {Theta}, H_Theta = {H_Theta}")
 
         # find homogeneous solution ____________X = X+ + X-_____true dis? on in- and outside
-        log_X = 1/2 * (-H_Theta + 1j * Theta) #by Mushkelishvili (cite): X = exp(1/2*(H(Theta)+iTheta)
+        log_X = 1/2 * (-H_Theta + 1j * Theta) #by Mushkelishvili (cite): X = exp(1/2*(H(Theta)+iTheta) # MAYBE TRY PUTTING BACK TO PLUS HERE?
         # by eq. 3.6: X_plus = exp(Y(z))-1/2*Y(0)) and X_minus = z^{-2}* X_plus
         # Y(z) is Cauchy integral of Theta(zeta) => by plemelj-sokhotski formulas: Y^{+}-Y^{-}=Theta
         X_plus = np.exp(log_X)
@@ -121,9 +135,17 @@ class WegmannSolver:
         #print(f"FLAG: X_plus = {X_plus}, X_minus = {X_minus}")
 
         # solve linearised problem
-        # p463f in the definition of the integral F, we have the integrand rho (belegungsfunktion) which by eq. 3.7 is given by
-        rho = g_k * ( f_k/g_k).imag / X_plus
-        #integral is evaluated via FFT
+        if verfahren == 1:
+            # p463f in the definition of the integral F, we have the integrand rho (belegungsfunktion) which by eq. 3.7 is given by
+            rho = g_k * ( f_k/g_k).imag / X_plus
+        elif verfahren == 2:
+            # for verfahren 2, the first iter is also run with verf. 1 and h_k is taken from the previous iter to define rho_v2
+            # hence why we redefine h_k outside the if statements for it to be in both scopes NO NEED TO DEFINE SINCE SCOPE IS WHOLE FCT APPARENTLY
+            if self.h_k is None:
+                raise RuntimeError("h_k is not defined yet, cannot run verfahren 2 without previous verfahren 1 iteration.")
+            rho = g_k * ((f_k - self.h_k)/g_k ).imag / X_plus # p 464 bottom paragraph, h_k is just the h_k from previous iteration
+        
+        # integral is evaluated via FFT
         rho_coeffs = np.fft.fft(rho)
         # F^+ is only positive frequencies, so we zero out all the negative ones
         rho_plus, rho_minus = rho_coeffs.copy(), rho_coeffs.copy()
@@ -134,10 +156,10 @@ class WegmannSolver:
         # by eq.3.7, Phi(z) = X(z)/pi * integral(rho/(zeta-z)dzeta) and by §5 F(z)=1/(2pi*i) * integral(rho/(zeta-z)dzeta) => Phi(z)= X * 2j * F(z)
         Phi_plus = X_plus * 2j * F_plus_spatial
         Phi_minus = X_minus *2j * F_minus_spatial
-        Phi_minus = np.conjugate(Phi_minus)
         # eq. 3.8: h_0 = 1/2 * (Phi^{+} + conj(Phi^{-})).
-        h_0 = 1/2 * (Phi_plus + Phi_minus)
+        h_0 = 1/2 * (Phi_plus + np.conjugate(Phi_minus))
         # assert np.mean(np.abs(np.fft.fft(h_0)[self.N//2:])) < 1e-10, f"h_0 should be analytic, has neg fourier coeffs magnitude {np.mean(np.abs(np.fft.fft(h_0)[self.N//2:]))} \n received h_0 = {h_0}"
+        
         # anchoring
         # we want h_0 = 0. since h = h_0 + P*X (eq 3.9) we have:
         # P = -h_0(0)/X(0)
@@ -145,17 +167,20 @@ class WegmannSolver:
         X_0 = np.mean(X_plus) # because the anchor is inside the circle => X_plus
         P = -h_0_0/X_0
 
-        # full analytic souton h_k+1 = h_0 + P*X (p464)
-        h_k_plus_1 = h_0 + P * X_plus
+        if verfahren == 1:
+            # full analytic souton h_k+1 = h_0 + P*X (p463)
+            self.h_k = h_0 + P * X_plus
+        elif verfahren == 2:
+            self.h_k = self.h_k + h_0 + P * X_plus
 
         # which yields the correction step U_k = (h-f)/g (p456 and again p464)
-        U_k = ((h_k_plus_1 - f_k) / g_k).real
+        U_k = ((self.h_k - f_k) / g_k).real
         # assert np.mean(np.abs(U_k.imag)) < 1e-10, f"correction step U_k should be real, check for issues in RH solver or hilbert transform. \n received U_k = {U_k}"
         U_k -= np.mean(U_k) # zero the mean for uniqueness (Riemann mapping thm)
         #print(f"FLAG: correction step after mean-zero: U_k = {U_k}")
         return np.fft.fft(U_k)
 
-    def find_conformal_map(self, max_iter=100, epsilon=1e-5, relaxation=0.1):
+    def find_conformal_map(self, max_iter=100, epsilon=1e-5, relaxation=0.1, verfahren=1):
         '''
         Wegmann's method for conformal mapping solver        
         :param self: Description
@@ -169,10 +194,14 @@ class WegmannSolver:
         # default correction step direction (orientation) as in the paper, 
         # might change direction if the correction causes error to increase
         #RH_sign = 1 
-        print(f"FLAG: Starting Wegmann solver with max_iter={max_iter}, epsilon={epsilon}, relaxation={relaxation} ...")
+        print(f"FLAG: Starting Wegmann solver with max_iter={max_iter}, epsilon={epsilon}, relaxation={relaxation}, verfahren={verfahren} ...")
         for i in range(max_iter):
             old_sigma = self.sigma_hat.copy()
-            U_k_hat = self.newton_step()
+
+            if verfahren == 1 or (verfahren == 2 and i == 0):
+                U_k_hat = self.newton_step(verfahren=1)
+            else:  
+                U_k_hat = self.newton_step(verfahren=2)
 
             self.sigma_hat = old_sigma + relaxation * U_k_hat # sigma_new = sigma_old + U_k (by equation 33)
             #enforce mean for uniqueness (riemann mapping thm); more numerically stable option than pinning a given point which could be badly chosen

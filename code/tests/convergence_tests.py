@@ -104,7 +104,7 @@ def plot_conformal_grid(solver, num_circles = 10, num_lines = 40):
     plt.legend()
     plt.show()
 
-def test_inverted_ellipse_convergence(N,p):
+def test_inverted_ellipse_convergence(N,p, relaxation, verfahren):
     '''
     test wegmann solver convergence for inverted ellipse target region
     example 2 of Gaier Anhang 5 and benchmark example in Wegmann's paper
@@ -118,7 +118,7 @@ def test_inverted_ellipse_convergence(N,p):
     else:
         solver.init_initial_guess_starshaped()
     print(f"Running wegmann solver for inverted ellipse target region, params N={N}, p={p} ...")
-    solver.find_conformal_map(max_iter=12, epsilon=1e-5, relaxation = 0.9)
+    solver.find_conformal_map(max_iter=12, epsilon=1e-5, relaxation = relaxation, verfahren=verfahren)
 
     if solver.error_history:
         print(f"last 10 error entries after convergence: {solver.error_history[-10:]}")
@@ -129,7 +129,7 @@ def test_inverted_ellipse_convergence(N,p):
     #check_analyticity(solver, tol = 1e-5)
     plot_conformal_grid(solver)
 
-def test_unit_disk_convergence(N):
+def test_unit_disk_convergence(N, verfahren):
     '''
     test convergence for unit disk target region, should be the identity map
     '''
@@ -140,12 +140,12 @@ def test_unit_disk_convergence(N):
     solver = WegmannSolver(unit_disk_bdary_obj, N)
 
     solver.init_initial_guess_identity()
-    solver.find_conformal_map(max_iter=100, epsilon=1e-5, relaxation = 1)
+    solver.find_conformal_map(max_iter=100, epsilon=1e-5, relaxation = 1, verfahren=verfahren)
 
     check_analyticity(solver, tol = 1e-10)
     plot_conformal_grid(solver)
 
-def test_kite_convergence(N):
+def test_kite_convergence(N, relaxation, verfahren):
     '''
     test convergence for kite domain target region
     k(s) = (cos(s) + 0.65* cos(2s) - 0.65, 1.5 * sin(s)) for s in [0,2*pi]
@@ -161,12 +161,12 @@ def test_kite_convergence(N):
     kite_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(kite_bdary_obj, N)
     solver.init_initial_guess_starshaped()
-    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation = 0.01)
+    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation = relaxation, verfahren=verfahren)
 
     plot_conformal_grid(solver)
     check_analyticity(solver, tol = 1e-5)
 
-def test_starfish_convergence(N, p):
+def test_starfish_convergence(N, p, relaxation, verfahren):
     '''
     Docstring for test_starfish_convergence
     
@@ -186,11 +186,11 @@ def test_starfish_convergence(N, p):
     starfish_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(starfish_bdary_obj, N)
     solver.init_initial_guess_starshaped()
-    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation = 0.01)
+    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation = relaxation, verfahren=verfahren)
     plot_conformal_grid(solver)
     check_analyticity(solver, tol = 1e-5)
 
-def test_eccentric_circle_convergence(N):
+def test_eccentric_circle_convergence(N, relaxation, verfahren):
     '''
     from Gaier, Anhang 5, first example
     example with known conformal map
@@ -215,7 +215,7 @@ def test_eccentric_circle_convergence(N):
     eccentric_circle_bdary = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(eccentric_circle_bdary, N)
     solver.init_initial_guess_starshaped()
-    solver.find_conformal_map(max_iter=100, epsilon=1e-5, relaxation = 0.8)
+    solver.find_conformal_map(max_iter=100, epsilon=1e-5, relaxation=relaxation, verfahren=verfahren)
     computed_phi = solver.get_final_boundary_points() 
     plot_conformal_grid(solver)
     distance_to_known_map = float(np.linalg.norm(computed_phi - known_conformal_phi))
@@ -224,15 +224,21 @@ def test_eccentric_circle_convergence(N):
 if __name__ == "__main__":
     # adapt params here for different target regions and convergence tests
     N = 128
+    p = 0.6
+    relaxation = 0.8
 
-    p = 3
+    # verfahren 1 or 2 from wegmann's paper, one is more exact and two converges faster.
+    # note any value other than 1 will run verfahren 2.
+    # (note verfahren translates to "method" but we chose the german word because method in non-py programming is a fct; to avoid confusion)
+    verfahren = 1
 
 
-
-    #remains to adapt plot_conformal_grid input params to take my actual N
+    # REMAINS to adapt plot_conformal_grid input params to take my actual N
     # REMAINS TO CHECK GRID ON ELLLIPSE: NOT AS EXPECTED
-    #test_inverted_ellipse_convergence(N, p) #converges for relaxation >0.8
-    #test_kite_convergence(N)
-    #test_unit_disk_convergence(N)
-    #test_starfish_convergence(N, p)
-    test_eccentric_circle_convergence(N)
+
+
+    test_inverted_ellipse_convergence(N, p, relaxation, verfahren) #converges for relaxation >0.8
+    #test_kite_convergence(N, relaxation, verfahren)
+    #test_unit_disk_convergence(N, verfahren)
+    #test_starfish_convergence(N, p, relaxation, verfahren)
+    #test_eccentric_circle_convergence(N, relaxation, verfahren)
