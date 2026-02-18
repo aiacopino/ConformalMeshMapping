@@ -91,6 +91,91 @@ class WegmannSolver:
         g_k = self.eta.evaluate_derivative(S_k) # as in the paper, no chain rule
         return f_k, g_k
 
+    def compute_U_k_correction_hat(self, psi, f_k, g_k):
+        '''
+        compute fourier coeffs of correction U_k where S_k+1 = S_k + U_k        
+        :param psi: approximation of conformal map on tangent
+        :param f_k: approximation of conformal map on boundary
+        :param g_k: tangent vector at boundary
+        '''
+        U_k_correction = ((psi - f_k) / g_k).real
+        return np.fft.fft(U_k_correction)
+    
+    def compute_new_sigma_hat(self, U_K_correction_hat):
+        '''
+        update parametrisation parameter sigma using the correction U_k computed from the RH problem solution
+        $S_{k+1}(theta) = S_k(theta) + U_k(theta)$
+        where $S(theta) = theta + sigma(theta)$
+        thus, theta + sigma_{k+1} = theta + sigma_k + U_k
+
+        '''
+        return self.sigma_hat + U_K_correction_hat
+    
+    def detrended_periodic_A(self, angle_A):
+        '''
+        helper function to mitigate gibbs phenomenon in hilbert transform of angle_A when computing M for RH problem solution
+        alternative to just hilbert transforming the nagle directly
+        OLD IMPLEMENTATION:
+        decomposes signal u(t) = periodic_u(t) + m*t
+        H[u] = H[periodic_u] + H[m*t]
+        N = len(angle_A)
+        #calc linear drift; is zero if the array is already periodic 
+        # -> no change if the input is already non-pathological
+        drift = angle_A[-1] - angle_A[0] # numerical noise
+        #subtract drift to make it periodic
+        slope_vec = np.linspace(0, drift, N)
+        print(f"FLAG: detrending hilbert input, drift = {drift}")
+        periodic_part = angle_A - slope_vec
+        return periodic_part, slope_vec
+        '''
+
+    def solve_RH_problem(self, A, RHS):
+        # step 2 of algorithm 3 in thesis
+        # https://arxiv.org/abs/1210.2199
+        '''
+        Solves Re( psi / A ) = RHS where Index(A) = 0: psi = M * (Re(W) + i*H[Re(W)])
+        homogeneous solution Ansatz: psi = M * W where M solves the homogeneous problem Re(M/A)=0, and W is the unknown function we solve for in the reduced Dirichlet problem
+        M = multiplier (homogeneous solution) => M solves Re(psi/A)=0
+        usually integrating factor of RH problem is multiplied to achieve a winding number of 0 (=> real)
+        W := psi/M is defined in order to reduce to Dirichlet problem: since M/A real (because pahse(M)=phase(A) => imaginary part divides out),
+        Re(M*W/A)=RHS <=> M/A* Re(W) = RHS <=> Re(W) = RHS * A/M
+        then the imaginary part of W is recovered via hilbert transform
+        finally psi = M*W
+        -
+        -
+        :param A: coefficient function in RH problem, array of complex values on unit circle
+        :param RHS: right hand side of RH problem, array of real values on unit circle
+        '''
+        # unwrap arg
+        angle_A = np.angle(A)
+        angle_A = np.unwrap(angle_A) # smoothing discontinuities coming from modulo 2pi
+        print(f"FLAG: max jump in angle of A (should be small after unwrapping): {np.max(np.abs(np.diff(angle_A)))}")
+        # M = exp( H[angle] + i*angle )
+        #H_angle = ops.hilbert_transform(angle_A) # this creates gibbs phenomenon
+        #M = np.exp(H_angle + 1j * angle_A) #this makes the error from gibbs phenomenon astronomical
+        #maybe next time implementation of nasser's work using second order fredholm equations and generalized neumann kernel would be better
+        # as it allows exploitation of the compact operator and is not affected by gibbs phenomenon
+        # alternatively, we introduce a helper function to work around the gibbs phenomenon by detrending the angle signal before hilbert transforming it, then reintroducing the trend after the transform 
+        # (since the trend is linear, its hilbert transform is known analytically and can be added back in easily)
+        angle_A_detrended, slope = self.detrended_periodic_A(angle_A)
+        #transform only periodic part
+        H_angle = ops.hilbert_transform(angle_A_detrended)
+        H_slope = ops.hilbert_transform(slope)
+        H_full = H_angle + H_slope
+        print(f"FLAG: max and min of H[angle_A] (after detrended hilbert transformation): {np.max(H_angle)}, {np.min(H_angle)}. H(slope)= {H_slope}")
+        M = np.exp(H_full + 1j * angle_A)
+        # Check ratio (M/A should be real)
+        ratio = (M / A).real 
+        print(f"FLAG: RH problem check, max imag part of M/A: {np.max(np.abs((M/A).imag))} (should be close to 0)")
+
+        # Solve for W = phi/M
+        Re_W = RHS / ratio
+        Im_W = ops.hilbert_transform(Re_W) # normalisation with mean = 0 (riemann mapping thm)
+        
+        W = Re_W + 1j * Im_W
+        
+        return M * W
+
     def newton_step(self):
         '''
         perform one newton iteration
@@ -110,16 +195,30 @@ class WegmannSolver:
         # see also formula in section 5 of the paper (p464)
         Theta = np.unwrap(np.arctan2(g_k.imag, g_k.real)) * 2 - 2* self.theta
         H_Theta = ops.hilbert_transform(Theta)
-        #print(f"FLAG: Theta = {Theta}, H_Theta = {H_Theta}")
+        '''
+        # singular integral equation as in Mushkelishvili's book
+        # winding number makes it impossible to integrate directly
+        # Re(psi/ig)=RHS = Im(f/g)
+        # by the Plemelj formulas:
+        Y = H_Theta + 1j * Theta # corerct /check this
+        Y_0 = np.mean(Y)
+        # X satisfies the homogeneous problem/ is the homogen solution Re(psi/ig)=0
+        # computed as in eq. 3.7 in wegmann's paper
+        X = np.exp(Y) - 0.5 * Y_0 # how to find Y_0?
 
+        #eq. 3.8
+        h_0 = 0.5 * (Phi + ops.hilbert_transform(np.fft.fft(Phi)))
+        h_k = ?
+        P = -h_0 / X # as on page 465
+        #find analytic fct
+        h_k_plus_1 = h_k + h_0 + P * X 
+        '''
         # find homogeneous solution ____________X = X+ + X-_____true dis? on in- and outside
-        log_X = 1/2 * (-H_Theta + 1j * Theta) #by Mushkelishvili (cite): X = exp(1/2*(H(Theta)+iTheta)
+        log_X = 1/2 * (H_Theta + 1j * Theta) #by Mushkelishvili (cite): X = exp(1/2*(H(Theta)+iTheta)
         # by eq. 3.6: X_plus = exp(Y(z))-1/2*Y(0)) and X_minus = z^{-2}* X_plus
         # Y(z) is Cauchy integral of Theta(zeta) => by plemelj-sokhotski formulas: Y^{+}-Y^{-}=Theta
         X_plus = np.exp(log_X)
         X_minus = self.zeta**(-2) * X_plus * np.exp(-Theta)
-        #print(f"FLAG: X_plus = {X_plus}, X_minus = {X_minus}")
-
         # solve linearised problem
         # p463f in the definition of the integral F, we have the integrand rho (belegungsfunktion) which by eq. 3.7 is given by
         rho = g_k * ( f_k/g_k).imag / X_plus
@@ -128,16 +227,15 @@ class WegmannSolver:
         # F^+ is only positive frequencies, so we zero out all the negative ones
         rho_plus, rho_minus = rho_coeffs.copy(), rho_coeffs.copy()
         rho_plus[self.N//2:] = 0 # Taylor series, Plemelj projection P+ (cite Mushkelishvili) corresponds to evaluating Cauchy integral F(z) inside unit disk
-        rho_minus[:self.N//2] = 0 # Laurent series, Plemelj projection P- corresponds to evaluating Cauchy integral F(z) outside the unit disk
+        rho_minus[:self.N//2+1] = 0 # Laurent series, Plemelj projection P- corresponds to evaluating Cauchy integral F(z) outside the unit disk
         F_plus_spatial = np.fft.ifft(rho_plus)
         F_minus_spatial = -np.fft.ifft(rho_minus) #defined n p 463
         # by eq.3.7, Phi(z) = X(z)/pi * integral(rho/(zeta-z)dzeta) and by §5 F(z)=1/(2pi*i) * integral(rho/(zeta-z)dzeta) => Phi(z)= X * 2j * F(z)
         Phi_plus = X_plus * 2j * F_plus_spatial
         Phi_minus = X_minus *2j * F_minus_spatial
-        Phi_minus = np.conjugate(Phi_minus)
+        Phi_minus = ops.hilbert_transform(Phi_minus)
         # eq. 3.8: h_0 = 1/2 * (Phi^{+} + conj(Phi^{-})).
         h_0 = 1/2 * (Phi_plus + Phi_minus)
-        # assert np.mean(np.abs(np.fft.fft(h_0)[self.N//2:])) < 1e-10, f"h_0 should be analytic, has neg fourier coeffs magnitude {np.mean(np.abs(np.fft.fft(h_0)[self.N//2:]))} \n received h_0 = {h_0}"
         # anchoring
         # we want h_0 = 0. since h = h_0 + P*X (eq 3.9) we have:
         # P = -h_0(0)/X(0)
@@ -151,9 +249,49 @@ class WegmannSolver:
         # which yields the correction step U_k = (h-f)/g (p456 and again p464)
         U_k = ((h_k_plus_1 - f_k) / g_k).real
         # assert np.mean(np.abs(U_k.imag)) < 1e-10, f"correction step U_k should be real, check for issues in RH solver or hilbert transform. \n received U_k = {U_k}"
+
+        '''
+        # STEP 2
+        # solve RH problem
+        # RHS = Im (f(zeta)/tangent_vec(zeta))
+        RHS = (f_k/g_k).imag # tangent vec has winding number 1, need winding number 0 for std RH solver
+        # g_k is tangent vector -> 1j*g_k is normal vector
+        A = 1j*g_k / self.zeta #new coefficient with winding nr 0
+        # RH solves Re(psi_bar/A) = RHS
+        psi_bar = self.solve_RH_problem(A, RHS)
+
+        # recover psi from psi_bar undoing the division by zeta in A 
+        # also this fixes degree of freedom f(0)=0 required for uniqueness by riemann mapping thm
+        # this crashes if target is not centered at 0 -> make adjustable
+        psi = psi_bar * self.zeta
+
+        # STEP 3
+        # compute correction 
+        U_k_hat = self.compute_U_k_correction_hat(psi, f_k, g_k)
+        
+        # quantity needed for correct sign (direction) of update step:
+        avg_tangent_magnitude = np.mean(np.abs(g_k))
+
+        return U_k_hat, avg_tangent_magnitude
+        '''
         U_k -= np.mean(U_k) # zero the mean for uniqueness (Riemann mapping thm)
-        #print(f"FLAG: correction step after mean-zero: U_k = {U_k}")
         return np.fft.fft(U_k)
+    
+    def find_boundary_mismatch(self, new_sigma_hat, old_sigma_hat):
+        '''
+        compute mismatch between new and old sigma_hat in terms of boundary displacement        
+        this is a simple measure of how much the boundary has changed
+        return the L2 norm of the difference in sigma_hat (i.e., how much the boundary has moved)
+
+        :param self: Description
+        :param new_sigma_hat: Description
+        :param old_sigma_hat: Description
+        '''
+        S_old = self.theta + np.fft.ifft(old_sigma_hat).real
+        S_new = self.theta + np.fft.ifft(new_sigma_hat).real
+        f_old = self.eta.evaluate(S_old)
+        f_new = self.eta.evaluate(S_new)
+        return np.linalg.norm(f_new - f_old)
 
     def find_conformal_map(self, max_iter=100, epsilon=1e-5, relaxation=0.1):
         '''
@@ -169,11 +307,53 @@ class WegmannSolver:
         # default correction step direction (orientation) as in the paper, 
         # might change direction if the correction causes error to increase
         #RH_sign = 1 
-        print(f"FLAG: Starting Wegmann solver with max_iter={max_iter}, epsilon={epsilon}, relaxation={relaxation} ...")
+                
         for i in range(max_iter):
             old_sigma = self.sigma_hat.copy()
             U_k_hat = self.newton_step()
 
+            '''
+            # anti divergence: low-pass filter (orszag's 2/3 rule)
+            # zero out the top 1/3 of freqencies to avoid accumulation of high-freq noise
+            freqs = np.fft.fftfreq(self.N) #ordered: [0,1,2,...,N/2, -N/2, ..., -2, -1] 
+            cutoff_fraction = 0.3 # smaller = MORE STABLE. maximum 0.5 (Nyquist frequency) "cpt support" like enforcing Schwarz decay"
+            high_freq_mask = np.abs(freqs) > cutoff_fraction
+            print(f"FAG: applying low-pass filter to correction, zeroing out {np.sum(high_freq_mask)} out of {self.N} frequencies ")#:\n {freqs[high_freq_mask]}")
+            #apply filter: zero out entries where the mask applies
+            U_k_hat [high_freq_mask] = 0
+
+            # check better direction and go there
+            sigma_pos = old_sigma + relaxation * U_k_hat
+            mismatch_pos = self.find_boundary_mismatch(sigma_pos, old_sigma)
+            sigma_neg = old_sigma - relaxation * U_k_hat
+            mismatch_neg = self.find_boundary_mismatch(sigma_neg, old_sigma)
+            # choose the correction that reduces the mismatch
+            if mismatch_pos < mismatch_neg:
+                self.sigma_hat = sigma_pos
+                mismatch = mismatch_pos
+                direction = "POS"
+            else:
+                self.sigma_hat = sigma_neg
+                mismatch = mismatch_neg
+                direction = "NEG"
+            print(f"FLAG: iter {i}, mismatch: {mismatch}, direction: {direction}")
+            
+            #self.sigma_hat = old_sigma + relaxation * U_k_hat # sigma_new = sigma_old + U_k (by equation 33) this diverges wildly
+            trial_sigma = old_sigma + RH_sign * relaxation * U_k_hat # 
+            mismatch = self.find_boundary_mismatch(trial_sigma, old_sigma)
+            
+            # check if we are not moving away from the boundary; if so, change sign (=direction) and undo correction step
+            # this is ugly
+            if mismatch > 0.05 * self.domain_diameter:
+                RH_sign = -RH_sign # flip sign of correction if it would worsen the mismatch
+                print(f"NOTE: flipped sign of correction. mismatch: {mismatch}")
+                trial_sigma = old_sigma + RH_sign * relaxation * U_k_hat # try correction with flipped sign
+                print(f"mismatch after flipping sign: {self.find_boundary_mismatch(trial_sigma, old_sigma)}")
+                #continue # skip update of sigma_hat this iteration if correction would worsen the mismatch, try again with flipped sign in next iteration
+
+            # if we are here, the correction is good, we can update sigma_hat
+            self.sigma_hat = trial_sigma
+            '''
             self.sigma_hat = old_sigma + relaxation * U_k_hat # sigma_new = sigma_old + U_k (by equation 33)
             #enforce mean for uniqueness (riemann mapping thm); more numerically stable option than pinning a given point which could be badly chosen
             # change this to anchoring a specific point for non-symmetric target shapes
@@ -181,7 +361,7 @@ class WegmannSolver:
 
             # if U_k is very small, we are done (remaining correction is very small, algorithm "settled" -> converged)
             # coul we also do this measuring the output of compute_U_k_correction_hat() fct?
-            correction_magnitude = float(np.linalg.norm(U_k_hat)) # norm of the correction vector    
+            correction_magnitude = np.linalg.norm(U_k_hat) # norm of the correction vector    
             self.error_history.append(correction_magnitude)
             print(f"FLAG: iter {i}, norm of correction: {correction_magnitude}")
             if correction_magnitude > 1e5:
@@ -192,7 +372,7 @@ class WegmannSolver:
                 print(f"Converged in {i} iterations.")# \n Error history: {self.error_history}")
                 return self.sigma_hat
         #if not converged after max_iter
-        print(f"Error history: {self.error_history}")
+        print(f"Max iterations reached. \n Error history: {self.error_history}")
 
         return self.sigma_hat
     
