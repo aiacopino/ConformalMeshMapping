@@ -22,6 +22,7 @@ class WegmannSolver:
         # the perfect shift has exactly centroid of target domain at 0
         # this will hopefully work because most of the regions studied by wegmann are more or less convex
         self.shift = eta.coeffs[0]
+        print(f"FLAG: normalisation shift applied to target region: {self.shift}")
         centered_coeffs = eta.coeffs.copy()
         centered_coeffs[0] = 0
         self.eta = BoundaryCurve(centered_coeffs)
@@ -31,11 +32,6 @@ class WegmannSolver:
 
         self.theta = np.linspace(0, 2*np.pi, num=N, endpoint=False) # array of equally spaced args (angles)
         self.zeta = np.exp(1j*self.theta) # array of equally spaced grid pts on unit circle [0, 2pi)
-
-        # fix normalization psi(0) = 0, psi'(0) > 0 for uniqueness (anchoring)
-        # what if normalization point is somewhere else: make adjustable to user input
-        # self.z_0 = 0 # eta.evaluate(0) ################### check this ######################
-        # self.s_0 = 0
         
         # initial guess: S(theta) = theta <=> sigma = 0
         self.sigma_hat = np.zeros(self.N, dtype=complex) # fourier coeffs of boundary correspondenec fct, equation 33 in thesis (fourier coeffs of sigma)
@@ -45,7 +41,7 @@ class WegmannSolver:
         #self.domain_diameter =  2 * np.max(np.abs(self.eta.evaluate(self.theta)))
 
         self.h_k = None # placeholder for h_k+1 to be used in newton step, defined here for scope reasons
-
+        self.final_bdary_pts = None # placeholder for final boundary points after convergence, defined here for scope reasons
     
     def init_initial_guess_identity(self):
         '''
@@ -70,8 +66,26 @@ class WegmannSolver:
 
         #uniqueness: mean zero (Riemann mapping thm)
         sigma_init -= np.mean(sigma_init)
-        self.sigma_hat = sigma_init.astype(complex) #FFT input format
+        self.sigma_hat = np.fft.fft(sigma_init)
         print(f"FLAG: polar initial guess, max |sigma|: {np.max(np.abs(sigma_init)):.4f}")
+
+    def init_initial_guess_non_convex(self):
+        '''
+        convergence-friendly initial guess for non-convex domains, based on Hiptmair's kite
+        k(s) = (cos(s) + 0.65* cos(2s) - 0.65, 1.5 * sin(s)) for s in [0,2*pi]
+        '''
+        points = self.eta.evaluate(self.theta)
+        angles = np.arctan2(points.imag / 1.5, points.real) #elliptical scaling
+        angles = np.unwrap(angles)
+
+        # angles=S(theta)=theta+sigma
+        sigma_init = angles - self.theta
+
+        #uniqueness: mean zero (Riemann mapping thm)
+        sigma_init -= np.mean(sigma_init)
+        self.sigma_hat = np.fft.fft(sigma_init)
+        print(f"FLAG: non-convex initial guess, max |sigma|: {np.max(np.abs(sigma_init)):.4f}")
+    
 
     def evaluate_boundary_geometry(self):
         '''
@@ -86,7 +100,9 @@ class WegmannSolver:
         #derivative of S_k : S_k = theta + sigma(theta) => S_k'(theta) = 1 + sigma'(theta)
         #sigma_dot_hat = ops.fourier_derivative(self.sigma_hat)
         #sigma_dot_val = np.fft.ifft(sigma_dot_hat).real
-        #S_dot_k = 1 + sigma_dot_val
+        S_dot_k = 1 + np.fft.ifft(ops.fourier_derivative(self.sigma_hat)).real # spatial domain derivative of S_k, needed for checking injectivity (divergence debugging)
+        if np.any(S_dot_k <= 0):
+            print(f"WARNING: S_k is not injective, S_dot_k has non-positive values: {S_dot_k[S_dot_k <= 0]}, consider improving initial guess.")
         
         f_k = self.eta.evaluate(S_k) #position on boundary f_k = η(S_k(θ)), geometric candidate but not analytic -> not extendable into interior of disk (analytic candidate is psi_k+1 on the tangent)
         #g_hat = ops.fourier_derivative(f_k) * S_dot_k #tangent on buondary g_k = η'(S_k(θ)) * S_k'(θ)
@@ -131,7 +147,8 @@ class WegmannSolver:
         # by eq. 3.6: X_plus = exp(Y(z))-1/2*Y(0)) and X_minus = z^{-2}* X_plus
         # Y(z) is Cauchy integral of Theta(zeta) => by plemelj-sokhotski formulas: Y^{+}-Y^{-}=Theta
         X_plus = np.exp(log_X)
-        X_minus = self.zeta**(-2) * X_plus * np.exp(-Theta)
+        X_minus = self.zeta**(-2) * X_plus * np.exp(-Theta*1j) # $$X^-(\zeta) = \zeta^{-2} X^+(\zeta) e^{-i\Theta(\zeta)}$$
+        # DEBUGGING FLAG before it had no *1j: X_minus = self.zeta**(-2) * X_plus * np.exp(-Theta)
         #print(f"FLAG: X_plus = {X_plus}, X_minus = {X_minus}")
 
         # solve linearised problem
@@ -165,7 +182,7 @@ class WegmannSolver:
         # P = -h_0(0)/X(0)
         h_0_0 = np.mean(h_0)
         X_0 = np.mean(X_plus) # because the anchor is inside the circle => X_plus
-        P = -h_0_0/X_0
+        P = -h_0_0/X_0 # this fixes psi(0)=0
 
         if verfahren == 1:
             # full analytic souton h_k+1 = h_0 + P*X (p463)
@@ -197,7 +214,7 @@ class WegmannSolver:
         print(f"FLAG: Starting Wegmann solver with max_iter={max_iter}, epsilon={epsilon}, relaxation={relaxation}, verfahren={verfahren} ...")
         for i in range(max_iter):
             old_sigma = self.sigma_hat.copy()
-
+            self.i = i
             if verfahren == 1 or (verfahren == 2 and i == 0):
                 U_k_hat = self.newton_step(verfahren=1)
             else:  
@@ -219,12 +236,41 @@ class WegmannSolver:
             #check if converged yet
             if correction_magnitude < epsilon:
                 print(f"Converged in {i} iterations.")# \n Error history: {self.error_history}")
+                self.normalise_orientation() # psi'(0)>0 maybe this helps fix the offset/ bad accuracy
                 return self.sigma_hat
         #if not converged after max_iter
         print(f"Error history: {self.error_history}")
+        print(f"minimal error after max iterations: {min(self.error_history)}. set as epsilon for convergence and plotting ;)")
 
         return self.sigma_hat
     
+    def normalise_orientation(self):
+        ''' 
+        ensure psi'(0)>0 for uniquenss
+        second riemann mapping thm condition
+        CAREFUL THIS YIELDS TOTAL CRAP FOR NON-CONVEX REGIONS, assertion error expected.
+        '''
+        self.final_bdary_pts = self.get_final_boundary_points()
+        coeffs = np.fft.fft(self.final_bdary_pts)/self.N
+        # psi'(0) is given by the first positive fourier coeff
+        # we cirrect by that rotation angle
+        rotation_angle = np.angle(coeffs[1])
+        #finally shift bdary correspondence by that
+        sigma_val = np.fft.ifft(self.sigma_hat).real
+        sigma_val -= rotation_angle
+        self.sigma_hat = np.fft.fft(sigma_val)
+        self.final_bdary_pts = self.get_final_boundary_points() #update 
+        #verif
+        new_final_coeffs = np.fft.fft(self.final_bdary_pts) / self.N
+        psi_prime_0 = new_final_coeffs[1]
+        # psi'(0) must be real and positive
+        #assert abs(psi_prime_0.imag) < 1e-6, f"Imaginary part of psi'(0) too large: {psi_prime_0.imag}"
+        if(abs(psi_prime_0.imag) >= 1e-6):
+            print(f"WARNING: Imaginary part of psi'(0) too large after orientation normalisation: {psi_prime_0}")
+        #assert psi_prime_0.real > 0, f"psi'(0) is negative: {psi_prime_0.real}"
+        if psi_prime_0.real <= 0:
+            print(f"WARNING: psi'(0) is negative after orientation normalisation: {psi_prime_0}")
+
     def get_final_boundary_points(self):
         '''
         reconstructs the final boundary after convergence, undoing the normalisation shift

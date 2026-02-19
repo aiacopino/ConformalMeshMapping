@@ -42,12 +42,3 @@ class BoundaryCurve:
         k = np.fft.fftfreq(self.N) * self.N
         exponent = 1j * np.outer(t, k)  # t rows, k cols
         return np.dot(np.exp(exponent), deriv_coeffs)
-
-'''
-    def boundaryCorrespondence():
-        #S: [0, 2pi] -> [0, 2pi], theta mapsto s mapping angle on unit disk to boundary parameter of target region eta(s). diffeo of the circle -> not periodic
-        # S(theta)= theta + u(theta) where u is 2pi-periodic smooth
-
-
-        return None
-    '''

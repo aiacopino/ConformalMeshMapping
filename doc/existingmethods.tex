@@ -503,27 +503,234 @@ This can be resolved by first translating the region such that the condition $\p
 \begin{figure}
     \centering
     \caption{A good initial guess is vital, as the algorithm is only guaranteed to converge locally quadratically for a close enough initial guess. The result of trying to find the map onto a kite by choosing the unit disk as initial guess is shown here.}
-    \includegraphics[width=\textwidth]{kite_initial_guess_circle.jpeg}
+    \includegraphics[width=0.6\textwidth]{kite_initial_guess_circle.jpeg}
 \end{figure}
+\begin{figure}
+    \centering
+    \caption{In this case, the initial guess was chosen to be a star, which shares some of the properties with the kite's tangent vector, but it is still too convex and therefore far away from the kite to guarantee convergence of the solver.}
+    \includegraphics[width=0.6\textwidth]{kite_divergence_gibbs.png}
+\end{figure}
+The solver has proven experimentally not to converge on the kite region parametrised by     
+\begin{equation}
+    k(s) = (cos(s) + 0.65* cos(2s) - 0.65, 1.5 * sin(s)) for s in [0,2*pi].
+\end{equation}
+A homotopy algorithm is a possible solution to this, which we omit due to time constraints. The idea is as follows: the parameter 0.65 is relaxed and a sequence of intermediate regions is computed, where each solution is the initial guess for the subsequent mapping.
 
 TODO
-GIBBS PHENOMENON
+GIBBS PHENOMENON:
+%Non-convex regions often have areas of high curvature (the "neck" of the kite). In the Fourier domain, high curvature translates to high-frequency components. If your discretization $N$ isn't high enough, the Plemelj projections (rho_plus, rho_minus) suffer from aliasing and Gibbs oscillations, which ruin the analyticity of $h_k$.
 
-ausprobieren mit quadrat (truncate infinite fourier series)
-
+\red{TODO: ausprobieren mit quadrat (truncate infinite fourier series)
+}
+The relaxation parameter is used for initial einpendeln of the corrections. If we just take the full correction from the beginning, the solver tends to crash because the approximation steps are too large in relation to the WHAT? Hence why we "damp" the approximation steps in cases where we do not have a good enough initial guess at hand. \red{OUTLOOK: MAKE THE REAXATION ADAPTABLE TO AUTO-TUNING BASED ON THE APPROXIMATION ERROR.}
 
 add images of mesh map to documentation!!!
 
-WRITE ABOUT RELAXATION FACTOR
-
+\red{TO DO: CHECK METHOD 1 IMPLEMENTATION WHY IT DONT CONVERGE}
+\red{TO DO: TEST INVERTED ELLIPSEAND COMPARE TO CONFORMAL MAP}
+\red{TO DO: RUN EXPERIMENTS AGAIN, COMPUTE DISTAANCE OF COMPUTED MAP TO THE ACTUAL BOUNDARY TO MEASURE EXACTNESS OF SOLUTION}
+\red{TO DO: FIND INITIAL GUESS FOR KITE}
+maybe test star with more edges?
 Note that Wegmann initial guess for inverted ellipse is always identity
 
 WEgmann describes two methods for solving the Riemann-Hilbert problem. He writes (\cite[§6]{Wegmann1978_newtonverfahren}) that the first method converges locally quadratically as long as the approximation error exceeds the discretisation error and only linearly from that point on, while the second method converges locally quadratically until machine precision is reached. However, the approxmation is significanly more exact in the first method, results which we have been able to reproduce. \red{ADD TABLES}
 
 $Y(z)$ is defined as a Cauchy integral of $\Theta$.By the Plemelj-Sokhotski formulas, the boundary values of a Cauchy integral satisfy:$$Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta)$$(The jump across the boundary is exactly the density function).Now look at Equation 3.6 for $\kappa=1$:Inside ($|z|<1$): $X(z) = \exp(Y(z) - C)$.So, $X^+ = \exp(Y^+ - C)$.Outside ($|z|>1$): $X(z) = z^{-2} \exp(Y(z) - C)$.So, $X^- = z^{-2} \exp(Y^- - C)$.If we take the ratio $X^+ / X^-$:$$\frac{X^+}{X^-} = \frac{\exp(Y^+ - C)}{z^{-2} \exp(Y^- - C)} = z^2 \exp(Y^+ - Y^-)$$Substituting the jump condition $Y^+ - Y^- = \Theta$:$$\frac{X^+}{X^-} = z^2 \exp(\Theta)$$Solving for $X^-$:$$X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}$$
 
-\subsection{Implementation}
+\newpage
+\subsection{Results}
 
+Some experiments with the solver have \red{confirmed} the results Wegmann got: Verfahren 2 typically converges faster, while Verfahren 1 typically yields more accurate results. 
+We present some of the results in this chapter. 
+Gaier provides some ineresting examples of known conformal maps to compare the solver to, which yields a direct measure of the exactness of the computed conformal map.
+The measure of exactness in the below tables is calculated as the norm of the difference of the functions.
+
+%%%%%%%%%%%% ECCENTRIC CIRCLE %%%%%%%%%%%%%%%%%%%
+\begin{figure}
+    \includegraphics[width=0.5\textwidth]{img/eccentric_v1_rel.2.png}
+    \includegraphics[width=0.5\textwidth]{img/eccentric_v2_rel.2.png}
+    \caption{Gaier's eccentric circle \cite[Anhang 5, p. 264]{Gaier1964}}
+\end{figure}
+\begin{table}
+    \caption{Eccentric circle discretized at $N = 512$ points.}
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+        \hline
+        Verfahren & 1 & 2 \\
+        \hline
+        Exactness & 53.84189489305918 & 54.26115719239023 \\
+        \hline
+        Iteration \# & \multicolumn{2}{c}{Norm of correction/ update step $\lVert U_{k} \rVert$} \\
+        0 & 151.98901475588582 & 151.98901475588582 \\
+        1 & 114.21594140252218 & 194.00835541321004 \\
+        2 & 89.44329058620063 & 160.87394441489494 \\
+        3 & 72.09916724327302 & 121.58970214106796 \\
+        4 & 59.35011962259898 & 90.8824454960736 \\
+        5 & 49.618271141773796 & 68.44494057994135 \\
+        6 & 41.96440935321939 & 52.09880562369982 \\
+        7 & 35.80001091040178 & 40.049386024748614 \\
+        8 & 30.740615820537126 & 31.041704607068777 \\
+        9 & 26.525954880686037 & 24.220616542709806 \\
+        10 & 22.974078804192068 & 18.99867133961369 \\
+        \dots & \dots & \dots \\
+        75 & 0.009990678563315262 & 9.93750931682235e-06 \\
+        \dots & \dots &  \\
+        150 & 9.93750931682235e-06 & \\
+
+        \hline
+    \end{tabular}
+\end{table}
+
+%%%%%%%%%%%% INVERTED ELLIPSE p=0.6 %%%%%%%%%%%%%%%%%%%
+\begin{figure}
+    \includegraphics[width=0.6\textwidth]{img/invellipse_v1_p.6_rel.4.png}
+    \includegraphics[width=0.6\textwidth]{img/invellipse_v2_p.6_rel.4.png}
+    \caption{Gaier's inverted ellipse, which is also Wegmann's flagship example from the 1978 paper. \cite[Anhang 5, p. 264]{Gaier1964}}
+\end{figure}
+\begin{table}
+    \caption{Inverted ellipse discretized at $N = 512$ points, with convexity parameter $p = 0.6$.}
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+        \hline
+        Verfahren & 1 & 2 \\
+        \hline
+        Exactness & 1.3977742222951416e-12 & 1.3975176541099112e-12 \\
+        \hline
+        Iteration \# & \multicolumn{2}{c}{Norm of correction/ update step $\lVert U_{k} \rVert$} \\
+        0 & 88.63480431858018 & 88.63480431858018 \\
+        1 & 54.90539548249176 & 54.90539548249178 \\
+        2 & 33.61316776554185 & 33.61316776554185 \\
+        3 & 20.41971454542174 & 20.419714545421737 \\
+        4 & 12.344745234840195 & 12.344745234840188 \\
+        5 & 7.440777181665198 & 7.440777181665202 \\
+        6 & 4.476783261513716 & 4.476783261513759 \\
+        7 & 2.690525881801778 & 2.6905258818017637 \\
+        8 & 1.6159243413944206 & 1.6159243413944353 \\
+        9 & 0.9701347833233221 & 0.970134783323305 \\
+        10 & 0.5822899509291396 & 0.5822899509291886 \\
+        \dots & \dots & \dots \\
+        55 & 6.050613540055119e-11 & 6.056667137459197e-11 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+%%%%%%%%%%%% INVERTED ELLIPSE p = 0.4 %%%%%%%%%%%%%%%%%%%
+\centering
+\begin{figure}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v1_p.4.png}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v2_p.4.png}    
+    \includegraphics[width=0.6\textwidth]{img/invellip_v1_p.4_detail.png}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v2_p.4_detail.png}
+    \caption{Gaier's inverted ellipse ut more convex. \cite[Anhang 5, p. 264]{Gaier1964}}
+\end{figure}
+\begin{table}
+    \caption{Inverted ellipse discretized at $N = 512$ points, with convexity parameter $p = 0.4$. We have tried with even more convex, but already $p=0.3$ is quite a challenge, relaxation must be chosen extremely small and many more discretisation points (at least 1024, and even then only an accuracy of $10^-4$ can be attained.)}
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+        \hline
+        Verfahren & 1 & 2 \\
+        \hline
+        Exactness & 1.2988876338244771e-11 & 0.0001315917931317448 \\
+        \hline
+        Iteration \# & \multicolumn{2}{c}{Norm of correction/ update step $\lVert U_{k} \rVert$} \\
+        0 & 36.577695800268735 & 36.577695800268735 \\
+        1 & 23.998212599782647 & 23.99821265406515 \\
+        2 & 15.288233808871608 & 15.288233845161551 \\
+        3 & 9.530324234394648 & 9.530324253913129 \\
+        4 & 5.854994260623575 & 5.854994270199947 \\
+        5 & 3.563899762601892 & 3.563899766424457 \\
+        6 & 2.1569923565730837 & 2.1569923572638827 \\
+        7 & 1.300975206997786 & 1.3009752061064879 \\
+        8 & 0.7830389289227928 & 0.7830389273436897 \\
+        9 & 0.47070941447541376 & 0.4707094127129884 \\
+        10 & 0.2827451906950015 & 0.2827451890177375 \\
+        \dots & \dots & \dots \\
+        53 &  8.177427768306776e-11 & 8.178251083046234e-11 \\
+        \hline
+    \end{tabular}
+\end{table}
+\centering
+
+\begin{figure}
+    \caption{$L^2$ Distance between computed conformal map and known conformal map on inverted ellipse, $p = 0.3$: \\
+    Verfahren 1: $3.710212908531002e-06$, Verfahren 2: $3.7636081451245516e-06$}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v1_p.3.png}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v2_p.3.png}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v1_p.3_detail.png}
+    \includegraphics[width=0.6\textwidth]{img/invellip_v2_p.3_detail.png}
+\end{figure}
+
+%%%%%%%%%%%% INVELLIPSE P=0.8 %%%%%%%%%%%%%%%%%%%
+\begin{figure}
+    %\includegraphics[width=0.5\textwidth]{}
+    %\includegraphics[width=0.5\textwidth]{}
+    \caption{AAAAAAAAAAAAAAAA}
+\end{figure}
+\begin{table}
+    \caption{Inverted ellipse discretized at $N = 512$ points, with convexity parameter $p = 0.6$.}
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+        \hline
+        Verfahren & 1 & 2 \\
+        \hline
+        Exactness &  &  \\
+        \hline
+        Iteration \# & \multicolumn{2}{c}{Norm of correction/ update step $\lVert U_{k} \rVert$} \\
+        0 &  &  \\
+        1 &  &  \\
+        2 &  &  \\
+        3 &  &  \\
+        4 &  &  \\
+        5 &  &  \\
+        6 &  &  \\
+        7 &  &  \\
+        8 &  &  \\
+        9 &  &  \\
+        10 &  &  \\
+        \dots & \dots & \dots \\
+        75 &  &  \\
+        \dots & \dots &  \\
+        150 &  &  \\
+
+        \hline
+    \end{tabular}
+\end{table}
+
+%%%%%%%%%%%% WHATEVER (KITE/STAR?)%%%%%%%%%%%%%%%%%%%
+\begin{figure}
+    %\includegraphics[width=0.5\textwidth]{}
+    %\includegraphics[width=0.5\textwidth]{}
+    \caption{AAAAAAAAAAAAAAAA}
+\end{figure}
+\begin{table}
+    \caption{Inverted ellipse discretized at $N = 512$ points, with convexity parameter $p = 0.6$.}
+    \centering
+    \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+        \hline
+        Verfahren & 1 & 2 \\
+        \hline
+        Exactness &  &  \\
+        \hline
+        Iteration \# & \multicolumn{2}{c}{Norm of correction/ update step $\lVert U_{k} \rVert$} \\
+        0 &  &  \\
+        1 &  &  \\
+        2 &  &  \\
+        3 &  &  \\
+        4 &  &  \\
+        5 &  &  \\
+        6 &  &  \\
+        7 &  &  \\
+        8 &  &  \\
+        9 &  &  \\
+        10 &  &  \\
+        \dots & \dots & \dots \\
+        75 &  &  \\
+        \dots & \dots &  \\
+        150 &  &  \\
+
+        \hline
+    \end{tabular}
+\end{table}
 
 \newpage
 \subsection{Comparison}

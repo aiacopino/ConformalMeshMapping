@@ -23,7 +23,8 @@ def get_inverted_ellipse_coefficients(N,p):
     y = r * np.sin(s)
     eta_vals = x + 1j*y
     eta_coeffs = np.fft.fft(eta_vals)/N
-
+    return eta_coeffs
+    ''' (no more fun)
     #plotting for fun
     plt.figure(figsize = (7,7))
     plt.plot(x,y,label=f'Inverted Ellipse with p={p}')
@@ -31,7 +32,7 @@ def get_inverted_ellipse_coefficients(N,p):
     plt.legend()
     plt.title(f"Wegmann's Inverted Ellipse Example (1978), N={N}, p={p}")
     plt.show()
-    return eta_coeffs
+    '''
 
 def check_analyticity(solver, tol):
     '''
@@ -52,7 +53,7 @@ def check_analyticity(solver, tol):
     else:
         print("Analyticity check passed: negative Fourier coefficients negligeable.")
 
-def plot_conformal_grid(solver, num_circles = 10, num_lines = 40):
+def plot_conformal_grid(solver, N, p=0, verfahren=1, relaxation=1):
     '''
     mesh on unit disk
     maybe make the mesh gen a method inside operators or so idk
@@ -61,25 +62,13 @@ def plot_conformal_grid(solver, num_circles = 10, num_lines = 40):
     :param num_circles: number of radial lines (concentric circles in unit disk)
     :param num_lines: number of angular lines (rays from origin in unit disk)must be even ? 
     '''
+    num_circles = 10
+    num_lines = N
     print("plotting conformal grid ...")
+
     r = np.linspace(0, 1, num_circles) # radial points
     theta = np.linspace(0, 2*np.pi, num_lines, endpoint=True) # angular points
     
-    '''
-    R, Theta = np.meshgrid(r, theta) 
-
-    # cartesian for passing to calculate_interior_mesh method
-    disk_mesh = R * np.exp(1j * Theta) # 2D array of complex numbers, points of mesh in unit disk
-    target_region_mesh = solver.calculate_interior_mesh(disk_mesh)
-
-    #plotting
-    plt.figure(figsize=(8,8))
-    plt.axis('equal')
-    plt.plot([target_region_mesh[i,:].real for i in range(num_lines)], [target_region_mesh[i, :].imag for i in range(num_lines)], 'k-', alpha =0.3) # plot angular lines
-    plt.plot([target_region_mesh[:,j].real for j in range(num_circles)], [target_region_mesh[:, j].imag for j in range(num_circles)], 'k-', alpha =0.5) # plot radial lines
-    plt.title(f"Conformal Grid in Target Region, N={solver.N}")
-    plt.show()
-    '''
     # Plot Circles
     plt.figure(figsize=(8, 8))
     for radius in r:
@@ -88,19 +77,18 @@ def plot_conformal_grid(solver, num_circles = 10, num_lines = 40):
         plt.plot(w_circle.real, w_circle.imag, 'b-', alpha=0.5, linewidth=0.8)
         
     # Plot Rays
-    theta_rays = np.linspace(0, 2*np.pi, num_lines, endpoint=False)
     r_ray = np.linspace(0, 1.0, 100)
-    for angle in theta_rays:
+    for angle in theta:
         z_ray = r_ray * np.exp(1j * angle)
         w_ray = solver.calculate_interior_mesh(z_ray)
         plt.plot(w_ray.real, w_ray.imag, 'k-', alpha=0.4, linewidth=0.8)
 
     # Plot Boundary
     bdary = solver.get_final_boundary_points()
-    plt.plot(bdary.real, bdary.imag, 'r--', linewidth=2, label='Boundary')
-    
+    plt.scatter(bdary.real, bdary.imag, color='red', s=10, zorder=5, label='Solver Output Grid Pts')
+    plt.plot(np.append(bdary.real, bdary.real[0]), np.append(bdary.imag, bdary.imag[0]), 'r-', label='Boundary') # close the boundary loop
     plt.axis('equal')
-    plt.title(f"Conformal Map (N={solver.N})")
+    plt.title(f"Conformal Map (N={N}, convexity param p={p}, relaxation={relaxation}) \n converged in {solver.i} iterations of verfahren {verfahren}")
     plt.legend()
     plt.show()
 
@@ -113,21 +101,29 @@ def test_inverted_ellipse_convergence(N,p, relaxation, verfahren):
     eta_coeffs = get_inverted_ellipse_coefficients(N, p)
     inverted_ellipse_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(inverted_ellipse_bdary_obj, N)
-    if p > 0.55: 
-        solver.init_initial_guess_identity()
-    else:
-        solver.init_initial_guess_starshaped()
+    solver.init_initial_guess_starshaped()
     print(f"Running wegmann solver for inverted ellipse target region, params N={N}, p={p} ...")
-    solver.find_conformal_map(max_iter=12, epsilon=1e-5, relaxation = relaxation, verfahren=verfahren)
+    solver.find_conformal_map(max_iter=10000, epsilon=1e-4, relaxation = relaxation, verfahren=verfahren)
 
     if solver.error_history:
         print(f"last 10 error entries after convergence: {solver.error_history[-10:]}")
     else:
         print("Error history is empty, something went wrong with convergence tracking.")
     
-    known_conformal_map = 0
-    #check_analyticity(solver, tol = 1e-5)
-    plot_conformal_grid(solver)
+    # plotting and measuring accuracy of result
+    theta_unitc = np.linspace(0, 2*np.pi, N, endpoint=False)
+    z_disk = np.exp(1j * theta_unitc)
+    #theta_theoretical_conformal = np.arctan2(p * np.sin(theta_unitc), np.cos(theta_unitc))
+    #r_theoretical_conformal = np.sqrt(1 - (1 - p**2) * np.cos(theta_theoretical_conformal)**2)
+    boundary_pts_theoretical_conformal = (2 * p * z_disk) / ((1 + p) + (1 - p) * z_disk**2)
+    computed_mapped_pts = solver.final_bdary_pts
+
+    #sigma_val = np.fft.ifft(solver.sigma_hat).real
+    #computed_angles = np.mod(theta_unitc + sigma_val, 2*np.pi)
+    #anglediff = np.mod(computed_angles - known_conformal_map + np.pi, 2*np.pi) - np.pi
+    distance_to_known_map = float(np.linalg.norm(computed_mapped_pts - boundary_pts_theoretical_conformal))
+    print(f"L^2 Distance between computed conformal map and known conformal map on inverted ellipse, p = {p}: {distance_to_known_map}")
+    plot_conformal_grid(solver, N, p, verfahren, relaxation)
 
 def test_unit_disk_convergence(N, verfahren):
     '''
@@ -143,7 +139,7 @@ def test_unit_disk_convergence(N, verfahren):
     solver.find_conformal_map(max_iter=100, epsilon=1e-5, relaxation = 1, verfahren=verfahren)
 
     check_analyticity(solver, tol = 1e-10)
-    plot_conformal_grid(solver)
+    plot_conformal_grid(solver, N, verfahren)
 
 def test_kite_convergence(N, relaxation, verfahren):
     '''
@@ -160,10 +156,11 @@ def test_kite_convergence(N, relaxation, verfahren):
     print(f"FLAG: Fourier coefficients of kite boundary: {eta_coeffs}")
     kite_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(kite_bdary_obj, N)
-    solver.init_initial_guess_starshaped()
+    #solver.init_initial_guess_starshaped()
+    solver.init_initial_guess_non_convex()
     solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation = relaxation, verfahren=verfahren)
 
-    plot_conformal_grid(solver)
+    plot_conformal_grid(solver, N, verfahren, relaxation)
     check_analyticity(solver, tol = 1e-5)
 
 def test_starfish_convergence(N, p, relaxation, verfahren):
@@ -177,7 +174,7 @@ def test_starfish_convergence(N, p, relaxation, verfahren):
     # cartesian, fixed radius
     R = 3
     t = np.linspace(0, 2*np.pi, N, endpoint=False)
-    r = R + p * np.cos(5 * t) # starfish shape, p controls convexity: p close to 0 is more non-convex with sharper cusps, p close to R is more convex and circle-like
+    r = R + p * np.cos(5 * t) # starfish shape, p controls convexity: p close to 0 is more convex
     x = np.cos(t)*(R + p * np.cos(5 * t))
     y = np.sin(t)*(R + p * np.cos(5 * t)) 
     eta_vals = x + 1j*y
@@ -186,8 +183,9 @@ def test_starfish_convergence(N, p, relaxation, verfahren):
     starfish_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(starfish_bdary_obj, N)
     solver.init_initial_guess_starshaped()
-    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation = relaxation, verfahren=verfahren)
-    plot_conformal_grid(solver)
+    #solver.find_conformal_map(max_iter=1000, epsilon=5e-2, relaxation = relaxation, verfahren=verfahren)
+    solver.find_conformal_map(max_iter=1000, epsilon=1e-4, relaxation = relaxation, verfahren=verfahren)
+    plot_conformal_grid(solver, N, p, verfahren, relaxation)
     check_analyticity(solver, tol = 1e-5)
 
 def test_eccentric_circle_convergence(N, relaxation, verfahren):
@@ -197,9 +195,9 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren):
 
     :param N: discretisation points
     '''
-    #params as in Gaier and Andersen
-    a = 0.2
-    b = 0.6 
+    #params as in Gaier and Andersen (not anymore hehe)
+    a = 0.55
+    b = 0.6
 
     print(f"START testing wegmann solver convergence for eccentric circle domain target region ... N={N}, a={a}, b={b}")
     t = np.linspace(0, 2*np.pi, N, endpoint=False)
@@ -215,27 +213,22 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren):
     eccentric_circle_bdary = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(eccentric_circle_bdary, N)
     solver.init_initial_guess_starshaped()
-    solver.find_conformal_map(max_iter=100, epsilon=1e-5, relaxation=relaxation, verfahren=verfahren)
+    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation=relaxation, verfahren=verfahren)
     computed_phi = solver.get_final_boundary_points() 
-    plot_conformal_grid(solver)
+    plot_conformal_grid(solver, N, 0, verfahren, relaxation)
     distance_to_known_map = float(np.linalg.norm(computed_phi - known_conformal_phi))
     print(f"Distance between computed conformal map and known conformal map on eccentric circle: {distance_to_known_map}")
 
 if __name__ == "__main__":
     # adapt params here for different target regions and convergence tests
-    N = 128
-    p = 0.6
-    relaxation = 0.8
+    N = 512
+    p = 0.3
+    relaxation = 0.01
 
     # verfahren 1 or 2 from wegmann's paper, one is more exact and two converges faster.
     # note any value other than 1 will run verfahren 2.
     # (note verfahren translates to "method" but we chose the german word because method in non-py programming is a fct; to avoid confusion)
-    verfahren = 1
-
-
-    # REMAINS to adapt plot_conformal_grid input params to take my actual N
-    # REMAINS TO CHECK GRID ON ELLLIPSE: NOT AS EXPECTED
-
+    verfahren = 2
 
     test_inverted_ellipse_convergence(N, p, relaxation, verfahren) #converges for relaxation >0.8
     #test_kite_convergence(N, relaxation, verfahren)
