@@ -53,7 +53,7 @@ def check_analyticity(solver, tol):
     else:
         print("Analyticity check passed: negative Fourier coefficients negligeable.")
 
-def plot_conformal_grid(solver, N, p=0, verfahren=1, relaxation=1):
+def plot_conformal_grid(solver, N, p=0, verfahren=1, relaxation=1, accuracy = np.inf):
     '''
     mesh on unit disk
     maybe make the mesh gen a method inside operators or so idk
@@ -88,7 +88,7 @@ def plot_conformal_grid(solver, N, p=0, verfahren=1, relaxation=1):
     plt.scatter(bdary.real, bdary.imag, color='red', s=10, zorder=5, label='Solver Output Grid Pts')
     plt.plot(np.append(bdary.real, bdary.real[0]), np.append(bdary.imag, bdary.imag[0]), 'r-', label='Boundary') # close the boundary loop
     plt.axis('equal')
-    plt.title(f"Conformal Map (N={N}, convexity param p={p}, relaxation={relaxation}) \n converged in {solver.i} iterations of verfahren {verfahren}")
+    plt.title(f"Conformal Map (N={N}, convexity param p={p}, relaxation={relaxation}) \n converged in {solver.i} iterations of verfahren {verfahren} with accuracy {accuracy}")
     plt.legend()
     plt.show()
 
@@ -121,9 +121,9 @@ def test_inverted_ellipse_convergence(N,p, relaxation, verfahren):
     #sigma_val = np.fft.ifft(solver.sigma_hat).real
     #computed_angles = np.mod(theta_unitc + sigma_val, 2*np.pi)
     #anglediff = np.mod(computed_angles - known_conformal_map + np.pi, 2*np.pi) - np.pi
-    distance_to_known_map = float(np.linalg.norm(computed_mapped_pts - boundary_pts_theoretical_conformal))
-    print(f"L^2 Distance between computed conformal map and known conformal map on inverted ellipse, p = {p}: {distance_to_known_map}")
-    plot_conformal_grid(solver, N, p, verfahren, relaxation)
+    accuracy = float(np.linalg.norm(computed_mapped_pts - boundary_pts_theoretical_conformal))
+    print(f"L^2 Distance between computed conformal map and known conformal map on inverted ellipse, p = {p}: {accuracy}")
+    plot_conformal_grid(solver, N, p, verfahren, relaxation, accuracy)
 
 def test_unit_disk_convergence(N, verfahren):
     '''
@@ -163,7 +163,34 @@ def test_kite_convergence(N, relaxation, verfahren):
     plot_conformal_grid(solver, N, verfahren, relaxation)
     check_analyticity(solver, tol = 1e-5)
 
-def test_starfish_convergence(N, p, relaxation, verfahren):
+def test_square_convergence(tolerance, N, relaxation = 0.1, verfahren = 1, cutoff = 1/3):
+    #smoothed square with side length 2 and centered at the origin, like in Gaier Anhang 5 Bsp 4
+    #step 1: create fourier coeffs for smoothed square boundary
+    t = np.linspace(0,2*np.pi, N, endpoint=False)
+    r = 1 / np.maximum(np.abs(np.cos(t)), np.abs(np.sin(t))) # radius for smoothed square boundary, r = 1/max(|cos(t)|, |sin(t)|)
+    eta_vals = r * np.exp(1j*t)
+    coeffs = np.fft.fft(eta_vals) / N
+    #truncation: zero out high frequencies (middle of the array)
+    cutoff = int(cutoff * N) # cutoff is ratio of coeffs to keep, so cutoff=1/3 means keep 2/3 of coeffs
+    coeffs[cutoff:N-cutoff] = 0
+    print(f"START testing wegmann solver convergence for smoothed square target region ... N={N}, cutoff={cutoff}")
+    square_bdary_obj = BoundaryCurve(coeffs)
+    solver = WegmannSolver(square_bdary_obj, N)
+    solver.init_initial_guess_starshaped()
+    print("running Wegmann solver for smoothed square target region ...")
+    solver.find_conformal_map(max_iter=10000, epsilon=tolerance, relaxation = relaxation, verfahren=verfahren)
+    
+    #check accuracy of result by comparing to known conformal map for non-smoothed square (Schwarz-Christoffel map)
+    computed_mapped_pts = solver.final_bdary_pts
+    # note that max (L^infty) of all points on this square is one, so we can just check component-wise if the computed points are far from the distance one lines
+    x_vals = computed_mapped_pts.real
+    y_vals = computed_mapped_pts.imag
+    maxnorm_computed_radii = np.maximum(np.abs(x_vals), np.abs(y_vals))
+    accuracy = float(np.linalg.norm(maxnorm_computed_radii - 1)) / np.sqrt(N) #RMS error
+    print(f"L^2 Geometric Error (Distance to PERFECT square bounds): {accuracy} \n Note accuracy is not expected to be very small due to truncation error. Current truncation cutoff: {cutoff} out of {N} coefficients.")
+    plot_conformal_grid(solver, N, 0, verfahren, relaxation, accuracy)
+
+def test_flower_convergence(N, p, relaxation, verfahren):
     '''
     Docstring for test_starfish_convergence
     
@@ -172,21 +199,27 @@ def test_starfish_convergence(N, p, relaxation, verfahren):
     '''
     print(f"START testing wegmann solver convergence for starfish domain target region ... N={N}, convexity param p={p}")
     # cartesian, fixed radius
+    petals = 8
     R = 3
     t = np.linspace(0, 2*np.pi, N, endpoint=False)
-    r = R + p * np.cos(5 * t) # starfish shape, p controls convexity: p close to 0 is more convex
-    x = np.cos(t)*(R + p * np.cos(5 * t))
-    y = np.sin(t)*(R + p * np.cos(5 * t)) 
+    r = R + p * np.cos(5 * t) # p controls convexity: p close to 0 is more convex
+    x = np.cos(t)*(R + p * np.cos(petals * t))
+    y = np.sin(t)*(R + p * np.cos(petals * t)) 
     eta_vals = x + 1j*y
     eta_coeffs = np.fft.fft(eta_vals)/N
     print(f"FLAG: Fourier coefficients of starfish boundary: {eta_coeffs}")
-    starfish_bdary_obj = BoundaryCurve(eta_coeffs)
-    solver = WegmannSolver(starfish_bdary_obj, N)
+    star_bdary_obj = BoundaryCurve(eta_coeffs)
+    solver = WegmannSolver(star_bdary_obj, N)
     solver.init_initial_guess_starshaped()
     #solver.find_conformal_map(max_iter=1000, epsilon=5e-2, relaxation = relaxation, verfahren=verfahren)
-    solver.find_conformal_map(max_iter=1000, epsilon=1e-4, relaxation = relaxation, verfahren=verfahren)
-    plot_conformal_grid(solver, N, p, verfahren, relaxation)
-    check_analyticity(solver, tol = 1e-5)
+    solver.find_conformal_map(max_iter=10000, epsilon=1e-6, relaxation = relaxation, verfahren=verfahren)
+
+    # plotting and measuring accuracy of result
+    computed_mapped_pts = solver.final_bdary_pts
+    computed_radii = np.abs(computed_mapped_pts)
+    accuracy = float(np.linalg.norm(computed_radii - r)) / np.sqrt(N) #RMS error
+    print(f"L^2 Distance between computed conformal map and known conformal map on flower shape, p = {p}: {accuracy}")
+    plot_conformal_grid(solver, N, p, verfahren, relaxation, accuracy)
 
 def test_eccentric_circle_convergence(N, relaxation, verfahren):
     '''
@@ -215,23 +248,29 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren):
     solver.init_initial_guess_starshaped()
     solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation=relaxation, verfahren=verfahren)
     computed_phi = solver.get_final_boundary_points() 
-    plot_conformal_grid(solver, N, 0, verfahren, relaxation)
-    distance_to_known_map = float(np.linalg.norm(computed_phi - known_conformal_phi))
-    print(f"Distance between computed conformal map and known conformal map on eccentric circle: {distance_to_known_map}")
+    plot_conformal_grid(solver, N, 0, verfahren, relaxation, accuracy)
+    accuracy = float(np.linalg.norm(computed_phi - known_conformal_phi))
+    print(f"Distance between computed conformal map and known conformal map on eccentric circle: {accuracy}")
 
 if __name__ == "__main__":
     # adapt params here for different target regions and convergence tests
     N = 512
-    p = 0.3
-    relaxation = 0.01
+    p = 0.5
+    relaxation = 0.7
+    tolerance = 1e-10
 
     # verfahren 1 or 2 from wegmann's paper, one is more exact and two converges faster.
     # note any value other than 1 will run verfahren 2.
     # (note verfahren translates to "method" but we chose the german word because method in non-py programming is a fct; to avoid confusion)
     verfahren = 2
 
-    test_inverted_ellipse_convergence(N, p, relaxation, verfahren) #converges for relaxation >0.8
+    #test_inverted_ellipse_convergence(N, p, relaxation, verfahren) #converges for relaxation >0.8
     #test_kite_convergence(N, relaxation, verfahren)
     #test_unit_disk_convergence(N, verfahren)
-    #test_starfish_convergence(N, p, relaxation, verfahren)
+    #test_flower_convergence(N, p, relaxation, verfahren)
     #test_eccentric_circle_convergence(N, relaxation, verfahren)
+
+    #cutoff here controls the smoothing of the square's edges. cutoff means 1/2 * ratio of coefficients to keep, 
+    # hence diminish this if diverging to get a rounder shape. cutoff = N//3 -> 2/3 of coeffs are kept
+    cutoff = 1/6
+    test_square_convergence(tolerance, N, relaxation, verfahren, cutoff)

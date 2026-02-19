@@ -102,7 +102,7 @@ class WegmannSolver:
         #sigma_dot_val = np.fft.ifft(sigma_dot_hat).real
         S_dot_k = 1 + np.fft.ifft(ops.fourier_derivative(self.sigma_hat)).real # spatial domain derivative of S_k, needed for checking injectivity (divergence debugging)
         if np.any(S_dot_k <= 0):
-            print(f"WARNING: S_k is not injective, S_dot_k has non-positive values: {S_dot_k[S_dot_k <= 0]}, consider improving initial guess.")
+            print(f"WARNING: S_k is NOT INJECTIVE, S_dot_k has non-positive values") #: {S_dot_k[S_dot_k <= 0]}, consider improving initial guess.")
         
         f_k = self.eta.evaluate(S_k) #position on boundary f_k = η(S_k(θ)), geometric candidate but not analytic -> not extendable into interior of disk (analytic candidate is psi_k+1 on the tangent)
         #g_hat = ops.fourier_derivative(f_k) * S_dot_k #tangent on buondary g_k = η'(S_k(θ)) * S_k'(θ)
@@ -266,10 +266,10 @@ class WegmannSolver:
         # psi'(0) must be real and positive
         #assert abs(psi_prime_0.imag) < 1e-6, f"Imaginary part of psi'(0) too large: {psi_prime_0.imag}"
         if(abs(psi_prime_0.imag) >= 1e-6):
-            print(f"WARNING: Imaginary part of psi'(0) too large after orientation normalisation: {psi_prime_0}")
+            print(f"WARNING: Imaginary part of psi'(0) too large after orientation normalisation") #: {psi_prime_0}")
         #assert psi_prime_0.real > 0, f"psi'(0) is negative: {psi_prime_0.real}"
         if psi_prime_0.real <= 0:
-            print(f"WARNING: psi'(0) is negative after orientation normalisation: {psi_prime_0}")
+            print(f"WARNING: psi'(0) is negative after orientation normalisation")#: {psi_prime_0}")
 
     def get_final_boundary_points(self):
         '''
