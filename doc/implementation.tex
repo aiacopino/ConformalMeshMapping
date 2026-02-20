@@ -1,6 +1,68 @@
 \section{Documentation and Implementation}
+\subsection{Implementation} \label{chap:WegmannImplementation}
+We have followed the exact implementation steps described in \cite[§5]{Wegmann1978_newtonverfahren}, which are actually two different methods in terms of discretisation. We have implemented both of those in order to compare the results to the ones Wegmann claims, see overview in \ref{chap:experiments}.
+Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation \cite[§5]{Wegmann1978_newtonverfahren}:
+Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
+$$\theta_k = \theta_0 + \frac{\pi k}{N}, \quad k\in[N-1]$$
+and write the integrals in terms of their Fourier transform
+\begin{equation}
+    F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
+\end{equation}
+where
+$$\sigma_n(\zeta_k)=\displaystyle\sum_{i=-n}^{n} c_i \zeta_k^i.$$ 
+This $\sigma_n \mapsto F$ can be computed fast ($\in\bigO(N\log N)$) via FFT.
+% Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
 
-\subsection{Testing (again?)}
-\red{VALIDATION AGAINST THE SCHWARZ-CHRISTOFFEL TOOLBOX!}
+Note that the boundary correspodence function $S_k$ maps the angle $\theta\in[0,2\pi]$ to the paramter $s\in[0,2\pi]\subset\R$. Since $S_k$ winds around the unit circle once, it must satisfy $S_k(2\pi)= S_k(0)+2\pi$ and is not periodic since the codomain is an interval. We resolve this by decomposing the map into the identity term plus a $2\pi$-periodic displacement function:
+\begin{equation}
+    S_k(\theta) = \theta + \sigma_k(\theta).
+\end{equation}
 
-% https://betterscientificsoftware.github.io/python-for-hpc/tutorials/python-pypi-packaging/#:~:text=You%20package%20should%20now%20be,pip%20install%20pyexample%20%2D%2Duser
+Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of the boundary. Hence why a "good" (close enough) initial guess is vital for numerical stability. This has also been verified numerically, see section \ref{chap:experiments}. In practice, for $\Omega$ far from circular, a homotopy method could be adopted, where each solution for a slightly deformed circle is used as initial guess for the next deformation until the target region is reached.
+Unlike the AP Method, which uses a fixed projection to find the next iterate, Wegmann's Method leverages the exact geometry of the boundary curve via $\theta$, which yields quadratic convergence since the error decreases much faster \cite[Theorem 4]{Wegmann1978_newtonverfahren}.
+%However, given a suitable initial guess, the method achieves a quadratic local convergence rate for smooth boundaries, or superlinear for sufficiently smooth boundaries \cite{Wegmann1989_alternating_projections}, unlike just linear convergence achieved by standard fixed-set alternating projection methods.
+
+Note that the condition (\ref{eq:InitialConditionsOnPsi}) could cause the algorithm to break or diverge due to non-injectivity of maps if the target region does not contain the origin. This can be resolved by first translating the region such that the condition $\psi(0)=0$ is satisfied, and then adding the shift back after computation of the conformal map. 
+
+
+\subsubsection{Numerical Solution to the Riemann-Hilbert Problem}
+\cite{Wegmann2005_num_methods_confmapping} integral equations, newton update steps
+\cite{Henrici1986_vol3} Hilbert BVP, construction of conformal maps
+\cite[§ 17]{Muskhelishvili1977} plemelj formulas (definition of M)
+
+The Riemann-Hilbert problem solves this equation for $\psi_{k+1}$. Since $\psi_{k+1}$ is the analytic approximation, we canreduce this problem of finding $\psi_{k+1}$ to that of finding Re$(\psi_{k+1})$ since the imaignary part of an analytic function is just its harmonic conjugate, which can numerically be computed efficiently using the operator $K$ defined in \ref{operatorK_N} (AKA Hilbert Transform).  
+Thus, the equation (\ref{eq:RHproblem}) 
+\begin{equation}
+    \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
+\end{equation}
+is rewritten as 
+\begin{equation}
+    Re(\psi_{k+1}) = \text{RHS} \frac{A}{M}
+\end{equation}
+where 
+
+
+
+
+
+TODO
+GIBBS PHENOMENON:
+%Non-convex regions often have areas of high curvature (the "neck" of the kite). In the Fourier domain, high curvature translates to high-frequency components. If your discretization $N$ isn't high enough, the Plemelj projections (rho_plus, rho_minus) suffer from aliasing and Gibbs oscillations, which ruin the analyticity of $h_k$.
+
+The relaxation parameter is used for initial einpendeln of the corrections. If we just take the full correction from the beginning, the solver tends to crash because the approximation steps are too large in relation to the WHAT? Hence why we "damp" the approximation steps in cases where we do not have a good enough initial guess at hand. \red{OUTLOOK: MAKE THE REAXATION ADAPTABLE TO AUTO-TUNING BASED ON THE APPROXIMATION ERROR.}
+
+Note that Wegmann initial guess for inverted ellipse is always identity
+
+WEgmann describes two methods for solving the Riemann-Hilbert problem. He writes (\cite[§6]{Wegmann1978_newtonverfahren}) that the first method converges locally quadratically as long as the approximation error exceeds the discretisation error and only linearly from that point on, while the second method converges locally quadratically until machine precision is reached. However, the approxmation is significanly more exact in the first method, results which we have been able to reproduce. \red{ADD TABLES}
+
+$Y(z)$ is defined as a Cauchy integral of $\Theta$.By the Plemelj-Sokhotski formulas, the boundary values of a Cauchy integral satisfy:$$Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta)$$(The jump across the boundary is exactly the density function).Now look at Equation 3.6 for $\kappa=1$:Inside ($|z|<1$): $X(z) = \exp(Y(z) - C)$.So, $X^+ = \exp(Y^+ - C)$.Outside ($|z|>1$): $X(z) = z^{-2} \exp(Y(z) - C)$.So, $X^- = z^{-2} \exp(Y^- - C)$.If we take the ratio $X^+ / X^-$:$$\frac{X^+}{X^-} = \frac{\exp(Y^+ - C)}{z^{-2} \exp(Y^- - C)} = z^2 \exp(Y^+ - Y^-)$$Substituting the jump condition $Y^+ - Y^- = \Theta$:$$\frac{X^+}{X^-} = z^2 \exp(\Theta)$$Solving for $X^-$:$$X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}$$
+
+
+\subsection{Documentation}
+The language of choice is Python because there is extensive support for numerical methods and scientific computing. The code is structured in a modular way and can be found on Github: \url{https://github.com/aiacopino/ConformalMeshMap}.
+To run experiments, simply run the file \texttt{main.py}, which will execute the code in \texttt{convergence\_tests.py}.
+The main implementation of Wegmann's method is in \texttt{wegmann.py}, which contains the class \texttt{WegmannSolver} with methods for each step of the algorithm. The code is hopefully well-documented with docstrings and comments for clarity.
+The following parameters can be adjusted in \texttt{main.py}:
+\begin{itemize}
+    \item löalala
+\end{itemize}

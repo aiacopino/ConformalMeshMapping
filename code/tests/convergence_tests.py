@@ -104,12 +104,12 @@ def test_inverted_ellipse_convergence(N,p, relaxation, verfahren):
     solver.init_initial_guess_starshaped()
     print(f"Running wegmann solver for inverted ellipse target region, params N={N}, p={p} ...")
     solver.find_conformal_map(max_iter=10000, epsilon=1e-4, relaxation = relaxation, verfahren=verfahren)
-
+    '''
     if solver.error_history:
         print(f"last 10 error entries after convergence: {solver.error_history[-10:]}")
     else:
         print("Error history is empty, something went wrong with convergence tracking.")
-    
+    '''
     # plotting and measuring accuracy of result
     theta_unitc = np.linspace(0, 2*np.pi, N, endpoint=False)
     z_disk = np.exp(1j * theta_unitc)
@@ -207,7 +207,7 @@ def test_flower_convergence(N, p, relaxation, verfahren):
     y = np.sin(t)*(R + p * np.cos(petals * t)) 
     eta_vals = x + 1j*y
     eta_coeffs = np.fft.fft(eta_vals)/N
-    print(f"FLAG: Fourier coefficients of starfish boundary: {eta_coeffs}")
+    print(f"FLAG: Fourier coefficients of flower/star boundary: {eta_coeffs}")
     star_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(star_bdary_obj, N)
     solver.init_initial_guess_starshaped()
@@ -221,7 +221,7 @@ def test_flower_convergence(N, p, relaxation, verfahren):
     print(f"L^2 Distance between computed conformal map and known conformal map on flower shape, p = {p}: {accuracy}")
     plot_conformal_grid(solver, N, p, verfahren, relaxation, accuracy)
 
-def test_eccentric_circle_convergence(N, relaxation, verfahren):
+def test_eccentric_circle_convergence(N, relaxation, verfahren, tolerance=1e-10):
     '''
     from Gaier, Anhang 5, first example
     example with known conformal map
@@ -235,10 +235,6 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren):
     print(f"START testing wegmann solver convergence for eccentric circle domain target region ... N={N}, a={a}, b={b}")
     t = np.linspace(0, 2*np.pi, N, endpoint=False)
     r = a * np.cos(t) + np.sqrt(b**2 - a**2 * np.sin(t)**2) # eccentric circle with foci at x=+-a, radius b
-    # conformal map given by Gaier, note his theta is out target angle and his phi is our t
-    numerator = b * np.sin(t)
-    denom = b * np.cos(t) - a
-    known_conformal_phi =  np.arctan2(numerator, denom) # arctan2 for correct quadrant handling
     x = r * np.cos(t)
     y = r * np.sin(t)
     eta_vals = x + 1j*y
@@ -246,31 +242,17 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren):
     eccentric_circle_bdary = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(eccentric_circle_bdary, N)
     solver.init_initial_guess_starshaped()
-    solver.find_conformal_map(max_iter=1000, epsilon=1e-5, relaxation=relaxation, verfahren=verfahren)
-    computed_phi = solver.get_final_boundary_points() 
-    plot_conformal_grid(solver, N, 0, verfahren, relaxation, accuracy)
-    accuracy = float(np.linalg.norm(computed_phi - known_conformal_phi))
+    solver.find_conformal_map(max_iter=300, epsilon=tolerance, relaxation=relaxation, verfahren=verfahren)
+    # test accuracy
+    computed_phi = np.unwrap(t + np.fft.ifft(solver.sigma_hat).real)
+    # conformal map given by Gaier, note his theta is our target angle and his phi is our t
+    c = a / ( b**2 - a**2)
+    numerator = np.sin(t)
+    denom = c*r + np.cos(t)
+    known_conformal_phi =  np.unwrap(np.arctan2(numerator, denom)) # arctan2 for correct quadrant handling
+    # fixing rotation
+    phase_diff = computed_phi - known_conformal_phi
+    phase_diff -= np.mean(phase_diff) # remove mean to correct for constant rotation ambiguity
+    accuracy = float(np.linalg.norm(phase_diff)) / np.sqrt(N) # RMS error of angle difference
     print(f"Distance between computed conformal map and known conformal map on eccentric circle: {accuracy}")
-
-if __name__ == "__main__":
-    # adapt params here for different target regions and convergence tests
-    N = 512
-    p = 0.5
-    relaxation = 0.7
-    tolerance = 1e-10
-
-    # verfahren 1 or 2 from wegmann's paper, one is more exact and two converges faster.
-    # note any value other than 1 will run verfahren 2.
-    # (note verfahren translates to "method" but we chose the german word because method in non-py programming is a fct; to avoid confusion)
-    verfahren = 2
-
-    #test_inverted_ellipse_convergence(N, p, relaxation, verfahren) #converges for relaxation >0.8
-    #test_kite_convergence(N, relaxation, verfahren)
-    #test_unit_disk_convergence(N, verfahren)
-    #test_flower_convergence(N, p, relaxation, verfahren)
-    #test_eccentric_circle_convergence(N, relaxation, verfahren)
-
-    #cutoff here controls the smoothing of the square's edges. cutoff means 1/2 * ratio of coefficients to keep, 
-    # hence diminish this if diverging to get a rounder shape. cutoff = N//3 -> 2/3 of coeffs are kept
-    cutoff = 1/6
-    test_square_convergence(tolerance, N, relaxation, verfahren, cutoff)
+    plot_conformal_grid(solver, N, 0, verfahren, relaxation, accuracy)
