@@ -177,7 +177,7 @@ def test_kite_convergence(N, relaxation, verfahren, tolerance):
     k(s) = (cos(s) + 0.65* cos(2s) - 0.65, 1.5 * sin(s)) for s in [0,2*pi]
 
     '''
-    print("START testing wegmann solver convergence for kite domain target region ...")
+    print(f"START testing wegmann solver convergence for kite domain target region, N={N} ...")
     s = np.linspace(0, 2*np.pi, N, endpoint=False)
     x = np.cos(s) + 0.65 * np.cos(2*s) - 0.65
     y = 1.5 * np.sin(s)
@@ -186,8 +186,9 @@ def test_kite_convergence(N, relaxation, verfahren, tolerance):
     print(f"FLAG: Fourier coefficients of kite boundary: {eta_coeffs}")
     kite_bdary_obj = BoundaryCurve(eta_coeffs)
     solver = WegmannSolver(kite_bdary_obj, N)
+    solver.init_initial_guess_identity()
     #solver.init_initial_guess_starshaped()
-    solver.init_initial_guess_non_convex()
+    #solver.init_initial_guess_non_convex()
     _, solver.status = solver.find_conformal_map(max_iter=10000, epsilon=tolerance, relaxation = relaxation, verfahren=verfahren)
 
     plot_conformal_grid(solver, N, p=0, verfahren=verfahren, relaxation=relaxation, accuracy=None, actual_boundary_pts_original=eta_vals)

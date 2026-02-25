@@ -166,7 +166,7 @@ class WegmannSolver:
         '''
         points = self.eta.evaluate(self.theta)
         angles = np.arctan2(points.imag / 1.5, points.real) #elliptical scaling
-        angles = np.unwrap(angles)
+        angles = np.unwrap(angles) # smoothen out jump discontniuties
 
         # angles=S(theta)=theta+sigma
         sigma_init = angles - self.theta
