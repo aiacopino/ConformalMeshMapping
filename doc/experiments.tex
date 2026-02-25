@@ -8,18 +8,17 @@ check angle preservation (e.g., via dot products on mapped vectors) and scale fa
 - Debugging: Use assertions for bijectivity (e.g., check injectivity numerically)
 - Error handling - what happens with degenerate inputs?
 \fi
-Remark. Note that in order to avoid confusion with the word 'method' in programming, we have chosen to use the german word 'Verfahren' to refer to the two different approaches described in Wegmann's paper.
-\bigskip
-Experiments conducted with the two Verfahren of the solver have confirmed the results Wegmann got with regard to convergence: Verfahren 2 typically converges faster. However, Wegmann claims that Verfahren 1 typically yields more accurate results, which we have not been able to reproduce. 
-We present some illustrations of our results in this chapter.
+Experiments conducted with the two Verfahren of the solver have confirmed the results Wegmann got with regard to convergence: Verfahren 2 typically converges faster, while Verfahren 1 typically yields more accurate results for the inverted ellipse (which is the target region Wegmann investigated; this accuracy statement is not true for other target regions)\cite[§5, last paragraph]{Wegmann1978_newtonverfahren}. This result is expected since Verfahren 2 uses the previous iteration's analytic aproximation to compute the next update. 
+Note that we have also looked at more irregular/ difficult examples than Wegmann did, where these results however do not hold:
+We present some of our findings in this chapter.
 In order to be able to measure the accuracy of the result computed by the solver, we relied on some explicitly known conformal maps, which are provided by Gaier in his book \cite[Anhang 5, p. 264]{Gaier1964}. 
 The measure of accuracy in the below tables is calculated as the $L^2$-norm of the difference of the functions at the respective discretisation points.
 
 \newpage
 %%%%%%%%%%%% ECCENTRIC CIRCLE %%%%%%%%%%%%%%%%%%%
 \begin{figure}[H]
-    \includegraphics[width=0.5\textwidth]{img/eccentric_v1_rel3.png}
-    \includegraphics[width=0.5\textwidth]{img/eccentric_v2_rel3.png}
+    \includegraphics[width=0.5\textwidth]{img/eccentric_v1_r5.png}
+    \includegraphics[width=0.5\textwidth]{img/eccentric_v2_r5.png}
     \caption{Gaier's eccentric circle. \cite[Anhang 5, p. 264]{Gaier1964}}
 \end{figure}
 
@@ -29,24 +28,25 @@ The measure of accuracy in the below tables is calculated as the $L^2$-norm of t
         \hline
         Verfahren & 1 & 2 \\
         \hline
-        Accuracy & 0.761790995509067 & 0.6256043985499594 \\
+        Accuracy & 0.7617909953665367 & 0.6256044084425069 \\
         \hline
         Iteration \# & \multicolumn{2}{c}{Norm of correction/ update step $\lVert U_{k} \rVert$} \\
-        0 & 720.3882650364529 & 720.3882650364529 \\
-        1 & 240.96871847609182 & 345.28799456238954 \\
-        2 & 123.03673246529644 & 181.9463636411823 \\
-        3 & 74.77256117097478 & 113.31865680003762 \\
-        4 & 49.23654870031479 & 75.15166708336353 \\
-        5 & 34.0021274191191 & 51.27741887350757 \\
-        6 & 24.257897110960663 & 35.466301329451 \\
-        7 & 17.731997779526324 & 24.69504948431332 \\
-        8 & 13.212311049497963 & 17.252206390803625 \\
-        9 & 9.99841060567796 & 12.072094322857915 \\
-        10 & 7.662812612112827 & 8.453676136529895 \\
+        \hline
+        0 & 104.8775858017584 & 104.8775858017584 \\
+        1 & 81.87425809394374  &  59.41935813881222 \\
+        2 & 62.66751424686198 & 31.716361353759435 \\
+        3 & 46.95009032391574 & 16.035383586044535 \\
+        4 & 34.46173609964178 & 7.823760569061395 \\
+        5 & 24.840609953455907 & 3.7374864126562635 \\
+        6 & 17.637432477604133 & 1.7627888154238582 \\
+        7 & 12.374928209211216 & 0.8242625445610174 \\
+        8 & 8.605055499867676 & 0.3827572592920929 \\
+        9 & 5.9446456377749595 & 0.17659331087623134 \\
+        10 & 4.087740356159886 & 0.0809341360315273 \\
         \dots & \dots & \dots \\
-        81 & 1.7080984717844722e-06 & 8.53657643311748e-11 \\
+        30 & 0.0019092775229002336 &  8.320454718446386e-08 \\
         \dots & \dots &  \\
-        127 & 9.666774826434523e-11 & \\
+        56 & 9.508621760787992e-08 & \\
         \hline
     \end{tabular}
 \end{table}
@@ -54,13 +54,18 @@ The measure of accuracy in the below tables is calculated as the $L^2$-norm of t
 \newpage
 %%%%%%%%%%%% INVERTED ELLIPSE p=0.6 %%%%%%%%%%%%%%%%%%%
 \begin{figure}[H]
-    \caption{Gaier's inverted ellipse, which is also Wegmann's flagship example. Convexity parameter: $p=0.6$ \cite[Anhang 5]{Gaier1964} \cite[§6]{Wegmann1978_newtonverfahren}}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p6_rel4.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p6_r4.png}
+    \caption{Gaier's inverted ellipse, which is also Wegmann's flagship example. Convexity parameter: $p=0.6$. Initial guess: "identity". \cite[Anhang 5]{Gaier1964} \cite[§6]{Wegmann1978_newtonverfahren}}
+    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p6_r4_ii.png}
+    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p6_r4_ii.png}
+\end{figure}
+\begin{figure}[H]
+    \caption{Gaier's inverted ellipse, which is also Wegmann's flagship example. Convexity parameter: $p=0.6$. Initial guess: "star-shaped". The "identity" initial guess seems to yield a more accurate mapping. \cite[Anhang 5]{Gaier1964} \cite[§6]{Wegmann1978_newtonverfahren}}
+    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p6_r4_is.png}
+    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p6_r4_is.png}
 \end{figure}
 
 \begin{table}[H] \centering
-    \caption{Inverted ellipse discretized at $N = 512$ points, with convexity parameter $p = 0.6$.}
+    \caption{Inverted ellipse discretised at $N = 512$ points, with convexity parameter $p = 0.6$ and initial guess "identity".}
     \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
         \hline
         Verfahren & 1 & 2 \\
@@ -88,17 +93,20 @@ The measure of accuracy in the below tables is calculated as the $L^2$-norm of t
 
 
 %%%%%%%%%%%% INVERTED ELLIPSE p = 0.4 %%%%%%%%%%%%%%%%%%%
-    \begin{figure}[H]
-    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p4_r4.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p4_r4.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p4_r4_detail.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p4_r4_detail.png}
-    \caption{Gaier's inverted ellipse with convexity parameter $p = 0.4$.\\ 
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p4_r4_i.png}
+    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p4_r4_i.png}
+    \caption{Gaier's inverted ellipse with convexity parameter $p = 0.4$ and initial guess "identity".\\ 
     \cite[Anhang 5]{Gaier1964}}
 \end{figure}
-\begin{table}[H]
+\begin{figure}[H]
+    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p4_r4_s.png}
+    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p4_r4_s.png}
+    \caption{Gaier's inverted ellipse with convexity parameter $p = 0.4$ and initial guess "star-shaped". Interestingly enough, this is not a better initial guess for the inverted ellipse.\\ 
+    \cite[Anhang 5]{Gaier1964}}
+\end{figure}\begin{table}[H]
     \centering
-    \caption{Inverted ellipse discretized at $N = 512$ points, with convexity parameter $p = 0.4$.}
+    \caption{Inverted ellipse discretised at $N = 512$ points, with convexity parameter $p = 0.4$.}
     \begin{tabular}{|p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
         \hline
         Verfahren & 1 & 2 \\
@@ -123,16 +131,14 @@ The measure of accuracy in the below tables is calculated as the $L^2$-norm of t
     \end{tabular}
 \end{table}
 
-\newpage
 %%%%%%%%%%%%%%%%%%% INVERTED ELLIPSE p = 0.3 %%%%%%%%%%%%%%%%%%%
-We have tried making this example even more convex, but already $p=0.3$ is quite a challenge, relaxation must be chosen extremely small and thus convergence takes much longer.
-\begin{figure}[H]
-    \caption{Accuracy of conformal map on inverted ellipse, $p = 0.3$: \\
-    Verfahren 1: $3.710212908531002e-06$, Verfahren 2: $3.7636081451245516e-06$}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p3.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p3.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v1_p3_detail.png}
-    \includegraphics[width=0.5\textwidth]{img/invellip_v2_p3_detail.png}
+We have tried making this example even more convex, but already $p=0.3$ is quite a challenge insofar as relaxation must be chosen extremely small and thus convergence takes much longer.
+\begin{figure}[H]\centering
+    \caption{Accuracy of conformal map on inverted ellipse, $p = 0.3$.}
+    \includegraphics[width=0.8\textwidth]{img/invellip_v1_p3.png}
+    \includegraphics[width=0.8\textwidth]{img/invellip_v2_p3.png}
+    %\includegraphics[width=0.5\textwidth]{img/invellip_v1_p3_detail.png}
+    %\includegraphics[width=0.5\textwidth]{img/invellip_v2_p3_detail.png}
 \end{figure}
 \iffalse
 %%%%%%%%%%%% SOMETHING %%%%%%%%%%%%%%%%%%%
@@ -208,29 +214,141 @@ We have tried making this example even more convex, but already $p=0.3$ is quite
 \end{table}
 \fi
 
-\red{Note for example the flower with 8 petals on the front page of this paper. When choosing convexity parameter as high as $p=0.5$, Wegmann's solver converges only using the second Verfahren. WHY?}
+\newpage
+The flower (or star) with 8 petals is an example illustrating the limits of this solver. The convexity parameter determines the "depth" of the petals, and can be chosen between 0 and 1, where $p=0$ is a perfect circle. 
+Already when choosing the convexity parameter above $p=0.4$, Wegmann's solver does not find a conformal map anymore.
 
+\begin{figure}
+    \caption{Flower with 8 petals, convexity parameter $p = 0.4$, initial guess "identity". }
+    \includegraphics[width=0.5\textwidth]{img/flower8_v1_p4_i.png}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v2_p4_i.png}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v1_p4_i_detail.png}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v2_p4_i_detail.png}
+\end{figure}
+
+\begin{figure}
+    \caption{Flower with 8 petals, convexity parameter $p = 0.4$, initial guess "star-shaped". Note that also for this region, the star-shaped initial guess does not help with convergence.}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v1_p4_s.png}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v2_p4_s.png}
+\end{figure}
+
+\begin{figure}
+    \caption{Flower with 8 petals, convexity parameter $p = 0.8$. Verfahren 1 does not converge, while Verfahren 2 does, just as Wegmann also seems to have experienced \cite[§5, last paragraph]{Wegmann1978_newtonverfahren}.}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v1_p8.png}
+    \includegraphics[width=0.5\textwidth]{img/flower8_v2_p8.png}
+    %\includegraphics[width=0.5\textwidth]{img/flower8_v1_p8_detail_tol.png}
+    %\includegraphics[width=0.5\textwidth]{img/flower8_v2_p8_detail_tol.png}
+\end{figure}
+
+Console output for flower, p=0.8:
+
+\begin{tiny}
+\begin{multicols}{2}
+\textbf{FLAG: Starting Wegmann solver with max iter=10000, epsilon=1e-07, relaxation=0.1, verfahren=1 ...}
+FLAG: iter 0, norm of correction: 69.68601088275882 \\
+FLAG: iter 1, norm of correction: 58.65954320120162 \\
+FLAG: iter 2, norm of correction: 50.48741778421798 \\
+FLAG: iter 3, norm of correction: 44.10788521056205 \\
+FLAG: iter 4, norm of correction: 38.9284813653687 \\
+FLAG: iter 5, norm of correction: 34.600411095193955 \\
+FLAG: iter 6, norm of correction: 30.90914485059758 \\
+FLAG: iter 7, norm of correction: 27.7144918546568 \\
+FLAG: iter 8, norm of correction: 24.91890975710748 \\
+FLAG: iter 9, norm of correction: 22.45142290135181 \\
+FLAG: iter 10, norm of correction: 20.258973071680387 \\
+FLAG: iter 11, norm of correction: 18.301290240783963 \\
+FLAG: iter 12, norm of correction: 16.54772408819092 \\
+FLAG: iter 13, norm of correction: 14.975456216269155 \\
+FLAG: iter 14, norm of correction: 13.568958210032967 \\
+FLAG: iter 15, norm of correction: 12.320896580348924 \\
+WARNING: injectivity of S\_k lost at iter 16, S\_dot\_k has non-positive values. Potential overlap of boundary points ==$>$ map not conformal
+\vspace{7cm}
+
+
+\textbf{FLAG: Starting Wegmann solver with max iter=10000, epsilon=1e-07, relaxation=0.1, verfahren=2 ...}
+FLAG: iter 0, norm of correction: 69.68601088275882 \\
+FLAG: iter 1, norm of correction: 58.65954470186708 \\
+FLAG: iter 2, norm of correction: 50.48739770157806 \\
+FLAG: iter 3, norm of correction: 44.10799860309936 \\
+FLAG: iter 4, norm of correction: 38.931598399569765 \\
+FLAG: iter 5, norm of correction: 34.61224999313286 \\
+FLAG: iter 6, norm of correction: 30.934123790132006 \\
+FLAG: iter 7, norm of correction: 27.753647786992467 \\
+FLAG: iter 8, norm of correction: 24.97063486263987 \\
+FLAG: iter 9, norm of correction: 22.51278227564243 \\
+FLAG: iter 10, norm of correction: 20.326481666646153 \\
+FLAG: iter 11, norm of correction: 18.37099772367776 \\
+FLAG: iter 12, norm of correction: 16.614643769493707 \\
+FLAG: iter 13, norm of correction: 15.032212034995903 \\
+FLAG: iter 14, norm of correction: 13.603217236231387 \\
+FLAG: iter 15, norm of correction: 12.310678283347903 \\
+FLAG: iter 16, norm of correction: 11.140262027127228 \\
+FLAG: iter 17, norm of correction: 10.079674169628378 \\
+FLAG: iter 18, norm of correction: 9.118221103686148 \\
+FLAG: iter 19, norm of correction: 8.246491261334691 \\
+FLAG: iter 20, norm of correction: 7.456120766754762 \\
+FLAG: iter 21, norm of correction: 6.739618973827985 \\
+\dots \\
+FLAG: iter 192, norm of correction: 1.0580030598505909e-07 \\
+FLAG: iter 193, norm of correction: 9.522027559088519e-08 \\
+Converged in 193 iterations. \\
+FLAG: orientation normalised, rotation offset = 2.2083026757808338e-16 \\
+SUCCESS: Riemann Mapping Theorem conditions are met for uniqueness: \\
+  -$>$ Holomorphy \& Boundary matched (error = 9.52e-08 $<$ 1e-07) \\
+  -$>$ Map is injective (S\_k' $>$ 0 implies psi is univalent via Darboux) \\
+  -$>$ Anchored at target center (psi(0) = -1.33e-16-2.13e-17j) \\
+  -$>$ Orientation normalised (psi'(0) $>$ 0) \\
+$L^2$ Distance between computed conformal map and known conformal map on flower shape, p = 0.8: 0.8423645611965841
+\end{multicols}
+\end{tiny}
+
+\newpage
+The same phenomenon can be observed for the truncated square.
 \begin{figure}[H]
-    \caption{Truncated Square}
+    \caption{Truncated Square with cutoff = 1/3. Verfahren 1 does not seem to converge, $\lVert U_k \rvert$ oscillates around the same values for some reason. More experiments needed.} \label{ex:truncatedSquare}
     \label{fig:truncatedSquare}
-    \centering
-    \includegraphics[height=0.5\textheight]{img/square.png}%
-    \vfill
-    \includegraphics[height=0.5\textheight]{img/square_detail.png}
+    \includegraphics[width=0.5\textwidth]{img/square_v1_c3_100K.png}
+    \includegraphics[width=0.5\textwidth]{img/square_v2_c3.png}
 \end{figure}
-It also it worth noting that for the example of the truncated square, only method 2 converges with a usable accuracy and relaxation. Method 1 diverges after the 1500th iteration even when choosing a relaxation factor as low as 1e-3. Verfahren 2 in turn converges incredibly quickly even with relaxation of only 0.7, as depicted in Figure \ref{fig:truncatedSquare}.
+\begin{figure}[H]
+    \caption{Truncated Square with cutoff = 1/5.}
+    \includegraphics[width=0.5\textwidth]{img/square_v1_c5.png}
+    \includegraphics[width=0.5\textwidth]{img/square_v2_c5.png}
+\end{figure}
 
-
-\begin{figure}[H]\centering
-    \caption{A good initial guess is vital, as the algorithm is only guaranteed to converge locally quadratically for a close enough initial guess. The result of trying to find the map onto a kite by choosing the unit disk as initial guess is shown here.}
-    \includegraphics[width=0.6\textwidth]{kite_initial_guess_circle.jpeg}
-\end{figure}
-\begin{figure}[H]\centering
-    \caption{In this case, the initial guess was chosen to be a star, which shares some of the properties with the kite's tangent vector, but it is still too convex and therefore far away from the kite to guarantee convergence of the solver.}
-    \includegraphics[width=0.6\textwidth]{kite_divergence_gibbs.png}
-\end{figure}
-The solver has proven experimentally not to converge on the kite region parametrised by     
+\newpage
+Next, we consider the strongly non-convex kite region parametrised by     
 \begin{equation}
     k(s) = (\text{cos}(s) + 0.65\text{cos}(2s) - 0.65, 1.5 \text{sin}(s)) \text{ for }s \in [0,2\pi].
 \end{equation}
-A homotopy algorithm is a possible solution to this, which we omit due to time constraints. The idea is as follows: the parameter 0.65 is relaxed and a sequence of intermediate regions is computed, where each solution is the initial guess for the subsequent mapping.
+The algorithm is only guaranteed to converge locally quadratically for a close enough initial guess. 
+However, our experimetns have shown that for the different initial guesses we have tried, the difference is not significant; The solver seems to just take a bit longer for less ideal initial guess.
+
+\bigskip
+
+We further observe that the computed boundary correspondence function, $S_k$, fails to remain injective, directly leading to a loss of conformality in the resulting map. Mathematically, this loss of local univalence occurs when the monotonicity condition is violated, i.e., when $S_k'(\theta) \le 0$. This failure is primarily driven by the crowding phenomenon at the high-curvature tips of the kite domain. To address this instability, several numerical mitigation strategies can be considered:
+\begin{itemize}
+    \item Adaptive damping: Dynamically adjusting the relaxation parameter during iterations could help maintain injectivity. If an update step causes $S_k$ to become non-injective, the step could be rolled back and a more conservative correction applied instead.
+    \item Spectral filtering: The high curvature at the kite's tips may induce Gibbs phenomenon in the Fourier representation of the boundary, leading to oscillations. Implementing a spectral filter like the cutoff parameter for the truncated square but applied inside the newton step of the solver could help suppress high-frequency components that contribute to non-injectivity.
+    \item Homotopy continuation: A homotopy approach could be employed, where the convexity parameter $p$ is gradually relaxed from a more convex shape to the target non-convex shape. This would generate a sequence of intermediate mappings, each serving as the initial guess for the next, potentially improving convergence and maintaining injectivity throughout the process.
+\end{itemize}
+
+\begin{figure}[H]
+    \caption{Kite with initial guess "identity" (row 1), "star-shaped" (row 2), "non-convex" (row 3) using Verfahren 1 (left) vs Verfahren 2 (right). Note that Verfahren 1 reports convergence, which is obviously false as the grid does not match the shape at all. This false positive is likely due to low resolution (too little discretisation points).}
+    \includegraphics[width=0.5\textwidth]{img/kite_v1_N32_r01_i.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v2_N32_r01_i.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v1_N32_r01_s.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v2_N32_r01_s.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v1_N32_r01_nc.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v2_N32_r01_nc.png}   
+\end{figure}
+\begin{figure}[H]
+    \caption{Kite with initial guess "identity" (row 1), "star-shaped" (row 2), "non-convex" (row 3) using Verfahren 1 (left) vs Verfahren 2 (right). Note that the higher resolution does not yield convergence anymore, and we can clearly see the effect of crowding. Furthermore, to stop Verfahren 2 from diverging, a much lower relaxation value should be applied.}
+    \includegraphics[width=0.5\textwidth]{img/kite_v1_N1024_r01_i.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v2_N1024_r01_i.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v1_N1024_r01_s.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v2_N1024_r01_s.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v1_N1024_r01_nc.png}
+    \includegraphics[width=0.5\textwidth]{img/kite_v2_N1024_r01_nc.png}   
+\end{figure}
+

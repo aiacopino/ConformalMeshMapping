@@ -1,10 +1,21 @@
-\begin{thebibliography}{{Wik}25d}
+\begin{thebibliography}{HQR13}
 
 \bibitem[AB94]{AnosovBolibruch1994_riemannhilbertproblems}
 Dmitrij~Vladimirovič Anosov and Andreĭ~Andreevič Bolibruch.
 \newblock {\em The Riemann-Hilbert Problem}, volume~22 of {\em Aspects of
   Mathematics}.
 \newblock Vieweg+Teubner Verlag, Wiesbaden, 1994.
+
+\bibitem[AF03]{AdamsFournier2003_sobolev}
+Robert~A. Adams and John J.~F. Fournier.
+\newblock {\em Sobolev Spaces}, volume 140 of {\em Pure and Applied
+  Mathematics}.
+\newblock Academic Press, Amsterdam, 2 edition, 2003.
+
+\bibitem[Ahl79]{ahlfors1979_complexanalysis}
+L.~V. Ahlfors.
+\newblock {\em Complex Analysis}.
+\newblock McGraw-Hill Book Company, 3 edition, 1979.
 
 \bibitem[Ama98]{Amano1998_Amanosmethod}
 Kaname Amano.
@@ -26,6 +37,11 @@ Philip~Raymond Brown.
 \newblock {\em The use of the Schwarz-Christoffel transformation in finite
   element mesh generation}.
 \newblock Phd, University of Leicester, 1990.
+
+\bibitem[Bur03]{Burrus2003horner}
+C.~Sidney Burrus.
+\newblock Horner's method for evaluating and deflating polynomials.
+\newblock Technical report, Rice University, Houston, Texas, 2003.
 
 \bibitem[CR25]{Castillo2025_hilberttransform}
 Ren{\'e}~E. Castillo and Edixon~M. Rojas.
@@ -135,54 +151,5 @@ Rudolf Wegmann.
 \newblock Chapter 9 - methods for numerical conformal mapping.
 \newblock In R.~Kühnau, editor, {\em Geometric Function Theory}, volume~2 of
   {\em Handbook of Complex Analysis}, pages 351--477. North-Holland, 2005.
-
-\bibitem[{Wik}25a]{wikipedia_autodiff}
-{Wikipedia contributors}.
-\newblock Automatic differentiation --- {Wikipedia}{,} the free encyclopedia.
-\newblock
-  \url{https://en.wikipedia.org/w/index.php?title=Automatic_differentiation&oldid=1320248234},
-  2025.
-\newblock [Online; accessed 14-November-2025].
-
-\bibitem[{Wik}25b]{wiki:FredholmIntegralEquation}
-{Wikipedia contributors}.
-\newblock Fredholm integral equation --- {Wikipedia}{,} the free encyclopedia.
-\newblock
-  \url{https://en.wikipedia.org/w/index.php?title=Fredholm_integral_equation&oldid=1314003753},
-  2025.
-\newblock [Online; accessed 7-December-2025].
-
-\bibitem[{Wik}25c]{wiki:HurwitzTheorem}
-{Wikipedia contributors}.
-\newblock Hurwitz's theorem (complex analysis) --- {Wikipedia}{,} the free
-  encyclopedia.
-\newblock
-  \url{https://en.wikipedia.org/w/index.php?title=Hurwitz%27s_theorem_(complex_analysis)&oldid=1321322619},
-  2025.
-\newblock [Online; accessed 7-December-2025].
-
-\bibitem[{Wik}25d]{wiki:MoebiusTransform}
-{Wikipedia contributors}.
-\newblock Möbius transformation --- {Wikipedia}{,} the free encyclopedia.
-\newblock
-  \url{https://en.wikipedia.org/w/index.php?title=M%C3%B6bius_transformation&oldid=1323948782},
-  2025.
-\newblock [Online; accessed 8-December-2025].
-
-\bibitem[{Wik}25e]{wiki:Polygon}
-{Wikipedia contributors}.
-\newblock Polygon --- {Wikipedia}{,} the free encyclopedia.
-\newblock
-  \url{https://en.wikipedia.org/w/index.php?title=Polygon&oldid=1320067726},
-  2025.
-\newblock [Online; accessed 8-December-2025].
-
-\bibitem[{Wik}25f]{wiki:SobolevSpace}
-{Wikipedia contributors}.
-\newblock Sobolev space --- {Wikipedia}{,} the free encyclopedia.
-\newblock
-  \url{https://en.wikipedia.org/w/index.php?title=Sobolev_space&oldid=1324240611},
-  2025.
-\newblock [Online; accessed 8-December-2025].
 
 \end{thebibliography}

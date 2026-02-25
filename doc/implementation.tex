@@ -1,68 +1,219 @@
 \section{Documentation and Implementation}
-\subsection{Implementation} \label{chap:WegmannImplementation}
-We have followed the exact implementation steps described in \cite[§5]{Wegmann1978_newtonverfahren}, which are actually two different methods in terms of discretisation. We have implemented both of those in order to compare the results to the ones Wegmann claims, see overview in \ref{chap:experiments}.
-Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation \cite[§5]{Wegmann1978_newtonverfahren}:
-Take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where
-$$\theta_k = \theta_0 + \frac{\pi k}{N}, \quad k\in[N-1]$$
-and write the integrals in terms of their Fourier transform
-\begin{equation}
-    F(z)=\frac{1}{2\pi i}\int \frac{\sigma_n(\zeta)}{\zeta - z} d\zeta
-\end{equation}
-where
-$$\sigma_n(\zeta_k)=\displaystyle\sum_{i=-n}^{n} c_i \zeta_k^i.$$ 
-This $\sigma_n \mapsto F$ can be computed fast ($\in\bigO(N\log N)$) via FFT.
-% Then, given $\eta(s)$, $\dot\eta(s)$ and $\Theta(s):= arg(\dot\eta(s))$ in closed form, and given initial values $S_1(\zeta_k)$ the next iteration is computed as follows:
 
-Note that the boundary correspodence function $S_k$ maps the angle $\theta\in[0,2\pi]$ to the paramter $s\in[0,2\pi]\subset\R$. Since $S_k$ winds around the unit circle once, it must satisfy $S_k(2\pi)= S_k(0)+2\pi$ and is not periodic since the codomain is an interval. We resolve this by decomposing the map into the identity term plus a $2\pi$-periodic displacement function:
+The language of choice is Python because there is extensive support for numerical methods and scientific computing. The code is structured in a modular way and can be found on Github: \url{https://github.com/aiacopino/ConformalMeshMap}.
+To run experiments, simply run the file \texttt{main.py}, which will execute the code in \texttt{convergence\_tests.py}.
+The main implementation of Wegmann's method is in \texttt{wegmann.py}, which contains the class \texttt{WegmannSolver} with methods for each step of the algorithm. The code is hopefully well-documented with docstrings and comments for clarity.
+
+\subsection{Discretisation} \label{chap:WegmannImplementation}
+We have followed the exact implementation steps described in \cite[§5]{Wegmann1978_newtonverfahren}, which details two different methods in terms of discretisation (Verfahren 1 and 2). We have implemented both in order to compare the results to Wegmann's claims, see the overview in Section \ref{chap:experiments}. 
+Note that in order to avoid confusion with the word 'method' in programming, we have chosen to use the German word 'Verfahren' to refer to the two different approaches described in Wegmann's paper.
+
+The algorithm fundamentally solves for the boundary correspondence function $S_k$, which maps the angle $\theta\in[0,2\pi]$ of the unit disk to the parameter $s\in[0,2\pi]$ of the target curve. Since $S_k$ winds around the unit circle once, it must satisfy $S_k(2\pi) = S_k(0) + 2\pi$. To allow for spectral processing via Fourier transforms, this is resolved by decomposing the map into the identity term plus a $2\pi$-periodic displacement function $\sigma_k$ \cite[Eq. 3.2]{Wegmann1984_convergence_iterative_method}:
 \begin{equation}
     S_k(\theta) = \theta + \sigma_k(\theta).
 \end{equation}
 
-Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of the boundary. Hence why a "good" (close enough) initial guess is vital for numerical stability. This has also been verified numerically, see section \ref{chap:experiments}. In practice, for $\Omega$ far from circular, a homotopy method could be adopted, where each solution for a slightly deformed circle is used as initial guess for the next deformation until the target region is reached.
-Unlike the AP Method, which uses a fixed projection to find the next iterate, Wegmann's Method leverages the exact geometry of the boundary curve via $\theta$, which yields quadratic convergence since the error decreases much faster \cite[Theorem 4]{Wegmann1978_newtonverfahren}.
-%However, given a suitable initial guess, the method achieves a quadratic local convergence rate for smooth boundaries, or superlinear for sufficiently smooth boundaries \cite{Wegmann1989_alternating_projections}, unlike just linear convergence achieved by standard fixed-set alternating projection methods.
-
-Note that the condition (\ref{eq:InitialConditionsOnPsi}) could cause the algorithm to break or diverge due to non-injectivity of maps if the target region does not contain the origin. This can be resolved by first translating the region such that the condition $\psi(0)=0$ is satisfied, and then adding the shift back after computation of the conformal map. 
-
-
 \subsubsection{Numerical Solution to the Riemann-Hilbert Problem}
-\cite{Wegmann2005_num_methods_confmapping} integral equations, newton update steps
-\cite{Henrici1986_vol3} Hilbert BVP, construction of conformal maps
-\cite[§ 17]{Muskhelishvili1977} plemelj formulas (definition of M)
 
-The Riemann-Hilbert problem solves this equation for $\psi_{k+1}$. Since $\psi_{k+1}$ is the analytic approximation, we canreduce this problem of finding $\psi_{k+1}$ to that of finding Re$(\psi_{k+1})$ since the imaignary part of an analytic function is just its harmonic conjugate, which can numerically be computed efficiently using the operator $K$ defined in \ref{operatorK_N} (AKA Hilbert Transform).  
-Thus, the equation (\ref{eq:RHproblem}) 
+Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation \cite[§5]{Wegmann1978_newtonverfahren}:
+At each iteration $k$, take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where $\theta_k = \theta_0 + \frac{\pi k}{N}$.
+
+To solve the RH problem equation \ref{eq:RHproblem} for $\psi_{k+1}$ at each iteration $k$, the method relies heavily on the evaluation of Cauchy-type integrals over the unit circle:
 \begin{equation}
-    \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
+    F(z)=\frac{1}{2\pi i}\int \frac{\varphi(\zeta)}{\zeta - z} d\zeta
 \end{equation}
-is rewritten as 
+for some density function $\varphi$.
+This integral is defined everywhere except directly on the boundary $\partial\mathbb{D}$. The Plemelj-Sokhotski formulas \cite[§ 17]{Muskhelishvili1977} define the limiting boundary values from the interior ($F^+$) and the exterior ($F^-$) of the disk.  These relate via the jump condition \cite[Eq. 17.3]{Muskhelishvili1977}:
+\begin{equation}\label{eq:Plemelj_Diff}
+    F^+(\zeta_k) - F^-(\zeta_k) = \varphi(\zeta_k).
+\end{equation}
+Furthermore, the sum of the limits corresponds to the Cauchy Principal Value integral, which on the unit circle is mathematically equivalent to the discrete Hilbert transform multiplied by $i$ \cite[Lemma 14.2]{Henrici1986_vol3}:
+\begin{equation}\label{eq:Plemelj_Sum}
+    F^+(\zeta_k) + F^-(\zeta_k) = i\mathcal{H}(\varphi)(\zeta_k).
+\end{equation}
+Adding Equations \ref{eq:Plemelj_Diff} and \ref{eq:Plemelj_Sum} yields the Plemelj projection for the interior analytic boundary value:
+\begin{equation}\label{eq:Plemelj_Projection}
+    F^+(\zeta_k) = \frac{1}{2} (\varphi + i \mathcal{H}(\varphi)).
+\end{equation}
+
+\iffalse
+The Plemelj-Sokhotski formulas \cite[§ 17]{Muskhelishvili1977} give the boundary values of $F$ as
 \begin{equation}
-    Re(\psi_{k+1}) = \text{RHS} \frac{A}{M}
+    F^+(\zeta_k) = \frac{1}{2} \Theta (\zeta_k) + \frac{1}{2\pi i} \int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - \zeta_k} d\zeta
+\end{equation} 
+on the interior o the disk and 
+\begin{equation}
+    F^-(\zeta_k) = -\frac{1}{2} \Theta (\zeta_k) + \frac{1}{2\pi i} \int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - \zeta_k} d\zeta
 \end{equation}
-where 
+on the exterior of the disk.
+These relate as \cite[Equation 17.3]{Muskhelishvili1977}
+\begin{equation}\label{eq:Plemelj}
+    F^+(\zeta_k) - F^-(\zeta_k) = \Theta(\zeta_k).
+\end{equation}
+And it also holds that \cite[Equation 17.4]{Muskhelishvili1977}
+\begin{equation}
+    F^+(\zeta_k) + F^-(\zeta_k) = \frac{1}{\pi i} \int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - \zeta_k} d\zeta = i\mathcal{H}(\Theta).
+\end{equation}
+Where the second inequality follows from the definition of the discrete Hilbert transform $\mathcal{H}e^{ikt}=-i\text{sgn}(k)e^{ikt}$ \cite[Lemma 14.2, Equation 14.2-32]{Henrici1986_vol3}. 
+Adding the last two equations yields
+\begin{equation}
+    F^+(\zeta_k) = \frac{1}{2} (\Theta + i \mathcal{H}(\Theta)) = \frac{1}{2} (i\Theta - \mathcal{H}(\Theta)).
+\end{equation}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bigskip\noindent\textbf{The Homogeneous Solution}\\
+Following \cite[§ 89, page 99ff]{Muskhelishvili1977}, we first find the homogeneous solution $X(z)$ to
+\begin{equation} 
+    \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= 0
+\end{equation} based on the tangent angle of the target boundary. 
+For $g_k$ the tangent vector of the target boundary, Wegmann defines the geometric angle \cite[page 457]{Wegmann1978_newtonverfahren}
+\begin{equation}
+    \Theta(\zeta) := \arg(\zeta^{-2} \frac{g_k} {\overline{g_k}} )=\arg(\zeta^{-2} \Delta ).
+\end{equation}
+Write $g_k = |g_k|e^{i\arg(g_k)}$ and $\overline{g_k}=|g_k|e^{-i\arg(g_k)}$ then the fraction equals 
+\begin{equation}
+    \Delta=e^{2i\arg(g_k)} \implies \arg(g_k/\overline{g_k})=\arg(\Delta)=2\arg(g_k).
+\end{equation}
+Since $\zeta\in\del\disk$, we have $\arg(\zeta^{-2})=-2\theta$.
+Hence,
+\begin{equation}
+    \arg(\zeta^{-2}\Delta)=\arg(\zeta^{-2})+\arg(\Delta) \implies \Theta(\zeta) = 2\arg(g_k) - 2\theta.
+\end{equation}
 
+Moreover, \cite[Eq. 3.5-3.6]{Wegmann1978_newtonverfahren} together with Equation \ref{eq:Plemelj_Projection} yields:
+\begin{equation}
+    \log(X^+(\zeta)) = \frac{1}{2} \left(i\Theta + i \mathcal{H}(i\Theta)\right) = \frac{1}{2} \left(i\Theta - \mathcal{H}(\Theta)\right).
+\end{equation}
+In the implementation, this is explicitly computed in the spatial domain to construct $X^+ = \exp(\log(X^+))$.
 
+Now, define $$Y(z) = \frac{1}{2\pi i} \displaystyle\int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - z} d\zeta$$ 
+to be the Cauchy integral of $\Theta$. By the Plemelj-Sokhotski formulas \eqref{eq:Plemelj_Diff}, the jump condition for $Y$ is given by:
+\begin{equation}\label{eq:Yjumpcondition}
+    Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta).
+\end{equation}
+By \cite[Eq. 3.6]{Wegmann1978_newtonverfahren},
+\begin{equation}
+    \begin{rcases}
+        X^+ = \exp(Y^+ - C) \\
+        X^-(z) = z^{-2} \exp(Y(z) - C)
+    \end{rcases} \implies X^- = z^{-2} \exp(Y^- - C).
+\end{equation}
+Consider the ratio $$\frac{X^+}{X^-} = \frac{\exp(Y^+ - C)}{z^{-2} \exp(Y^- - C)} = z^2 \exp(Y^+ - Y^-)$$
+Substituting the jump condition \ref{eq:Yjumpcondition} yields 
+\begin{equation}
+    \frac{X^+}{X^-} = z^2 \exp(\Theta) \iff X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}.
+\end{equation}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bigskip\noindent\textbf{The Inhomogeneous Solution}\\
+With $X^+$ established, we define the density function $\rho$ (the \textit{Belegungsfunktion} \cite[§5]{Wegmann1984_convergence_iterative_method}):
+\begin{equation}
+    \rho =
+    \begin{cases}
+        \frac{g_k \cdot \text{Im}(f_k /g_k)}{X^+} & \text{ for Verfahren 1} \\
+        \frac{g_k \cdot \text{Im}((f_k - psi_k)/g_k)}{X^+} & \text{ for Verfahren 2},
+    \end{cases}
+\end{equation}
+where $\psi_k$ is the previous step's analytic approximation. Note that this implies that the first iteration is always carried out using Verfahren 1.
+To find the boundary values $F^+$ and $F^-$, a second Cauchy integral using $\rho$ as the density is evaluated \cite[Eq. 3.7]{Wegmann1978_newtonverfahren}. 
+\begin{equation}
+    \Phi(z) = \frac{X(z)}{\pi} \displaystyle\int_{\del\disk} \frac{\rho(\zeta)}{(\zeta-z)} d\zeta = \frac{X(z)}{\pi}F(z).
+\end{equation}
+While $F(z)$ could be evaluated using the spatial Hilbert transform, we apply a frequency-domain optimization. The Plemelj projections are isolated by computing the FFT and isolating the negative and non-negative frequencies in order to obtain 
+\begin{align}
+    F^+ &= \text{IFFT}(\hat{\rho}_{k \ge 0}), \\
+    F^- &= -\text{IFFT}(\hat{\rho}_{k < 0}).
+\end{align}
+By \cite[Eq. 3.7 and p.464]{Wegmann1978_newtonverfahren}, the analytic functions $\Phi^+$ and $\Phi^-$ are then constructed by scaling the Cauchy integrals with the fundamental homogeneous solutions:
+\begin{equation}
+    \Phi^+ = 2i X^+ F^+, \quad \Phi^- = 2i X^- F^-.
+\end{equation}
+Finally, these components are combined to yield the initial analytic update function $\psi_0$ \cite[Eq. 3.8]{Wegmann1978_newtonverfahren}:
+\begin{equation}
+    \psi_0 = \frac{1}{2} \left( \Phi^+ + \overline{\Phi^-} \right).
+\end{equation}
+This procedure reduces the evaluation of the singular boundary integral to $\mathcal{O}(N\log N)$ operations \cite[page 109]{Henrici1986_vol3}.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bigskip\noindent\textbf{Anchoring and Calculation of Correction}\\
+$\psi_0$ is a particular solution to the inhomogeneous problem. The general analytic solution is given by \cite[Eq. 3.9]{Wegmann1978_newtonverfahren}
+\begin{equation}
+    \psi_{k+1} = 
+    \begin{cases}
+        \psi_0 + P X^+ & \text{ for Verfahren 1} \\
+        \psi_k + \psi_0 + P X^+ & \text{ for Verfahren 2}.
+    \end{cases}
+\end{equation}
 
-TODO
-GIBBS PHENOMENON:
-%Non-convex regions often have areas of high curvature (the "neck" of the kite). In the Fourier domain, high curvature translates to high-frequency components. If your discretization $N$ isn't high enough, the Plemelj projections (rho_plus, rho_minus) suffer from aliasing and Gibbs oscillations, which ruin the analyticity of $h_k$.
+To ensure the uniqueness of the conformal map as dictated by the Riemann Mapping Theorem, we must fix three real degrees of freedom. 
+We enforce the anchoring condition $\psi(0) = 0$, which requires $\psi_{k+1}(0) = 0$. 
+By the Mean Value Property \cite[Eq. 14.2-2]{Henrici1986_vol3} of analytic functions, the value of an analytic function at the origin of the unit disk is exactly the mean of its boundary values. Thus, evaluating the condition at $z=0$ yields:
+\begin{equation} \label{eq:initcond_1}
+    0 = \psi_{k+1}(0) = \psi_0(0) + P X^+(0) \implies P = -\frac{\underline{\psi_0}}{\underline{X^+}},
+\end{equation}
+where the underline here denotes the arithmetic mean over the discretized boundary points.
 
-The relaxation parameter is used for initial einpendeln of the corrections. If we just take the full correction from the beginning, the solver tends to crash because the approximation steps are too large in relation to the WHAT? Hence why we "damp" the approximation steps in cases where we do not have a good enough initial guess at hand. \red{OUTLOOK: MAKE THE REAXATION ADAPTABLE TO AUTO-TUNING BASED ON THE APPROXIMATION ERROR.}
+Once the properly anchored analytic function $\psi_{k+1}$ is constructed, the real-valued boundary correction step $U_k$ is extracted. Following \cite[Eq. 2.4]{Wegmann1978_newtonverfahren}, the update is the projection of the discrepancy $(\psi_{k+1} - f_k)$ onto the tangent vector $g_k$:
+\begin{equation}
+    U_k = \text{Re}\left( \frac{\psi_{k+1} - f_k}{g_k} \right).
+\end{equation}
+Finally, to prevent rotational drift of the parametrization during the iterative process enforcing the $f'(0) > 0$ condition of the Riemann Mapping Theorem the mean of $U_k$ is zeroed before the step is applied:
+\begin{equation}\label{eq:initcond_2}
+    U_k \leftarrow U_k - \overline{U_k}.
+\end{equation}
 
-Note that Wegmann initial guess for inverted ellipse is always identity
-
-WEgmann describes two methods for solving the Riemann-Hilbert problem. He writes (\cite[§6]{Wegmann1978_newtonverfahren}) that the first method converges locally quadratically as long as the approximation error exceeds the discretisation error and only linearly from that point on, while the second method converges locally quadratically until machine precision is reached. However, the approxmation is significanly more exact in the first method, results which we have been able to reproduce. \red{ADD TABLES}
-
-$Y(z)$ is defined as a Cauchy integral of $\Theta$.By the Plemelj-Sokhotski formulas, the boundary values of a Cauchy integral satisfy:$$Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta)$$(The jump across the boundary is exactly the density function).Now look at Equation 3.6 for $\kappa=1$:Inside ($|z|<1$): $X(z) = \exp(Y(z) - C)$.So, $X^+ = \exp(Y^+ - C)$.Outside ($|z|>1$): $X(z) = z^{-2} \exp(Y(z) - C)$.So, $X^- = z^{-2} \exp(Y^- - C)$.If we take the ratio $X^+ / X^-$:$$\frac{X^+}{X^-} = \frac{\exp(Y^+ - C)}{z^{-2} \exp(Y^- - C)} = z^2 \exp(Y^+ - Y^-)$$Substituting the jump condition $Y^+ - Y^- = \Theta$:$$\frac{X^+}{X^-} = z^2 \exp(\Theta)$$Solving for $X^-$:$$X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}$$
-
-
-\subsection{Documentation}
-The language of choice is Python because there is extensive support for numerical methods and scientific computing. The code is structured in a modular way and can be found on Github: \url{https://github.com/aiacopino/ConformalMeshMap}.
-To run experiments, simply run the file \texttt{main.py}, which will execute the code in \texttt{convergence\_tests.py}.
-The main implementation of Wegmann's method is in \texttt{wegmann.py}, which contains the class \texttt{WegmannSolver} with methods for each step of the algorithm. The code is hopefully well-documented with docstrings and comments for clarity.
-The following parameters can be adjusted in \texttt{main.py}:
+\subsection{Uniqueness of the solution}
+The three degrees of freedom fixed to ensure uniqueness of the conformal map are the following:
 \begin{itemize}
-    \item löalala
+    \item $\psi(0) = 0$ (eq. \ref{eq:initcond_1}): The real and imaginary parts of the origin's image are fixed to the center of the target region, locking down two degrees of freedom (translation). In the implementation, this is enforced by shifting the target region such that its center lies on the origin, computing the conformal map, and then shifting the result back (\texttt{self.shift}).
+    \item $\psi'(0) > 0$ (eq. \ref{eq:initcond_2}): This condition prevents rotational drift of the parametrization during the iterative process. This is enforced by zeroing the mean of the correction step $U_k$ before applying it to update the boundary correspondence function.
 \end{itemize}
+Furthermore, bijectivity of the map is guaranteed by construction via monotonicity of the parametrisation $S_k$, tracked by the property \texttt{self.is\_injective}.
+
+\subsection{Solving the Interior Mapping}
+Once we have the unique mapping between the boundaries, it remains to find the mapping for the rest of the mesh points in the interior of the disk. This is done by leveraging Cauchy's Integral Formula \ref{eq:CauchyIntegralFormula} in theory, but numerically unstable in practice for points near the boundary, as the kernel presents a singularity. 
+By analyticity of the mapping (also on the interior) the negative Fourier coefficients of the boundary mapping vanish and the positive Fourier coefficients are exactly the Taylor coefficients. Hence, we can evaluate the interior mapping at any point by evaluating the Taylor series with the Fourier coefficients as coefficients, which can be done efficiently using Horner's method \cite{Burrus2003horner} as implemented in the \texttt{calculate\_interior\_mesh()} method.
+
+
+\subsection{The Initial Guess Problematic}
+Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of the boundary. Hence why a "good" (close enough) initial guess is vital for numerical stability \cite[Thm. 5]{Wegmann1978_newtonverfahren}. 
+Note that Wegmann proves this, but in his own testing only used the identity as initial guess; we have tried to do better (see experiments section \ref{chap:experiments}).
+
+\subsection{Verfahren 1 vs. Verfahren 2} \label{chap:verfahren1-2}
+In order to compare our results to Wegmann's, we have implemented both Verfahren 1 and Verfahren 2 as described in \cite[§5]{Wegmann1978_newtonverfahren}.
+This leads to different convergence properties, as mentioned in \cite[§5]{Wegmann1978_newtonverfahren}, see experiments section \ref{chap:experiments}.
+
+\subsection{Reproducibility and Results}
+\subsubsection{Parameters}
+The reader may want to reproduce the results in chapter \ref{chap:experiments}, or try out the Wegmann method on their own target region. To do so, simply run \texttt{main.py}. 
+There are some parameters that can be adjusted in \texttt{main.py}, which will be explained briefly in what follows. 
+\bigskip
+\flushleft
+\begingroup %horizontal padding
+\def\arraystretch{1.5}
+\begin{tabular}{ p{0.2\textwidth} | p{0.8\textwidth} }
+    \textbf{Parameter} & \textbf{Description} \\
+    \hline
+    \texttt{N} & Number of discretisation points. more is generally better for accuracy, but also more computationsally intensive (slower CPUs might struggle with $N>1000$). Note also that for highly non-convex target regions, more discretiastion points can lead to Gibbs phenomenon and thus worse results, so less points acts as a sort of "smoothing" here. Note $N$ must be even or ideally a power of 2 for well-behaved Fourier transform.\\
+    \texttt{p} & Convexity parameter, to be chosen between $0$ and $1$ where applicable. $p = 0$ yields a perfect circle for the flower region, while the same yields very sharp cusps for the inverted ellipse region. \\
+    \texttt{relaxation} & Relaxation parameter for initial stabilisation of the corrections. If we just take the full correction from the beginning, the solver tends to crash because the approximation steps are too large in direction of the tangent and might overshoot the boundary. Hence why we "damp" the approximation steps in cases where we do not have a good enough initial guess at hand. Choosing this parameter = 1 means no relaxation(multiplier of step size), smaller means damping, larger means more aggressive updates. \\
+    \texttt{verfahren} & 1 or 2, which of Wegmann's two methods to use for solving the Riemann-Hilbert problem. The first method is more accurate but only quadratically convergent until approximation error exceeds discretisation error, while the second method is less accurate but quadratically convergent until machine precision is reached. See more detail in chapter \ref{chap:verfahren1-2}. \\
+    \texttt{tolerance} & Convergence tolerance for the solver, i.e. the maximum allowed approximation error for the solver to be considered as having converged. It is mathematically defined as the current step's update's norm, $\lVert U_k \rVert$. Note that this is different from the accuracy metric, which is computed against Gaier's known analytical solutions and is not used as a stopping criterion for the solver (chapter \ref{chap:accuracy}). \\
+    \texttt{petals} & Parameter used for the Flower region only, defining number of petals. Note more petals with all other parameters constant mean sharper corners, hence potentially earlier failure of the solver. \\
+    \texttt{cutoff} & Parameter used for the Truncated Square (see fig. \ref{ex:truncatedSquare}) region only. The Truncated Square is defined as taking the fourier series representation of the geometric square with corners and zeroing out the high-frequency components at the center of the coefficent array, resulting in rounded corners. The cutoff value is half the ratio of frequencies which are kept, i.e. \texttt{square\_coeffs[cutoff:N-cutoff] = 0}\\
+\end{tabular}
+\endgroup 
+\bigskip
+
+\subsubsection{Convergence and Plotting}
+Note that we chose to output a plot in any event, not just when the solver converges, because plotting intermediate or divergent steps is a diagnostic tool used to generate the failure figures in Chapter \ref{chap:experiments}. This allows us to visually inspect the behaviour of the solver in cases where it fails to converge, which can be helpful for understanding the reasons for failure and for debugging purposes.
+The actual status of the solver is tracked via \texttt{solver.status}, which can take the following values:
+We define the solver as having \texttt{CONVERGED} if the condition that the approximation error $\lVert U_k \rVert$ is smaller than the user-defined tolerance parameter is met. We define \texttt{DIVERGED} as the condition that the approximation error exceeds a certain threshold (currently set to $10^5$) and \texttt{MAX\_ITER\_REACHED} if the solver does not converge within a maximum number of iterations (e.g. $10'000$).
+Note that the above definition of convergence can lead to a situation where the solver is considered as having converged, but the resulting map is not actually conformal because the boundary parametrisation function $S_k$ is not injective, i.e. $\psi$ folds onto itself. This is checked via a boolean state variable \texttt{is\_injective = not np.any(S\_dot\_k <= 0)} and yields status \texttt{CONVERGED\_BUT\_NOT\_CONFORMAL}. 
+In this case, it is advisable to try again with a different (closer) initial guess or with a smaller relaxation parameter or lower number of discretisation points.
+
+\subsubsection{Accuracy} \label{chap:accuracy}
+We define accuracy as the $L^2$-norm of the difference between the computed map and Gaier's known analytical solution, evaluated at the discretisation points on the boundary. Note that this is different from the convergence criterion, which is based on the approximation error of the solver's update steps and is not directly related to the accuracy of the final solution.
+
+\subsubsection{Testing Other Target Regions}
+For testing other target regions than the few already implemented, the user can simply define a new method in \texttt{convergence\_tests.py} analogous to the existing methods. The only requirement for the target region is that it must be simply connected and sufficiently smooth \cite[Theorem 1]{Wegmann1984_convergence_iterative_method}.

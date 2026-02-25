@@ -16,7 +16,7 @@ We start with an overview of the methods covered and how to choose between them 
 \subsection{Schwarz-Christoffel Method} \label{chap:SchwarzChristoffelMethod}
 One class of methods for finding the conformal mapping $\psi$ is given by the Schwarz-Christoffel equation, which relates the derivative of $\psi$ to an integral over the boundary of the target domain $\Omega$ when $\Omega$ is a polygon.
 \subsubsection{Preliminaries and Notation}
-\begin{definition} [\cite{wiki:Polygon}]
+\begin{definition}
     A \textbf{Polygon} is a piecewise linear Jordan curve with finitely many line segments connecting corner points $z_1, ..., z_N$.
 \end{definition} 
 
@@ -116,7 +116,7 @@ In this section we will focus on the easiest version called the "geodesic algori
 First, let us introduce the following definition:
 
 \subsubsection{Möbius Transforms}
-\begin{definition}[{\cite{wiki:MoebiusTransform}, \cite[page 209]{SteinShakarchi2003_complexanalysis}}]
+\begin{definition}[{\cite[page 31]{ahlfors1979_complexanalysis}, \cite[page 209]{SteinShakarchi2003_complexanalysis}}]
     A \textbf{Möbius transform} is a function on the extended complex plane $\hat\C:=\C\cup\{\infty\}$ which is uniquely determined by where it sends three points. It has the form
     $$ f(z) = \frac{az + b}{cz + d} $$
     with complex numbers $a,b,c,d$ such that $ad - bc \neq 0$.
@@ -304,9 +304,10 @@ Let $L^2([0,2\pi])$ be the space of all $2\pi$-periodic complex functions $f$ wh
 \begin{equation}
     (f,g)_2= \frac{1}{2\pi}Re \int_{0}^{2\pi} f(t) \overline{g(t)} dt.
 \end{equation}
-\begin{definition}[\cite{wiki:SobolevSpace}]
-    The \textbf{Sobolev space $W$} is defined as the space of all absolutely continuous functions $f\in L^2$ such that the derivative $f'$ exists and is also in $L^2$. The inner product on $W$ is defined as
-    $$(f,g)_W = (f,g)_2 + (f',g')_2.$$
+
+\begin{definition}[{Sobolev Space, \cite[Definition 3.2]{AdamsFournier2003_sobolev}}]
+    The \textbf{Sobolev space $W^{m,p}$} is defined as the space of all absolutely continuous functions $f\in L^p$ such that the derivative $D^pf$ exists and is also in $L^p$. The inner product on $W^{m,p}$ is defined as
+    $$(f,g)_{W^{m,p}} = \left (\sum_{0 \leq |k| < m} \lVert D^kf\rVert_{L^p}^p \right )^{1/p}.$$
 \end{definition}
 This is a Hilbert space over $\R$. The subspaces of real functions are denoted $L_{\R}^2$ and $W_{\R}$ respectively. Note that we can orthogonally decompose $W$ into the direct sum of the subspaces $W = W^{+} \oplus W^{-}$ \cite{Wegmann1989_alternating_projections} where $f \in L^2$ is decomposed as follows into its Fourier series:
 $$f(t) =  \sum_{n = -\infty}^{\infty} a_n e^{int} = 
@@ -464,7 +465,7 @@ First we note that Schwarz-Christoffel only works on polygons and Theodorsen's m
 We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy, but it is worthwile noting that this is a good choice in cases where the boundary is so rough/ irregular that deterministic methods fail.
 Since we are given a smooth boundary of the target domain, we can opt for a more accurate method.
 
-The Zipper method is very well implementable and robust (it can handle rough boundaries including fractals), but there is a small caveat to be aware of for the efficient point evaluations. Since the Zipper method essentially constructs $\psi$ as a composition of many maps, the derivative is numerically expensive to compute (chain rule). Also, trying a finite differences approach is slow and potentially numerically unstable, but there is hope in a technique called Forward Automatic Differentiation which is both exact and efficient \cite{wikipedia_autodiff}. 
+The Zipper method is very well implementable and robust (it can handle rough boundaries including fractals), but there are already a MATLAB implementation.
 
 The Conjugate Function Method contains a very astute idea mathematically, but its implementation is not very interesting beyond $hp$-FEM for which there already are powerful libraries, so there would not be much value in implementing a rudimentary FEM solver given the scope of this thesis. 
 

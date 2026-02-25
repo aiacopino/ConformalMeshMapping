@@ -64,10 +64,6 @@ We closely follow the proof by normal families in \cite{SteinShakarchi2003_compl
     A family $\mathcal{F}$ of holomorphic functions on $\Omega$ that is uniformly bounded on compact subsets of $\Omega$ is normal if and only if it is equicontinuous on compacta.
 \end{theorem}
 
-\begin{theorem}[Hurwicz \cite{wiki:HurwitzTheorem}] \label{thm:Hurwicz}
-    Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f\neq 0$. 
-    If $f$ has a zero of order $m$ at $z_0$ then for every $\eps>0$ and sufficientlly large $k=k(\eps)\in\N$, $f_k$ has precisely $m$ zeros in $B_{\eps}(z_0)$ including multiplicities. Moreover, the zeros converge to $z_0$ as $k\to\infty$. 
-\end{theorem}
 We will use the following corollary of Hurwicz' theorem in the proof of \ref{thm:RiemannMappingTheorem}:
 \begin{corollary}[{\cite[Proposition 3.5]{SteinShakarchi2003_complexanalysis}}] \label{thm:HurwiczCor}
     Let $\Omega \subset \mathbb{C}$ be a connected open subset and let $f_n: \Omega \to \mathbb{C}$ be a sequence of injective holomorphic functions that converges uniformly on compact subsets of $\Omega$ to a holomorphic function $f$. Then $f$ is either constant or injective.
@@ -162,7 +158,7 @@ $\hfill\qed$
 
 Existence established, the problem now becomes the explicit construction of a conformal mapping.
 Once the boundaries of the domain and target region are conformally mapped, the interior can be deduced from the boundary by the Cauchy Integral Formula \cite[page 357]{Wegmann2005_num_methods_confmapping}, \cite[Theorem 1.2]{Gaier1964}
-\begin{equation}
+\begin{equation} \label{eq:CauchyIntegralFormula}
     \psi(z)=\frac{1}{2\pi i}\int_{\del\disk} \frac{\psi(\zeta)}{\zeta - z} d\zeta \quad \text{ for } z\in\disk.
 \end{equation}
 Hence why the main focus of the task lies on mapping boundary to boundary.
@@ -210,7 +206,7 @@ This problem has a unique real solution $u$, which then yields a unique solution
     K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)\cot(\frac{s-t}{2}) dt,
 \end{equation}
 
-which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}).
+which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}, \cite[Theorem 14.2c]{Henrici1986_vol3}).
 
 \begin{remark}[{\cite[Chapter 12.3]{Wegmann2005_num_methods_confmapping}}]
     In order to implement numerical methods efficiently via the Fast Fourier Transform later, we will use the functions' Fourier series representations. Hence e.g. on a grid of $N = 2n$ equidistant points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as 
@@ -239,7 +235,7 @@ In principle, there are two strategies for finding conformal mappings, namely to
 
 \subsection{Solution of the Boundary Value Problem via Fredholm Integral Equations of the Second Kind}
 We often numerically solve BVPs by transforming them into integral equations \cite[page 281]{Henrici1986_vol3}. Integral equations are equations in which an unknown function appears under an integral sign. 
-They are classified into two main types: Fredholm and Volterra integral equations, where Fredholm integral equations have fixed limits of integration, while Volterra integral equations have variable limits of integration. Both types can be further categorized into first kind and second kind, depending on whether the unknown function appears only under the integral sign or also outside of it \cite{wiki:FredholmIntegralEquation}.
+They are classified into two main types: Fredholm and Volterra integral equations, where Fredholm integral equations have fixed limits of integration, while Volterra integral equations have variable limits of integration. Both types can be further categorized into first kind and second kind, depending on whether the unknown function appears only under the integral sign or also outside of it \cite[p. 284]{Henrici1986_vol3}.
 
 \begin{definition}
     A \textbf{Fredholm integral equation of the second kind} is an equation of the form
@@ -289,7 +285,7 @@ In two dimensions, the most common choice for mesh elements are triangles or qua
 We will be given a triangular mesh in the form of a list of nodes and a list of cells by two vectors:
 A $N\times2$ matrix of points (complex coordinates of $N$ nodes) and a $M\times 3$ matrix of integers (containing the indices of nodes constituing each of the $M$ triangles).
 
-\subsubsection{Mesh Structure}
+\subsubsection{Mesh Structure}\label{chap:meshStructure}
 To ensure bijectivity and conformality of the mapping $\psi$ acting on the discretised domain, the discretisation must be done intelligently, i.e. the mesh must satisfy certain regularity criteria. Ill-chosen meshes could lead to overlaps of the target mesh nodes, failing bijectivity, or even non-conformality of $\psi$ due to the failure to satisfy the discrete geometric constraints which are required for angle preservation.
 
 In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells \cite[§4.1]{Wechsung2019_shapeopt_robustsolvers_incompressible} where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that 
@@ -301,7 +297,6 @@ we define $d(K)$ the diameter of the smallest $K$-circumscribing ball (aka diame
     \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty).
 \end{equation}
 
-\red{to do. add a mesh quality analyser to the code}
 
 \subsection{Crowding AKA the Geneva Effect}
 Crowding is the phenomenon that occurs when a set of more or less equally distributed points on the domain are mapped to a much more dense set of points on the target region, thereby causing numerical issues due to the angles on the grid becoming very small \cite[]{Gaier1964}, \cite[page 428]{Henrici1986_vol3}, \cite{Banjai2008_SC_crowdingworkaround}. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. The following illustration shows the concentration of points near the equator of the ellipse when mapping equidistant points from the unit disk.
@@ -322,5 +317,5 @@ Wegmann proved the following result.
 This means that crowding increases exponentially with the aspect ratio of the target region.
 \input{elongated_v2.tex}
 
-\red{DeLillo has shown how crowding affects the accuracy of numerical computations.}
-\cite{DeLillo1994_crowding_accuracy}
+DeLillo has shown how crowding affects the accuracy of numerical computations \cite{DeLillo1994_crowding_accuracy}. 
+See results from our owwn experiments in chapter \ref{chap:experiments}. 

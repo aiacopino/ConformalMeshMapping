@@ -1,2 +1,12 @@
 \section{Conclusion and Outlook}
-The algorithm could be extended to cover non-convex regions by implementing a homotopy method, which relaxes the target region and computes a sequence of intermediate mappings, where each solution is the initial guess for the subsequent mapping. This is a common approach to ensure convergence of iterative solvers when the initial guess is not sufficiently close to the target solution. We omit this extension due to time constraints, but it is a promising direction for future work.
+Note that thanks to the Riemann Mapping Theorem, which heralded this field of research and served as the opening fact for this paper, it is theoretically possible to find a conformal mapping between any two simply connected regions.
+The most straight-forward next steps for improving the current solver are
+\begin{enumerate}
+    \item Finding a way of getting a better initial guess for the mapping, which would allow us to solve for more complicated target regions and ensure convergence of the solver. This is especially important for non-convex target regions, where the current initial guess method fails to produce a meaningful starting point for the solver.
+    \item Implementing a homotopy method to extend the algorithm to more complicated target regions without necessarily needing a better initial guess. This would allow us to solve for non-convex target regions by starting with a relaxed version of the target region and gradually morphing it into the desired shape, using the solution from each step as the initial guess for the next step.
+    \item An easy tweak to the existing algorithm would be to make the relaxation parameter "intelligent" in the sense that it would be automatically adjusted at each iteration based on the current state of the solver, e.g. by looking at the change in accuracy or the change in the solution between iterations. This should allow for faster convergence and better stability of the solver.
+\end{enumerate}
+
+Another possible analytic tool that would be interesting to implement is a sort of mesh quality criterion as described in chapter \ref{chap:meshStructure}. 
+
+%Personally, I am particularly interested into what could be done to find conformal mappings onto fractal target regions; maybe exploring the Zipper method next.
