@@ -2,9 +2,9 @@
 %maybe change structure to section existence of a conformal map, section construction of a conformal map
 \subsection*{Conventions}
 Throughout this text, we identify $\R^2$ with the complex plane $\C$ and write $$\C\ni z=x+iy \text{ where } x,y\in\R.$$
-The task is to find an angle-preserving mapping $\psi$ from the unit disk $\disk$ to $\Omega$, given a simply connected bounded domain $\Omega\subset\C$ with boundary $\Gamma$ and $2\pi$-periodic parametrization 
+The task is to find an angle-preserving mapping $\psi$ from the unit disk $\disk$ to $\Omega$, given a simply connected bounded domain $\Omega\subset\C$ with boundary $\Gamma$ and $2\pi$-periodic parametrisation 
 $$\eta: [0, 2\pi] \to \Gamma \quad \text{ with } \quad \eta \in C^0 ([0,2\pi])$$ by its fourier series representation. 
-In particular, for the implementation we are given a matrix of size $N\times 2$ containing $2N$ complex fourier coefficients, thus our boundary is parametrised by a trigonometric polynomial and hence smooth. \label{note:bdarySmooth}
+In particular, for the implementation we are given a matrix of size $1\times N$ containing $N=2n$ complex fourier coefficients, thus our boundary is parametrised by a trigonometric polynomial and hence smooth. \label{note:bdarySmooth}
 
 We are also given a curvilinear triangular mesh $\widehat{\mathcal{M}}$ on $\disk$ satisfying some regularity conditions (see chapter \ref{chap:Meshes}).
 
@@ -15,20 +15,22 @@ We are also given a curvilinear triangular mesh $\widehat{\mathcal{M}}$ on $\dis
 
 \subsection{Conformal Mappings}
 
-\begin{definition} \label{def:ConformalMap}
-    A \textbf{conformal mapping}, also called a conformal map, conformal transformation, angle-preserving transformation, or biholomorphic map, is a transformation $f(z)$ that preserves local angles. An analytic function is conformal at any point where it has nonzero derivative.
+\begin{definition} [{\cite[Chap. 2.2]{SteinShakarchi2003_complexanalysis}}]
+    A complex-valued function on an open set $\Omega \subset \C$ is called \textbf{holomorphic, regular, complex differentiable} or if for every $z_0 \in\Omega$, the limit
+    $$ \frac{f(z_0+h)-f(z_0)}{h}$$ exists as $h \to 0$ in $\C$.
+    A holomorphic function is locally given by a convergent power series, i.e. for any $z_0\in \Omega$ there exists a neighborhood $U\subset \Omega$ of $z_0$ such that for all $z\in U$ we have $$ f(z) = \sum_{n=0}^{\infty} a_n (z - z_0)^n $$ for some complex coefficients $a_n \in \C$.
+    The terms analytic and holomorphic are used interchangeably.
 \end{definition}
 
-\begin{definition}
-    A \textbf{complex analytic function} or \textbf{holomorphic function} on an open subset $U\subset\C$ is locally given by a convergent power series, i.e. for any $z_0\in U$ there exists a neighborhood $V\subset U$ of $z_0$ such that for all $z\in V$ we have $$ f(z) = \sum_{n=0}^{\infty} a_n (z - z_0)^n $$ for some complex coefficients $a_n \in \C$.
-    The terms analytic and holomorphic are used interchangeably.
+\begin{definition} \label{def:ConformalMap} [{\cite[Chap. 8]{SteinShakarchi2003_complexanalysis}}]
+    If a holomorphic function $f: \Omega \to\Omega$ is also bijective, then $f$ is called \textbf{biholomorphic} or \textbf{conformal}.
 \end{definition}
 
 % This type of mapping is useful as some mesh properties (in particular angles) remain regular under such transformations. This ensures that cells do not become too stretched or overlap, which would cause numerical issues or even solver failure as experienced by Wechsung \cite{Wechsung2019}. 
 
 \subsection{Riemann Mapping Theorem}
 
-\begin{theorem}[Riemann Mapping Theorem]\label{thm:RiemannMappingTheorem}
+\begin{theorem}[{Riemann Mapping Theorem \cite[Theorem 3.1]{SteinShakarchi2003_complexanalysis}}]\label{thm:RiemannMappingTheorem}
     If $\Omega$ is a non-empty simply connected open proper subset of the complex plane $\mathbb{C}$, then there exists a biholomorphic mapping $f$ (i.e. a bijective holomorphic mapping whose inverse is also holomorphic) from $\Omega$ onto the open unit disk
     $$ \disk = \{z \in \mathbb{C}: |z|<1 \}. $$
     This mapping is known as a Riemann mapping.
@@ -99,7 +101,12 @@ Then there exist radii $\alpha, \beta \in (0, r)$ such that for the open balls $
 \subsubsection{Proof of Riemann Mapping Theorem}
 \textit{Step 1: Existence and injectivity} \\
 Let $\Omega$ be a simply connected open proper subset of $\mathbb{C}$. We show that $\Omega$ is conformally equivalent to an open subset of the unit disk containing the origin. 
-Indeed, choose $\alpha \notin \Omega$ and consider the function $$f(z) := log(z-\alpha)$$ on $\Omega$, which is well-defined and holomorphic since $z-\alpha$ never vanishes on $\Omega$. 
+Indeed, choose $\alpha \notin \Omega$ and consider the function 
+$$f(z) := log(z-\alpha)$$ 
+on $\Omega$, which is well-defined and holomorphic since $z-\alpha$ never vanishes on $\Omega$. 
+By assumption on simply-connectedness of $\Omega$, b< \cite[Theorem 6.2]{SteinShakarchi2003_complexanalysis} the branch of logarithm is 
+$$log_{\Omega}(z) = c_0 + \int_{z_0}^{z} \frac{1}{w - \alpha} dw $$
+where $z_0$ is a fixed point in $\Omega$ and $e^{c_0}=z_0-\alpha$.
 Note $f$ is injective since $e^{f(z)} = z-\alpha$ is ($f(z_1) = f(z_2) \implies z_1 - \alpha = z_2 - \alpha$).
 Then for a point $\omega \in \Omega$ we get $f(z) \neq f(\omega) + 2\pi i \quad\forall z \in \Omega$ since otherwise we would find $z = \omega$ again by exponentiating.
 In fact, $f(z)\cap B_{\varepsilon}(f(\omega) + 2\pi i) = \emptyset$ for some $\varepsilon > 0$ since otherwise we would find a sequence $z_n \to \omega$ with $f(z_n) \to f(\omega) + 2\pi i$, contradicting the continuity of $f$.
@@ -146,7 +153,7 @@ $\hfill\qed$
 
 Note that the Riemann mapping is unique up to three real degrees of freedom, which are fixed by setting (\ref{eq:InitialConditionsOnPsi}) in the above proof. Later the uniqueness will be achieved by prescribing the image of three distinct boundary points instead, as we will only be working with the boundaries.
 \begin{corollary}
-    Any two simple connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
+    Any two simply connected open proper subsets of $\mathbb{C}$ are conformally equivalent.
 \end{corollary}
 \textit{Proof.} This follows directly from the Riemann mapping theorem by taking the unit disk as an intermediate step.
 $\hfill\qed$
@@ -172,7 +179,7 @@ When the region $\Omega$ is bounded by a closed Jordan curve $\Gamma$ the mappin
 $S$ is called the \textbf{boundary correspondence function}. 
 By the Riemann mapping theorem, we need to fix at least three degrees of freedom (\ref{eq:InitialConditionsOnPsi}) for uniqueness of the conformal mapping $\psi$, which we achieve through fixing three points on the boundary via the boundary correspondence equation (\ref{eq:boundaryCorrespondence}).
 
-From Definition \ref{def:ConformalMap} we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition).
+From Definition \ref{def:ConformalMap} we know that a complex diﬀerentiable function with nonvanishing complex derivative is conformal, and complex differentiability in two dimensions can be caracterised by the Cauchy-Riemann equations (necessary and sufficient condition)\cite[Proposition 2.3]{SteinShakarchi2003_complexanalysis}.
 Denoting $z=x+iy$ and
 $$J:= \begin{pmatrix}
     \partial_x & -\partial_y \\
@@ -201,13 +208,23 @@ It can be described as finding $\psi$ analytic in $\disk$, continuous in $\overl
     \end{matrix}
 \end{equation}
 where $\psi$ is $2\pi$-periodic and Hölder continuous \cite[Chapter 12.3]{Wegmann2005_num_methods_confmapping}.
-This problem has a unique real solution $u$, which then yields a unique solution for $\psi$ up to an additive imaginary constant \cite[Corollary 15.1b]{Henrici1986_vol3}(which we fix via our normalisation condition (\ref{eq:InitialConditionsOnPsi})), which can be constructed using the conjugation operator 
+This problem has a unique real solution $u$, which together with its (unique up to a constant) conjugate harmonic function $v$ yields a unique solution for $\psi$ up to an additive imaginary constant \cite[Corollary 15.1b]{Henrici1986_vol3}. 
+The conjugate harmonic function $v$ can be constructed using the conjugation operator 
 \begin{equation}\label{eq:operatorK}
     K\psi(s) := \frac{1}{2\pi}\int_{0}^{2\pi} \psi(t)\cot(\frac{s-t}{2}) dt,
 \end{equation}
+which is also known as Hilbert Transform (details on this in \cite[Chapter 2.5]{Wegmann2005_num_methods_confmapping}, \cite{Castillo2025_hilberttransform}, \cite[Theorem 14.2c]{Henrici1986_vol3}).
+In case $u$ has an absolutely convergent Fourier series representation
+\begin{equation}
+    u(z)=\sum_{n=-\infty}^{\infty} a_n z^n = a_0 + 2 Re(\sum_{n=1}^{\infty} a_n z^n) \text{ for } z\in\disk,
+\end{equation}
+where the second equality follows from the fact that $u$ is real, the conjugate harmonic function $v$ can then be obtained by
+\begin{equation}
+    v(z) = 2 Im(\sum_{n=1}^{\infty} a_n z^n) = -i \sum_{n=-\infty}^{\infty} \text{sgn}(n)a_n z^n  \text{ for } z\in\disk
+\end{equation}
+\cite[Theorem 13.5a]{Henrici1986_vol3}.
 
-which is also known as Hilbert Transform (details on this in \cite{Castillo2025_hilberttransform}, \cite[Theorem 14.2c]{Henrici1986_vol3}).
-
+\iffalse
 \begin{remark}[{\cite[Chapter 12.3]{Wegmann2005_num_methods_confmapping}}]
     In order to implement numerical methods efficiently via the Fast Fourier Transform later, we will use the functions' Fourier series representations. Hence e.g. on a grid of $N = 2n$ equidistant points $t_j = \frac{(j-1)2\pi}{N}$, $\psi$ will be written as 
     $$\psi(t_j)=\sum_{k=-n+1}^{n} c_k e^{ikt_j} \text{ for } j\in [N]$$ 
@@ -220,13 +237,13 @@ which is also known as Hilbert Transform (details on this in \cite{Castillo2025_
     These considerations are of particular importance for all methods based on conjugation.
 \end{remark}
 \bigskip
+\fi
+
 In principle, there are two strategies for finding conformal mappings, namely to solve linear or non-linear boundary value problems. The linear problems are naturally faster to solve numerically, however their kernels must be adapted to each new fixed boundary and thus these methods present complications when dealing with predefined boundaries. Non-linear methods on the other hand can be more flexible with respect to the boundary shape, but are computationally more expensive. But since we are mainly interested in solving the mapping problem for a fixed boundary shape, we will focus on linear methods in this article.
 
-\subsection{Boundary Conditions} 
-
-\begin{remark} [{\red{citation}}]
-    Note that the Cauchy-Riemann equations do not guarantee a solution for arbitrary boundary data. A holomorphic map from the boundary of the unit disk onto some boundary of a convex set in $\C$ satisfies Cauchy-Riemann equations if the boundary of the target set can be described by non-negative Fourier frequencies. Thus, the choice of parametrization of the target region's boundary is usually another challenge posed when solving conformal mapping problems, but for the scope of this article we assume to be given a suitable parametrization of $\del\Omega$.
-\end{remark}
+\subsection{Boundary Conditions}
+Note that a solution to the Dirichlet problem for the Laplace equation is in general only conformal if the boundary condition function $f:\del\disk\to\Gamma$ is real and continuous \cite[§13.5]{Henrici1986_vol3}, \cite[Theorem 8]{Wegmann2005_num_methods_confmapping}.
+Thus, the boundary of the target set should be given by non-negative Fourier frequencies; for the scope of this article we assume to be given a suitable parametrisation of $\Gamma=\del\Omega$.
 %\subsubsection{Dirichlet Boundary Conditions}
 %\subsubsection{Neumann Boundary Conditions}
 %\subsection{Mixed boundary conditions (Wec 4.3)(?)}
@@ -253,15 +270,19 @@ Let $\eta:[0,2\pi]\to\Gamma$ be a parametrization of the boundary and $s,t\in[0,
 \input{neumannkernel.tex}
 The Neumann kernel is defined for $s \neq t$ as 
 \begin{equation}\label{eq:NeumannKernel}
-    K(s,t) = \frac{1}{\pi} \frac{\sin(\theta(t)-\varphi_s(t))}{r_{st}}
+    K(s,t) = \frac{1}{\pi} \frac{\sin(\theta(t)-\varphi_s(t))}{r_{st}}.
 \end{equation}
+It is used to solve Fredholm equations of the first kind like Symm's equation, which is foundational in Amano's method \ref{chap:AmanosMethod}.
 
 \begin{remark}[{\cite[page 40]{Gaier1964}}]
     The integral in equation (\ref{eq:FredholmSecondKind}) can be interpreted as a Riemann or Riemann-Stieltjes integral, where the latter is more general and allows for evaluation of non-bounded integrands. This could be important if the boundary correspondence function $S$ as seen in (\ref{eq:boundaryCorrespondence}) is not continuously differentiable. These two interpretations lead to different methods of discretisation and different error estimates when solving the integral equation numerically.
     However, since we will only be working with smooth boundaries in this article, we will not go into further detail on this topic.
 \end{remark}
 
-\subsection{Discretisation} \label{chap:Meshes}
+
+
+
+\subsection{Domain Discretisation} \label{chap:Meshes}
 In order to numerically solve boundary value problems the domain is usually discretised by creating a mesh $\M$ of $N$ nodes (points) and $M$ elements (cells) covering the domain $\Omega$. 
 There are many methods to create such meshes, but for the scope of this article we will assume to be given a mesh on the domain and only briefly discuss some important properties of meshes and mesh generation methods. We highly recommend referring to \cite{Brown1990_SC_meshgen} for a more in-depth treatment of mesh generation techniques.
 
@@ -282,39 +303,39 @@ There are many methods to create such meshes, but for the scope of this article 
 
 In two dimensions, the most common choice for mesh elements are triangles or quadrilaterals. Triangular meshes are more flexible in adapting to complex geometries, while quadrilateral meshes can provide better accuracy for certain types of problems. Hybrid meshes combining both types are also used in practice to combine advantages.
 
-We will be given a triangular mesh in the form of a list of nodes and a list of cells by two vectors:
+For the scope of this paper, we assume to be given a triangular mesh in the form of a list of nodes and a list of cells by two vectors:
 A $N\times2$ matrix of points (complex coordinates of $N$ nodes) and a $M\times 3$ matrix of integers (containing the indices of nodes constituing each of the $M$ triangles).
 
 \subsubsection{Mesh Structure}\label{chap:meshStructure}
 To ensure bijectivity and conformality of the mapping $\psi$ acting on the discretised domain, the discretisation must be done intelligently, i.e. the mesh must satisfy certain regularity criteria. Ill-chosen meshes could lead to overlaps of the target mesh nodes, failing bijectivity, or even non-conformality of $\psi$ due to the failure to satisfy the discrete geometric constraints which are required for angle preservation.
 
-In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells \cite[§4.1]{Wechsung2019_shapeopt_robustsolvers_incompressible} where for a mesh $\mathcal{M}:= \{K\}$ of triangles $K$ such that 
+In order to keep the approximation error as low as possible while maintaining good solver performance, we typically want uniform meshes, e.g. where the triangulation is close to equilateral. The quality of a mesh is measured in terms of its individual cells \cite[§4.1]{Wechsung2019_shapeopt_robustsolvers_incompressible} where for a mesh $\mathcal{M}:= \{K_i\}_i$ of triangles $K_i$ such that 
 \begin{equation}
- \overline{\Omega}= \displaystyle\cup_{K\in\mathcal{M}}K
+ \overline{\Omega}= \displaystyle\cup_{K_i\in\mathcal{M}}K_i
 \end{equation} 
-we define $d(K)$ the diameter of the smallest $K$-circumscribing ball (aka diameter of $K$) and $\mu(K)$ the diameter of the largest ball inscribed in K. Then a measure for the quality of K is the ratio of these diameters
+we define $d(K_i)$ the diameter of the smallest $K_i$-circumscribing ball (aka diameter of $K_i$) and $\mu(K_i)$ the diameter of the largest ball inscribed in $K_i$. Then a measure for the quality of $K_i$ is the ratio of these diameters
 \begin{equation}
-    \rho(K) := \frac{d(K)}{\mu(K)} \in [1,\infty).
+    \rho(K_i) := \frac{d(K_i)}{\mu(K_i)} \in [1,\infty).
 \end{equation}
 
 
 \subsection{Crowding AKA the Geneva Effect}
-Crowding is the phenomenon that occurs when a set of more or less equally distributed points on the domain are mapped to a much more dense set of points on the target region, thereby causing numerical issues due to the angles on the grid becoming very small \cite[]{Gaier1964}, \cite[page 428]{Henrici1986_vol3}, \cite{Banjai2008_SC_crowdingworkaround}. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. The following illustration shows the concentration of points near the equator of the ellipse when mapping equidistant points from the unit disk.
+Crowding is the phenomenon that occurs under a conformal mapping $\psi:\disk\to\Omega$ when a set of more or less equally distributed points on the domain $\disk$ are mapped to a much more dense set of points on the target region $\Omega$, thereby causing numerical issues due to the cells in certain areas of the grid becoming very small \cite[page 428]{Henrici1986_vol3}, \cite{Banjai2008_SC_crowdingworkaround}. This typically occurs when the target region is elongated, i.e. has a high aspect ratio. The following illustration shows the concentration of points near the equator of the ellipse when mapping equidistant points from the unit disk.
 \input{crowding_v2.tex}
 
 Wegmann proved the following result.
 
 \begin{theorem} [{\cite[Theorem 6]{Wegmann2005_num_methods_confmapping}}]
-    When the region $G$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $G$ touches both small sides then the conformal mapping $\psi : \disk \rightarrow \Omega$ satisfies
+    When the region $\Omega$ can be enclosed in a rectangle with sides $a$ and $b$, $b \leq a$, such that $\Omega$ touches both small sides then the conformal mapping $\psi : \disk \rightarrow \Omega$ satisfies
     $$
-    \|\psi'\|_D \geq b \psi(b/a)
+    \|\psi'\|_D \geq b \varphi(b/a)
     $$
-    with a function $\psi(\tau)$ which behaves for small $\tau$ like
+    with a function $\varphi(\tau)$ which behaves for small $\tau$ like
     $$
-    \psi(\tau) \approx \frac{1}{2\pi \sqrt{\epsilon}} \exp\left(\frac{\pi}{2\tau}\right).
+    \varphi(\tau) \approx \frac{1}{2\pi \sqrt{\epsilon}} \exp\left(\frac{\pi}{2\tau}\right).
     $$
 \end{theorem}
-This means that crowding increases exponentially with the aspect ratio of the target region.
+This means that as the ratio of the rectangle sides decreases (i.e. $\Omega$ becomes more elongated), the cells on the domain mesh are being exponentially stretched under the conformal mapping.
 \input{elongated_v2.tex}
 
 DeLillo has shown how crowding affects the accuracy of numerical computations \cite{DeLillo1994_crowding_accuracy}. 

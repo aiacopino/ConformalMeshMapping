@@ -1,0 +1,58 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+A level-1 auxiliary file: theory.aux
+Reallocating 'name_of_file' (item size: 1) to 20 items.
+A level-1 auxiliary file: existingmethods.aux
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+A level-1 auxiliary file: implementation.aux
+Reallocating 'name_of_file' (item size: 1) to 16 items.
+A level-1 auxiliary file: experiments.aux
+Reallocating 'name_of_file' (item size: 1) to 12 items.
+A level-1 auxiliary file: outlook.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: alpha.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+You've used 27 entries,
+            2543 wiz_defined-function locations,
+            755 strings with 9581 characters,
+and the built_in function-call counts, 9136 in all, are:
+= -- 900
+> -- 321
+< -- 26
++ -- 97
+- -- 93
+* -- 608
+:= -- 1498
+add.period$ -- 81
+call.type$ -- 27
+change.case$ -- 138
+chr.to.int$ -- 27
+cite$ -- 27
+duplicate$ -- 412
+empty$ -- 741
+format.name$ -- 139
+if$ -- 1880
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 28
+newline$ -- 136
+num.names$ -- 84
+pop$ -- 155
+preamble$ -- 1
+purify$ -- 172
+quote$ -- 0
+skip$ -- 320
+stack$ -- 0
+substring$ -- 477
+swap$ -- 54
+text.length$ -- 26
+text.prefix$ -- 19
+top$ -- 0
+type$ -- 180
+warning$ -- 0
+while$ -- 83
+width$ -- 30
+write$ -- 355

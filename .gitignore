@@ -19,3 +19,6 @@ Thumbs.db
 __pycache__/
 BAvenv/
 *.pyc
+
+#corrections/feedback
+corr/

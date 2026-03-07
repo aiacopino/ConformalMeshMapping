@@ -259,7 +259,7 @@ In practice, the star-shape requirement can also be relaxed by smoothing the bou
 
 \subsection{Amano's Method of Fundamental Solutions} \label{chap:AmanosMethod}
 A potential theoretic formulation of the conformal mapping problem leads to a Fredholm integral equation of the first kind, known as Symm's integral equation, which has a kernel with logarithmic singularity. 
-Unlike Fredholm integral equations of the second kind like Theodorsen's equation, where the singularity of the kernel creates numerical instabilities, Symm's equation is easily solvable by numerical methods \cite[Chapter 9.1]{Kythe1998_symmsintegralequation}. One of these is Amano's method.
+Unlike Fredholm integral equations of the second kind like Theodorsen's equation, where the singularity of the kernel creates numerical instabilities, Symm's equation is easily solvable by numerical methods \cite[Chapter 9.1]{Kythe1998_symmsintegralequation}, \cite[Chapter 3.1]{Wegmann2005_num_methods_confmapping}. One of these is Amano's method.
 Conceptually, a pair of conjugate harmonic functions are expressed by a complex logarithmic potential, and the mapping problems are reduced to singular Fredholm integral equations of the ﬁrst kind. Gaier \cite{Gaier1964} mathematically studied Symm’s integral equation and proved the existence and uniqueness of the solution. These methods need $\bigO(N^3)$ operations if the boundary is discretized at N points. Henrici showed that complexity of $\bigO(N^2\log N)$ can be achieved by using FFTs \cite{Henrici1986_vol3}.
 
 \begin{definition}[{\cite[§ 4]{Amano1998_Amanosmethod}}]
