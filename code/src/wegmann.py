@@ -13,20 +13,26 @@ class WegmannSolver:
     def __init__(self, eta, N):
         '''        
         :param eta: boundary parametrisation, format: array of fourier coefficients (complex)
-        :param N: number of discretization points on the boundary
+        :param N: number of discretisation points on the boundary
         '''
         self.N = N
-        
+        self.num_coeffs = len(eta.coeffs) #NOT EQUAL TO N!!!!!!!!!!!!! careful
         # to fix a parameter psi(0)=0 for uniqueness, we might need to shift the target region so that it contains 0 in the first place. 
         # the perfect shift has exactly centroid of target domain at 0
         # this will hopefully work because most of the regions studied by wegmann are more or less convex
+        
+        # COMMENT FOLLOWING LINES FOR ECCENTRIC CIRCLE RUN
         self.shift = eta.coeffs[0]
         print(f"FLAG: normalisation shift applied to target region: {self.shift}")
         centered_coeffs = eta.coeffs.copy()
         centered_coeffs[0] = 0
         self.eta = BoundaryCurve(centered_coeffs)
-
-        if len(self.eta.coeffs) % 2 != 0: #check even number of fourier coeffs
+        '''
+        self.shift = 0
+        self.eta = eta #unshifted for eccentric circle
+        '''
+        print(f"FLAG: number of fourier coeffs for boundary parametrisation: {self.num_coeffs}")
+        if self.num_coeffs % 2 != 0: #check even number of fourier coeffs
             raise ValueError(f"WegmannSolver __init__: error in normalisation shift. Expected even number of Fourier coefficients and zero mean (first coeff), got {len(self.eta.coeffs)} coeffs and mean {self.eta.coeffs[0]}.")
 
         self.theta = np.linspace(0, 2*np.pi, num=N, endpoint=False) # array of equally spaced args (angles)

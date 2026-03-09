@@ -79,8 +79,8 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren, tolerance=1e-10)
     :param N: discretisation points
     '''
     #params as in Gaier and Andersen (not anymore hehe)
-    a = 0.55
-    b = 0.6
+    a = 0.2
+    b = a/.6
 
     print(f"START testing wegmann solver convergence for eccentric circle domain target region ... N={N}, a={a}, b={b}")
     t = np.linspace(0, 2*np.pi, N, endpoint=False)
@@ -90,18 +90,23 @@ def test_eccentric_circle_convergence(N, relaxation, verfahren, tolerance=1e-10)
     eta_vals = x + 1j*y
     eta_coeffs = np.fft.fft(eta_vals)/N
     eccentric_circle_bdary = BoundaryCurve(eta_coeffs)
+    #debugging
+    print(f"FLAG: center of eta is {eccentric_circle_bdary.coeffs[0]}, should be close to 0 for centered shape. First 5 Fourier coefficients of eccentric circle boundary: {eccentric_circle_bdary.coeffs[:5]}")
     solver = WegmannSolver(eccentric_circle_bdary, N)
-    solver.init_initial_guess_starshaped()
+    #solver.init_initial_guess_starshaped()
+    solver.init_initial_guess_identity()
     _, solver.status = solver.find_conformal_map(max_iter=300, epsilon=tolerance, relaxation=relaxation, verfahren=verfahren)
     # test accuracy
-    computed_phi = np.unwrap(t + np.fft.ifft(solver.sigma_hat).real)
-    # conformal map given by Gaier, note his theta is our target angle and his phi is our t
+    computed_t = np.unwrap(t + np.fft.ifft(solver.sigma_hat).real)
+    computed_r = a * np.cos(computed_t) + np.sqrt(b**2 - a**2 * np.sin(computed_t)**2)
+    # conformal map given by Gaier, note his theta is our target angle and his phi is our computed_t
     c = a / ( b**2 - a**2)
-    numerator = np.sin(t)
-    denom = c*r + np.cos(t)
+    numerator = np.sin(computed_t)
+    denom = c*computed_r + np.cos(computed_t)
     known_conformal_phi =  np.unwrap(np.arctan2(numerator, denom)) # arctan2 for correct quadrant handling
     # fixing rotation
-    phase_diff = computed_phi - known_conformal_phi
+    # Wegmann goes t to computed_t, Gaier geos back. if solver is correct the composition should be the identity
+    phase_diff = known_conformal_phi - t
     phase_diff -= np.mean(phase_diff) # remove mean to correct for constant rotation ambiguity
     accuracy = float(np.linalg.norm(phase_diff)) / np.sqrt(N) # RMS error of angle difference
     print(f"Distance between computed conformal map and known conformal map on eccentric circle: {accuracy}")
@@ -119,6 +124,8 @@ def test_inverted_ellipse_convergence(N,p, relaxation, verfahren, initial_guess=
     solver = WegmannSolver(inverted_ellipse_bdary_obj, N)
     if initial_guess == "starshaped":
         solver.init_initial_guess_starshaped()
+    elif initial_guess == "non_convex":
+        solver.init_initial_guess_non_convex()
     else:
         solver.init_initial_guess_identity() # Wegmann's choice for this example, but can diverge for low p
     print(f"Running wegmann solver for inverted ellipse target region, params N={N}, p={p} ...")
