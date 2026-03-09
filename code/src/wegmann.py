@@ -224,7 +224,7 @@ class WegmannSolver:
         #print(f"FLAG: Theta = {Theta}, H_Theta = {H_Theta}")
 
         # find homogeneous solution X
-        i_log_X = 1/2 * (-H_Theta + 1j * Theta) # by Mushkelishvili: log(X) = exp(1/2*(H(Theta)+iTheta)
+        i_log_X = 1/2 * (-H_Theta + 1j * Theta) # by Mushkelishvili: X = exp(1/2*(H(Theta)+iTheta)
         # by eq. 3.6: X_plus = exp(Y(z))-1/2*Y(0)) and X_minus = z^{-2}* X_plus
         # Y(z) is Cauchy integral of Theta(zeta) => by plemelj-sokhotski formulas: Y^{+}-Y^{-}=Theta
         X_plus = np.exp(i_log_X)
@@ -246,7 +246,7 @@ class WegmannSolver:
         rho_coeffs = np.fft.fft(rho)
         # F^+ is only positive frequencies, so we zero out all the negative ones
         rho_plus, rho_minus = rho_coeffs.copy(), rho_coeffs.copy()
-        rho_plus[self.N//2:] = 0 # Taylor series, Plemelj projection P+ (cite Mushkelishvili) corresponds to evaluating Cauchy integral F(z) inside unit disk
+        rho_plus[self.N//2:] = 0 # Taylor series, Plemelj projection P+ corresponds to evaluating Cauchy integral F(z) inside unit disk
         rho_minus[:self.N//2] = 0 # Laurent series, Plemelj projection P- corresponds to evaluating Cauchy integral F(z) outside the unit disk
         F_plus_spatial = np.fft.ifft(rho_plus)
         F_minus_spatial = -np.fft.ifft(rho_minus) #defined n p 463

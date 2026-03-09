@@ -1,6 +1,9 @@
-\section{Documentation and Implementation}
+\section{Documentation and Implementation} \label{chap:implementation}
 
-The language of choice is Python because there is extensive support for numerical methods and scientific computing. The code is structured in a modular way and can be found on Github: \url{https://github.com/aiacopino/ConformalMeshMap}.
+The language of choice is Python because there is extensive support for numerical methods and scientific computing. The code is structured in a modular way and can be found on Github: 
+
+\url{https://github.com/aiacopino/ConformalMeshMapping}.
+
 To run experiments, simply run the file \texttt{main.py}, which will execute the code in \texttt{convergence\_tests.py}.
 The main implementation of Wegmann's method is in \texttt{wegmann.py}, which contains the class \texttt{WegmannSolver} with methods for each step of the algorithm. The code is hopefully well-documented with docstrings and comments for clarity.
 
@@ -18,24 +21,46 @@ The algorithm fundamentally solves for the boundary correspondence function $S_k
 Since we assume $\psi$ to map from the unit disk $\disk$, the integral equations can be explicitly solved by discretization and trigonometric interpolation \cite[§5]{Wegmann1978_newtonverfahren}:
 At each iteration $k$, take $N=2n$ equidistant points $\zeta_k=e^{i\theta_k}$ on the boundary of the disk, where $\theta_k = \theta_0 + \frac{\pi k}{N}$.
 
-To solve the RH problem equation \ref{eq:RHproblem} for $\psi_{k+1}$ at each iteration $k$, the method relies heavily on the evaluation of Cauchy-type integrals over the unit circle:
+To solve the linear Riemann-Hilbert problem equation \ref{eq:RHproblem} for $\psi_{k+1}$ at each iteration $k$, the method relies heavily on the evaluation of Cauchy-type integrals over the unit circle:
 \begin{equation}
-    F(z)=\frac{1}{2\pi i}\int \frac{\varphi(\zeta)}{\zeta - z} d\zeta
+    F(z)= \frac{1}{2\pi i} \displaystyle \int_{\del\disk} \frac{\varphi(\zeta)}{\zeta - z} d\zeta
 \end{equation}
-for some density function $\varphi$.
-This integral is defined everywhere except directly on the boundary $\partial\mathbb{D}$. The Plemelj-Sokhotski formulas \cite[§ 17]{Muskhelishvili1977} define the limiting boundary values from the interior ($F^+$) and the exterior ($F^-$) of the disk.  These relate via the jump condition \cite[Eq. 17.3]{Muskhelishvili1977}:
+for some density function $\varphi:\del\disk\to\C$.
+
+This integral is defined everywhere except directly on the boundary $\partial\mathbb{D}$. 
+There, the uniform limits $F^+$ from the left and $F^-$ from the right of the boundary are defined by the Plemelj formulae \cite[Eq. 17.2]{Muskhelishvili1977}
+\begin{equation}
+    \begin{matrix}
+        F^+(z) = \frac{1}{2} \varphi(z) + \frac{1}{2\pi i} \int_{\del\disk} \frac{\varphi(\zeta)}{\zeta - z} d\zeta, \\
+        F^-(z) = -\frac{1}{2} \varphi(z) +\frac{1}{2\pi i} \int_{\del\disk} \frac{\varphi(\zeta)}{\zeta - z} d\zeta.
+    \end{matrix}
+\end{equation}
+These are equivalent to \cite[Lemma 14.2e]{Henrici1986_vol3}
+\begin{equation}
+    \begin{matrix} \label{eq:F+Hilbert}
+        F^+(z) = \frac{1}{2}\varphi(z) + \frac{i}{2} K \varphi(z) + \hat\varphi, \\
+        F^-(z) = - \frac{1}{2}\varphi(z) + \frac{i}{2} K \varphi(z) + \hat\varphi,
+    \end{matrix}
+\end{equation} where $\hat\varphi$ is the mean value of $\varphi$.
+
+The Plemelj-Sokhotski formulas \cite[§ 17]{Muskhelishvili1977} define the limiting boundary values from the interior ($F^+$) and the exterior ($F^-$) of the disk. 
+These relate via the jump condition \cite[Eq. 17.3]{Muskhelishvili1977}:
 \begin{equation}\label{eq:Plemelj_Diff}
     F^+(\zeta_k) - F^-(\zeta_k) = \varphi(\zeta_k).
 \end{equation}
-Furthermore, the sum of the limits corresponds to the Cauchy Principal Value integral, which on the unit circle is mathematically equivalent to the discrete Hilbert transform multiplied by $i$ \cite[Lemma 14.2]{Henrici1986_vol3}:
+Furthermore, the sum of the limits corresponds to the Cauchy Principal Value integral, which on the unit circle satisfies \cite[Lemma 14.2e]{Henrici1986_vol3}, \cite[Eq. 17.4]{Muskhelishvili1977}:
 \begin{equation}\label{eq:Plemelj_Sum}
-    F^+(\zeta_k) + F^-(\zeta_k) = i\mathcal{H}(\varphi)(\zeta_k).
+    F^+(\zeta_k) + F^-(\zeta_k) = i\mathcal{H}(\varphi)(\zeta_k)+\hat\varphi.
 \end{equation}
 Adding Equations \ref{eq:Plemelj_Diff} and \ref{eq:Plemelj_Sum} yields the Plemelj projection for the interior analytic boundary value:
 \begin{equation}\label{eq:Plemelj_Projection}
-    F^+(\zeta_k) = \frac{1}{2} (\varphi + i \mathcal{H}(\varphi)).
+    F^+(\zeta_k) = \frac{1}{2} (\varphi + i \mathcal{H}(\varphi) + \hat\varphi).
 \end{equation}
 
+\begin{remark}
+    From now on, denote $f_k = \eta(S_k)$ and $g_k = \dot\eta(S_k)$ for brevity.
+    Note also $\zeta\in\del\disk$.
+\end{remark}
 \iffalse
 The Plemelj-Sokhotski formulas \cite[§ 17]{Muskhelishvili1977} give the boundary values of $F$ as
 \begin{equation}
@@ -60,45 +85,57 @@ Adding the last two equations yields
     F^+(\zeta_k) = \frac{1}{2} (\Theta + i \mathcal{H}(\Theta)) = \frac{1}{2} (i\Theta - \mathcal{H}(\Theta)).
 \end{equation}
 \fi
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \bigskip\noindent\textbf{The Homogeneous Solution}\\
+Let $X$ be a fundamental solution to the homogeneous RH-problem \cite[§ 40]{Muskhelishvili1977}
+\begin{equation}
+    F^+(\zeta) = G(\zeta) F^-(\zeta)
+\end{equation}\red{WHAT IS G}
 Following \cite[§ 89, page 99ff]{Muskhelishvili1977}, we first find the homogeneous solution $X(z)$ to
 \begin{equation} 
     \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= 0
 \end{equation} based on the tangent angle of the target boundary. 
-For $g_k$ the tangent vector of the target boundary, Wegmann defines the geometric angle \cite[page 457]{Wegmann1978_newtonverfahren}
+For $g_k$ the tangent vector of the target boundary and a suitable choice of branch of the argument \cite[page 457]{Wegmann1978_newtonverfahren}, Wegmann defines the Hölder-continuous
 \begin{equation}
-    \Theta(\zeta) := \arg(\zeta^{-2} \frac{g_k} {\overline{g_k}} )=\arg(\zeta^{-2} \Delta ).
-\end{equation}
-Write $g_k = |g_k|e^{i\arg(g_k)}$ and $\overline{g_k}=|g_k|e^{-i\arg(g_k)}$ then the fraction equals 
+    \Theta(\zeta) := \arg(\zeta^{-2} \frac{g_k} {\overline{g_k}} ).
+\end{equation} 
+In the code, this choice of argument function is dealt with via \texttt{np.unwrap()}.
+Write $g_k = |g_k|e^{i\arg(g_k)}$ and $\overline{g_k}=|g_k|e^{-i\arg(g_k)}$ to get
 \begin{equation}
-    \Delta=e^{2i\arg(g_k)} \implies \arg(g_k/\overline{g_k})=\arg(\Delta)=2\arg(g_k).
+    \arg(g_k/\overline{g_k})=\arg(e^{2i\arg(g_k)})=2\arg(g_k).
 \end{equation}
 Since $\zeta\in\del\disk$, we have $\arg(\zeta^{-2})=-2\theta$.
 Hence,
 \begin{equation}
-    \arg(\zeta^{-2}\Delta)=\arg(\zeta^{-2})+\arg(\Delta) \implies \Theta(\zeta) = 2\arg(g_k) - 2\theta.
+    \arg(\zeta^{-2} g_k/\overline{g_k})=\arg(\zeta^{-2})+\arg(g_k/\overline{g_k}) 
+    \implies \Theta(\zeta) = 2\arg(g_k) - 2\theta.
 \end{equation}
+\red{Note that $\Theta$ is a measure of how much the polar angle of the coordinate $\del\disk\ni\zeta=e^{i\theta}$ is rotated by the conformal map onto the tangent angle on $\Gamma$.}
 
-Moreover, \cite[Eq. 3.5-3.6]{Wegmann1978_newtonverfahren} together with Equation \ref{eq:Plemelj_Projection} yields:
-\begin{equation}
-    \log(X^+(\zeta)) = \frac{1}{2} \left(i\Theta + i \mathcal{H}(i\Theta)\right) = \frac{1}{2} \left(i\Theta - \mathcal{H}(\Theta)\right).
-\end{equation}
-In the implementation, this is explicitly computed in the spatial domain to construct $X^+ = \exp(\log(X^+))$.
-
-Now, define $$Y(z) = \frac{1}{2\pi i} \displaystyle\int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - z} d\zeta$$ 
+Now, define \cite[Eq. 3.5]{Wegmann1978_newtonverfahren}
+\begin{equation} \label{eq:Yintegral}
+    Y(z) = \frac{1}{2\pi} \displaystyle\int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - z} d\zeta = \frac{1}{2\pi i} \displaystyle\int_{\del\disk} \frac{i \Theta(\zeta)}{\zeta - z} d\zeta
+\end{equation} 
 to be the Cauchy integral of $\Theta$. By the Plemelj-Sokhotski formulas \eqref{eq:Plemelj_Diff}, the jump condition for $Y$ is given by:
 \begin{equation}\label{eq:Yjumpcondition}
     Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta).
 \end{equation}
-By \cite[Eq. 3.6]{Wegmann1978_newtonverfahren},
-\begin{equation}
-    \begin{rcases}
-        X^+ = \exp(Y^+ - C) \\
-        X^-(z) = z^{-2} \exp(Y(z) - C)
-    \end{rcases} \implies X^- = z^{-2} \exp(Y^- - C).
+By \cite[Eq. 3.6]{Wegmann1978_newtonverfahren}and \cite[page 105]{Muskhelishvili1977},
+\begin{equation} \label{eq:X_homogensol}
+    \begin{matrix}
+%    \begin{rcases} 
+        X^+ = \exp(Y^+ - \hat Y) \\
+        X^-(z) = z^{-2} \exp(Y^-(z) - \hat Y)
+%    \end{rcases} \implies X^- = z^{-2} \exp(Y^- - C).
+    \end{matrix}
 \end{equation}
-Consider the ratio $$\frac{X^+}{X^-} = \frac{\exp(Y^+ - C)}{z^{-2} \exp(Y^- - C)} = z^2 \exp(Y^+ - Y^-)$$
+where $\hat Y=\frac{1}{2}Y(0)$.
+Moreover, combining \ref{eq:Plemelj_Projection}, \eqref{eq:Yintegral} and \eqref{eq:X_homogensol} yields:
+\begin{equation}
+    \log(X^+(\zeta)) = Y^+-\frac{1}{2}Y(0) = \frac{1}{2} \left(i\Theta + i \mathcal{H}(i\Theta)\right) = \frac{1}{2} \left(i\Theta - \mathcal{H}(\Theta)\right).
+\end{equation}
+Exponentiating yields the homogeneous solution on the interior of the disk. It remains to find the limiting function $X^-$ on the exterior of the disk.
+Consider the ratio $$\frac{X^+}{X^-} = \frac{\exp(Y^+ - \hat Y)}{z^{-2} \exp(Y^- - \hat Y)} = z^2 \exp(Y^+ - Y^-)$$
 Substituting the jump condition \ref{eq:Yjumpcondition} yields 
 \begin{equation}
     \frac{X^+}{X^-} = z^2 \exp(\Theta) \iff X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}.
@@ -106,27 +143,27 @@ Substituting the jump condition \ref{eq:Yjumpcondition} yields
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bigskip\noindent\textbf{The Inhomogeneous Solution}\\
-With $X^+$ established, we define the density function $\rho$ (the \textit{Belegungsfunktion} \cite[§5]{Wegmann1984_convergence_iterative_method}):
+With $X^+$ established, consider the density function $\rho$ (the \textit{Belegungsfunktion} \cite[§5]{Wegmann1984_convergence_iterative_method}):
 \begin{equation}
     \rho =
     \begin{cases}
         \frac{g_k \cdot \text{Im}(f_k /g_k)}{X^+} & \text{ for Verfahren 1} \\
-        \frac{g_k \cdot \text{Im}((f_k - psi_k)/g_k)}{X^+} & \text{ for Verfahren 2},
+        \frac{g_k \cdot \text{Im}((f_k - \psi_k)/g_k)}{X^+} & \text{ for Verfahren 2},
     \end{cases}
 \end{equation}
-where $\psi_k$ is the previous step's analytic approximation. Note that this implies that the first iteration is always carried out using Verfahren 1.
-To find the boundary values $F^+$ and $F^-$, a second Cauchy integral using $\rho$ as the density is evaluated \cite[Eq. 3.7]{Wegmann1978_newtonverfahren}. 
+where $\psi_k$ is the previous step's analytic approximation. Note that this definition implies that the first iteration is always carried out using Verfahren 1.
+To find the boundary values $\Phi^+$ and $\Phi^-$ of the particular solution, a second Cauchy integral using $\rho$ as the density is evaluated \cite[Eq. 3.7]{Wegmann1978_newtonverfahren}, \cite[Eq. 40.24]{Muskhelishvili1977}.
 \begin{equation}
     \Phi(z) = \frac{X(z)}{\pi} \displaystyle\int_{\del\disk} \frac{\rho(\zeta)}{(\zeta-z)} d\zeta = \frac{X(z)}{\pi}F(z).
 \end{equation}
-While $F(z)$ could be evaluated using the spatial Hilbert transform, we apply a frequency-domain optimization. The Plemelj projections are isolated by computing the FFT and isolating the negative and non-negative frequencies in order to obtain 
-\begin{align}
-    F^+ &= \text{IFFT}(\hat{\rho}_{k \ge 0}), \\
-    F^- &= -\text{IFFT}(\hat{\rho}_{k < 0}).
-\end{align}
-By \cite[Eq. 3.7 and p.464]{Wegmann1978_newtonverfahren}, the analytic functions $\Phi^+$ and $\Phi^-$ are then constructed by scaling the Cauchy integrals with the fundamental homogeneous solutions:
+While $F(z)$ could be evaluated using the spatial Hilbert transform, we apply a frequency-domain optimisation.
+By analyticity of $F$, the numerical evaluation of the Cauchy integral can be done exploiting Fourier theory. The Plemelj projection $F^-$ on the outside of the disk corresponds to the Laurent series of $\rho$ (negative frequencies), while $F^+$ on the inside corresponds to the Taylor series \cite[Eq. 14.2-31, 14.2-32]{Henrici1986_vol3}.
+Following \cite[Eq. 3.7 and p.464]{Wegmann1978_newtonverfahren}, the analytic functions $\Phi^+$ and $\Phi^-$ are then constructed by scaling the Cauchy integrals with the fundamental homogeneous solutions:
 \begin{equation}
-    \Phi^+ = 2i X^+ F^+, \quad \Phi^- = 2i X^- F^-.
+    \begin{matrix}
+         \Phi^+ = 2i \frac{X^+(z)}{\pi}\int \frac{\rho(\zeta)}{\zeta - z} d\zeta = X^+ F^+ \\
+         \Phi^- = 2i \frac{X^-(z)}{\pi}\int \frac{\rho(\zeta)}{\zeta - z} d\zeta = X^- F^-.
+    \end{matrix}
 \end{equation}
 Finally, these components are combined to yield the initial analytic update function $\psi_0$ \cite[Eq. 3.8]{Wegmann1978_newtonverfahren}:
 \begin{equation}
@@ -144,6 +181,7 @@ $\psi_0$ is a particular solution to the inhomogeneous problem. The general anal
         \psi_k + \psi_0 + P X^+ & \text{ for Verfahren 2}.
     \end{cases}
 \end{equation}
+$P$ is a polynomial of degree 2 which is found by enforcing the uniqueness constraints for $\psi_{k+1}$.
 
 To ensure the uniqueness of the conformal map as dictated by the Riemann Mapping Theorem, we must fix three real degrees of freedom. 
 We enforce the anchoring condition $\psi(0) = 0$, which requires $\psi_{k+1}(0) = 0$. 
@@ -151,7 +189,7 @@ By the Mean Value Property \cite[Eq. 14.2-2]{Henrici1986_vol3} of analytic funct
 \begin{equation} \label{eq:initcond_1}
     0 = \psi_{k+1}(0) = \psi_0(0) + P X^+(0) \implies P = -\frac{\underline{\psi_0}}{\underline{X^+}},
 \end{equation}
-where the underline here denotes the arithmetic mean over the discretized boundary points.
+where the underline here denotes the arithmetic mean over the discretised boundary points.
 
 Once the properly anchored analytic function $\psi_{k+1}$ is constructed, the real-valued boundary correction step $U_k$ is extracted. Following \cite[Eq. 2.4]{Wegmann1978_newtonverfahren}, the update is the projection of the discrepancy $(\psi_{k+1} - f_k)$ onto the tangent vector $g_k$:
 \begin{equation}
@@ -163,7 +201,7 @@ Finally, to prevent rotational drift of the parametrization during the iterative
 \end{equation}
 
 \subsection{Uniqueness of the solution}
-The three degrees of freedom fixed to ensure uniqueness of the conformal map are the following:
+The three degrees of freedom fixed to ensure uniqueness of the conformal map are tracked as follows in the implementation:
 \begin{itemize}
     \item $\psi(0) = 0$ (eq. \ref{eq:initcond_1}): The real and imaginary parts of the origin's image are fixed to the center of the target region, locking down two degrees of freedom (translation). In the implementation, this is enforced by shifting the target region such that its center lies on the origin, computing the conformal map, and then shifting the result back (\texttt{self.shift}).
     \item $\psi'(0) > 0$ (eq. \ref{eq:initcond_2}): This condition prevents rotational drift of the parametrization during the iterative process. This is enforced by zeroing the mean of the correction step $U_k$ before applying it to update the boundary correspondence function.
@@ -178,6 +216,13 @@ By analyticity of the mapping (also on the interior) the negative Fourier coeffi
 \subsection{The Initial Guess Problematic}
 Note that this is a Newton method and thus only guaranteed to converge locally due to the linearisation of the boundary. Hence why a "good" (close enough) initial guess is vital for numerical stability \cite[Thm. 5]{Wegmann1978_newtonverfahren}. 
 Note that Wegmann proves this, but in his own testing only used the identity as initial guess; we have tried to do better (see experiments section \ref{chap:experiments}).
+
+Apart from the simple identity initial guess, we have tried implementing two more sophisticated initial guesses. 
+It is however worth mentioning that neither of those significantly improved our results; they are probably still way too far from the true solution.
+\subsubsection{Star-shaped Initial Guess}
+For strongly deformed but still star-shaped target regions, a radial projection of the target boundary onto the unit circle can be used as an initial guess. This is implemented in the \texttt{init\_initial\_guess\_starshaped()} method, which computes the initial boundary correspondence function $S_0$ by projecting each point on the target boundary radially onto the unit circle and then interpolating to get a smooth function.
+\subsubsection{Non-Convex Initial Guess}
+For the kite region, neither the identity nor the star-shaped initial guesses seem to be close enough to the true solution for the solver to converge with a useful amount of discretisation points. Hence why we tried using a "squished" version of the identity as an initial guess, which is implemented in the \texttt{init\_initial\_guess\_non\_convex()} method. This method takes the identity map and applies a non-linear transformation to it, effectively "squishing" the unit disk into a shape that resembles the target region more closely. The transformation is defined by a function that maps the unit circle to itself while introducing non-convexity, which can help the solver converge for highly non-convex target regions.
 
 \subsection{Verfahren 1 vs. Verfahren 2} \label{chap:verfahren1-2}
 In order to compare our results to Wegmann's, we have implemented both Verfahren 1 and Verfahren 2 as described in \cite[§5]{Wegmann1978_newtonverfahren}.

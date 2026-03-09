@@ -376,10 +376,11 @@ This factor decreases the number of outer iterations, which in our case are the 
 
 
 \subsection{Wegmann's Method} \label{chap:WegmannMethod}
-The projection onto the tangent space described above is analytically equivalent to a linearization of the boundary value problem. Wegmann \cite{Wegmann1978_newtonverfahren} showed that the update shift $U_k(t)$ is the solution to the linearized equation below.
-%For smooth $\del\Omega$, Integral equations of the second kind can be solved by Newton's method \cite{Wegmann1978_newtonverfahren}.
+Conformal mappings can be considered as a special case of a more general class of boundary value problems called nonlinear \textbf{Riemann-Hilbert problems} and can be solved by Newton iteration over linear RH problems \cite[Chapter 2.5]{Wegmann2005_num_methods_confmapping}.
+%The projection onto the tangent space described above is analytically equivalent to a linearisation of the boundary value problem. Wegmann \cite{Wegmann1978_newtonverfahren} showed that the update shift $U_k(t)$ is the solution to the linearised equation below.
 Given $\eta$ the differentiable parametrization of $\Gamma$ with $\dot\eta(s)\neq 0 \text{ } \forall s$, we construct the conformal mapping by iterated correction of an initial guess $S$ as follows.
 %Assume a starting configuration of points $z_1, z_2, ..., z_N$ in $\disk$ and their images $\zeta_1, \zeta_2, ..., \zeta_N$ on $\Gamma$ such that $\psi(z_k)=\zeta_k$. 
+(Note that the problem boils down to finding the correct boundary correspondence function $S$ and is nonlinear in this unknown.)
 Assume that the approximation for $\psi$ after $k$ steps be given by $\psi_k(\zeta)=\eta(S_k(\zeta))$. 
 $$
 \begin{tikzpicture}[node distance=2cm, auto]
@@ -391,50 +392,61 @@ $$
 \draw[->, out = -40, in = -140, looseness = 0.5] (A) to node [below]{$\psi$}(C); % this should be a circular arrow under the diagram
 \end{tikzpicture}
 $$ 
-We improve the approximation by moving the points along their tangents towards the boundary curve, i.e. by finding a correction function $U_k:\del\disk\to[0,2\pi]$ such that
+We improve the approximation by moving the points $\{\eta(S_k(\zeta))\mid \zeta\in\del\disk\}$ along their tangents towards the boundary curve, i.e. by finding a correction function $U_k:\del\disk\to[0,2\pi]$ such that \cite[Equation 30]{Wegmann1978_newtonverfahren}
 \begin{equation}\label{eq:h_k+1}
     \eta(S_k(\zeta))+U_k(\zeta)\dot\eta(S_k(\zeta)) = \psi_{k+1}(\zeta)
 \end{equation}
 where $\psi_{k+1}$ is an analytic approximation for $\psi$ on $\overline\Omega$. Note that $\psi_{k+1}$ does not generally take values on $\Gamma$. 
-The above equation (\ref{eq:h_k+1}) is a non-homogeneous Riemann-Hilbert Problem \cite{AnosovBolibruch1994_riemannhilbertproblems} of two unknowns, $U_k$ and $\psi_{k+1}$, which is solved using a method described in \cite[§ 87]{Muskhelishvili1977} and \cite{Wegmann1978_newtonverfahren}.
-By the Riemann Mapping Theorem, it admits a unique solution only if we fix the mapping normalization. We therefore require that a specific boundary point $z_0$ corresponds to the target parameter $s_0$ (where $\eta(s_0) = c_0$). A direct coordinate constraint $\psi_{k+1}(z_0) = c_0$ is geometrically impossible because $\psi_{k+1}(z_0)$ is constrained to the tangent vector, while $c_0$ lies on the curve $\Gamma$. Therefore, the normalization condition is transferred to the parameter space. We force the updated parameter function to satisfy $S_{k+1}(z_0) = s_0$, which directly yields the necessary boundary condition for $U_k$ \cite[Equation 2.4a]{Wegmann1978_newtonverfahren}:
+The above equation (\ref{eq:h_k+1}) is a non-homogeneous and non-linear Riemann-Hilbert Problem \cite{AnosovBolibruch1994_riemannhilbertproblems} of two unknowns, $U_k$ and $\psi_{k+1}$, which is solved using a method described in \cite[§ 87]{Muskhelishvili1977} and \cite{Wegmann1978_newtonverfahren} (see section \ref{chap:implementation}). 
+This type of problem of finding an analytic function for a given relation of the limiting values of its real and imaginary parts of some was first studied by Riemann and the specific problem here was introduced by Hilbert, hence the name \cite[§89]{Muskhelishvili1977}.
+
+By the Riemann Mapping Theorem, it admits a unique solution only if we fix three degrees of freedom. 
+The first two are fixed by requiring that a specific boundary point $z_0$ corresponds to the target parameter $s_0$ (where $\eta(s_0) = c_0$). 
+A direct coordinate constraint $\psi_{k+1}(z_0) = c_0$ is geometrically impossible because $\psi_{k+1}(z_0)$ is constrained to the tangent vectornot typically lying on the boundary $\Gamma$, while $c_0$ lies on the curve $\Gamma$. 
+Therefore, the normalization condition is transferred to the parameter space:
+We force the updated parameter function to satisfy $S_{k+1}(z_0) = s_0$, which directly yields the necessary boundary condition for $U_k$ \cite[Equation 2.4a]{Wegmann1978_newtonverfahren}:
 \begin{equation}
-    U_k(z_0)=s_0-S_k(z_0).
+    U_k(z_0)=s_0-S_k(z_0) \in \R.
 \end{equation}
+\red{AND THE THIRD DOF?}
+
+This corresponds to the geometric observation that we are moving the current analytic approximation $\psi_{k+1}$ towards the boundary along the tangent, i.e.
+\begin{equation}
+    \psi_{k+1}(\zeta)-\eta((S_k(\zeta))) = c \cdot \dot\eta(S_k(\zeta))
+\end{equation}
+where $c\in\R$. 
 
 To find $U_k$, equation (\ref{eq:h_k+1}) is rewritten into \cite[Equation 3.4]{Wegmann1978_newtonverfahren}:
-\begin{equation}\label{eq:RHproblem}
-    \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
-\end{equation}
-
-This corresponds to the geometric observation that we are essentially moving the current analytic approximation $\psi_{k+1}$ towards the boundary along the tangent, i.e.
 \begin{equation}
-    \psi_{k+1}-\eta((S_k(\zeta))) = c \cdot \dot\eta(S_k(\zeta))
+    \R \ni U_k = \frac{\psi_{k+1}}{\dot\eta(S_k)} - \frac{\eta(S_k)}{\dot\eta(S_k)} \iff
 \end{equation}
-where $c\in\R$. Hence, 
+\begin{equation}
+    \text{Im}(\frac{\psi_{k+1}(\zeta)-\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))})=0 \iff
+\end{equation}
 \begin{equation} \label{eq:imaginaryParts}
-    \text{Im}(\frac{\psi_{k+1}-\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))})=0 \iff
-    \text{Im}(\frac{\psi_{k+1}}{\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).        
+    \text{Im}(\frac{\psi_{k+1}(\zeta)}{\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).        
 \end{equation}
-Note that since for a complex number Im$(a+ib) = b = -i\text{Re}(a+ib)$, we have
+Note that since for a complex number Im$(a+ib) = b = \text{Re}(-i(a+ib))$, we have
 \begin{equation}
-    \text{Im}(\frac{\psi_{k+1}}{\dot\eta(S_k(\zeta))}) = -i\text{Re}(\frac{\psi_{k+1}}{\dot\eta(S_k(\zeta))}) = \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))}),
+    \text{Im}(\frac{\psi_{k+1}(\zeta)}{\dot\eta(S_k(\zeta))}) = \text{Re}(-i\frac{\psi_{k+1}(\zeta)}{\dot\eta(S_k(\zeta))}) = \text{Re}(\frac{\psi_{k+1}(\zeta)}{i\dot\eta(S_k(\zeta))}),
 \end{equation}
-which can be plugged into equation (\ref{eq:imaginaryParts}) to yield exactly equation (\ref{eq:RHproblem}).
-This eliminates $U_k$ from the equation and yields a Dirichlet problem for $\psi_{k+1}$. The analytic $\psi_{k+1}$ can then be reconstructed by adding the imaginary part \cite[Lemma 14.2]{Henrici1986_vol3}using the operator $K$ defined in chapter \ref{operatorK_N}. 
-
+which can be plugged into equation \eqref{eq:imaginaryParts} to yield the linear Riemann-Hilbert problem for $\psi_{k+1}$:
+\begin{equation}\label{eq:RHproblem}
+    \text{Re}(\frac{\psi_{k+1}(\zeta)}{i\dot\eta(S_k(\zeta))})= \text{Im}(\frac{\eta(S_k(\zeta))}{\dot\eta(S_k(\zeta))}).
+\end{equation}
+The full analytic $\psi_{k+1}$ can then be reconstructed by adding the imaginary part \cite[Lemma 14.2]{Henrici1986_vol3} using the (Hilbert transform) operator $K$ defined in chapter \ref{operatorK_N}. 
+Next, $U_k$ is computed by plugging $\psi_{k+1}$ into the equation \eqref{eq:h_k+1} and taking the real part.
 Finally, we get an approximation for the parametrization $S$ by 
 \begin{equation}
-    S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta)
+    S_{k+1}(\zeta):= S_k(\zeta)+U_k(\zeta).
 \end{equation}
-which can be understood as "new guess equals last guess plus some correction".
-
+\bigskip
 
 \begin{algorithm}
     \caption{Wegmann's Method}
     \begin{algorithmic}[1]
         \STATE \textbf{Input:} Target boundary $\eta: [0, 2\pi] \to \mathbb{C}$, anchor points $z_0 \in \partial\mathbb{D}, s_0 \in [0, 2\pi]$.
-        \STATE \textbf{Initialize:} $S_0(\zeta) = \arg(\zeta)$ (Identity) or guess satisfying $S_0(z_0)=s_0$.
+        \STATE \textbf{Initialise:} $S_0(\zeta) = \arg(\zeta)$ (Identity) or guess satisfying $S_0(z_0)=s_0$.
         \WHILE {not converged}
             \STATE \textit{// 1. Evaluate current boundary geometry}
             \STATE $f_k(\zeta) := \eta(S_k(\zeta))$ \hfill // Position on boundary
@@ -445,9 +457,9 @@ which can be understood as "new guess equals last guess plus some correction".
             \begin{equation*}
                 \text{Re}\left(\frac{\psi_{k+1}(\zeta)}{i g_k(\zeta)}\right) = \text{Im}\left(\frac{f_k(\zeta)}{g_k(\zeta)}\right) \quad \forall \zeta \in \partial\mathbb{D}
             \end{equation*}
-            \STATE subject to the constraint:
+            \STATE Find analytic $\psi_{k+1}$ by adding the imaginary part via Hilbert transform \ref{eq:operatorK}:
             \begin{equation*}
-                 \text{Re}\left(\frac{\psi_{k+1}(z_0) - f_k(z_0)}{g_k(z_0)}\right) = s_0 - S_k(z_0)
+                 \psi_{k+1} := \text{Re}(\psi_{k+1}) + i K \text{Re}(\psi_{k+1})
             \end{equation*}
 
             \STATE \textit{// 3. Compute correction and update}
@@ -465,7 +477,7 @@ First we note that Schwarz-Christoffel only works on polygons and Theodorsen's m
 We refrain from using probabilistic methods due to their inherent randomness and the difficulty of guaranteeing a certain accuracy, but it is worthwile noting that this is a good choice in cases where the boundary is so rough/ irregular that deterministic methods fail.
 Since we are given a smooth boundary of the target domain, we can opt for a more accurate method.
 
-The Zipper method is very well implementable and robust (it can handle rough boundaries including fractals), but there are already a MATLAB implementation.
+The Zipper method is very well implementable and robust (it can handle rough boundaries including fractals), but there is already a MATLAB implementation (zippit).
 
 The Conjugate Function Method contains a very astute idea mathematically, but its implementation is not very interesting beyond $hp$-FEM for which there already are powerful libraries, so there would not be much value in implementing a rudimentary FEM solver given the scope of this thesis. 
 
