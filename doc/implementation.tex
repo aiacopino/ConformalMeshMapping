@@ -88,9 +88,10 @@ Adding the last two equations yields
 
 \bigskip\noindent\textbf{The Homogeneous Solution}\\
 Let $X$ be a fundamental solution to the homogeneous RH-problem \cite[§ 40]{Muskhelishvili1977}
-\begin{equation}
+\begin{equation}\label{eq:Gjumpcondition}
     F^+(\zeta) = G(\zeta) F^-(\zeta)
-\end{equation}\red{WHAT IS G}
+\end{equation}
+where the so-called \textbf{jump condition} $G$ will be found towards the end of this section \eqref{eq:Gdefinition}.
 Following \cite[§ 89, page 99ff]{Muskhelishvili1977}, we first find the homogeneous solution $X(z)$ to
 \begin{equation} 
     \text{Re}(\frac{\psi_{k+1}}{i\dot\eta(S_k(\zeta))})= 0
@@ -110,15 +111,14 @@ Hence,
     \arg(\zeta^{-2} g_k/\overline{g_k})=\arg(\zeta^{-2})+\arg(g_k/\overline{g_k}) 
     \implies \Theta(\zeta) = 2\arg(g_k) - 2\theta.
 \end{equation}
-\red{Note that $\Theta$ is a measure of how much the polar angle of the coordinate $\del\disk\ni\zeta=e^{i\theta}$ is rotated by the conformal map onto the tangent angle on $\Gamma$.}
-
+%\red{Note that $\Theta$ is a measure of how much the polar angle of the coordinate $\del\disk\ni\zeta=e^{i\theta}$ is rotated by the conformal map onto the tangent angle on $\Gamma$.}
 Now, define \cite[Eq. 3.5]{Wegmann1978_newtonverfahren}
 \begin{equation} \label{eq:Yintegral}
     Y(z) = \frac{1}{2\pi} \displaystyle\int_{\del\disk} \frac{\Theta(\zeta)}{\zeta - z} d\zeta = \frac{1}{2\pi i} \displaystyle\int_{\del\disk} \frac{i \Theta(\zeta)}{\zeta - z} d\zeta
 \end{equation} 
 to be the Cauchy integral of $\Theta$. By the Plemelj-Sokhotski formulas \eqref{eq:Plemelj_Diff}, the jump condition for $Y$ is given by:
 \begin{equation}\label{eq:Yjumpcondition}
-    Y^+(\zeta) - Y^-(\zeta) = \Theta(\zeta).
+    Y^+(\zeta) - Y^-(\zeta) = i\Theta(\zeta).
 \end{equation}
 By \cite[Eq. 3.6]{Wegmann1978_newtonverfahren}and \cite[page 105]{Muskhelishvili1977},
 \begin{equation} \label{eq:X_homogensol}
@@ -135,7 +135,11 @@ Moreover, combining \ref{eq:Plemelj_Projection}, \eqref{eq:Yintegral} and \eqref
     \log(X^+(\zeta)) = Y^+-\frac{1}{2}Y(0) = \frac{1}{2} \left(i\Theta + i \mathcal{H}(i\Theta)\right) = \frac{1}{2} \left(i\Theta - \mathcal{H}(\Theta)\right).
 \end{equation}
 Exponentiating yields the homogeneous solution on the interior of the disk. It remains to find the limiting function $X^-$ on the exterior of the disk.
-Consider the ratio $$\frac{X^+}{X^-} = \frac{\exp(Y^+ - \hat Y)}{z^{-2} \exp(Y^- - \hat Y)} = z^2 \exp(Y^+ - Y^-)$$
+Consider the ratio 
+\begin{equation} \label{eq:Gdefinition}
+    \frac{X^+}{X^-} = \frac{\exp(Y^+ - \hat Y)}{z^{-2} \exp(Y^- - \hat Y)} = z^2 \exp(Y^+ - Y^-)
+\end{equation}
+Note this is exactly the jump condition for $X$ as in \eqref{eq:Gjumpcondition}.
 Substituting the jump condition \ref{eq:Yjumpcondition} yields 
 \begin{equation}
     \frac{X^+}{X^-} = z^2 \exp(\Theta) \iff X^- = X^+ \cdot z^{-2} \cdot e^{-\Theta}.

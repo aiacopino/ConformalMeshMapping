@@ -167,7 +167,12 @@ We have tried making this example even more convex, but already $p=0.3$ is quite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Flower/ Star}
-The flower (or star) with 8 petals is an example illustrating the limits of this solver. The convexity parameter determines the "depth" of the petals, and can be chosen between 0 and 1, where $p=0$ is a perfect circle. 
+The flower (or star) with a number $\alpha$ of petals is an example illustrating the limits of this solver. 
+The boundary is parametrised by 
+\begin{equation}
+    \eta = R + p \cos(\alpha \theta) \text{ for } \theta \in [0, 2\pi)
+\end{equation} 
+where $R$ is the radius of the basis circle and the convexity parameter $p$ determines the "depth" of the petals, and can be chosen between 0 and 1, where $p=0$ is a perfect circle. 
 Already when choosing the convexity parameter above $p=0.4$, Wegmann's solver does not find a conformal map anymore.
 
 \begin{figure}
